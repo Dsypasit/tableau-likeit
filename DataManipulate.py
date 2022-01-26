@@ -19,10 +19,24 @@ class data_manipulate:
     def get_column(self):
         return self.column.tolist()
     
-    def get_type(self):
-        return self.data.dtypes.tolist()
+    def separated_dimension_measure(self):
+        self.dimension = []
+        self.measure = []
+
+        for colname, coltype in self.data.dtypes.iteritems():
+            if coltype == 'object': self.dimension.append(colname)
+            else : self.measure.append(colname)
+    
+    def get_dimension(self):
+        return self.dimension
+
+    def get_measure(self):
+        return self.measure
+
 
 if __name__ == "__main__":
     d = data_manipulate()
     d.load_data('Superstore.csv')
-    print(d.get_type())
+    d.separated_dimension_measure()
+    print('m',d.get_measure())
+    print('d',d.get_dimension())
