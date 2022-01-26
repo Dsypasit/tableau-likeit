@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import QFileDialog, QWidget, QTableWidgetItem
 from DataManipulate import data_manipulate
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
+from Widgets.DateItem import DateWidgetItem
+import re
 
 class Ui_Dialog():
     def __init__(self):
@@ -29,7 +31,7 @@ class Ui_Dialog():
     
     def make_table(self):
         self.header = self.dt.get_column()
-        self.data = self.dt.get_data()[:1000]
+        self.data = self.dt.get_data()
         self.tableWidget.setColumnCount(len(self.header))
         self.tableWidget.setRowCount(len(self.data))
         self.tableWidget.setHorizontalHeaderLabels(self.header)
@@ -39,6 +41,8 @@ class Ui_Dialog():
                 if type(item) in (int, float):
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', item):
+                    newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
                 self.tableWidget.setItem(row, col, newItem)
