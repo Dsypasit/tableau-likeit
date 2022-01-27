@@ -32,6 +32,10 @@ class data_manipulate:
 
     def get_measure(self):
         return self.measure
+    
+    def get_groupby(self, col, *measure):
+        return data.groupby(col)[measure].sum()
+
 
 
 if __name__ == "__main__":
@@ -40,3 +44,6 @@ if __name__ == "__main__":
     d.separated_dimension_measure()
     print('m',d.get_measure())
     print('d',d.get_dimension())
+    data = d.data
+    p = ['Sales', 'Discount']
+    print(data.groupby(['Region']).mean())
