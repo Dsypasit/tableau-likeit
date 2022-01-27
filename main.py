@@ -22,7 +22,7 @@ class Ui_Dialog():
         self.path = "Path"
 
     def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; excel file(*.xlsx)")
         if filename:
             self.path = filename
             self.dt.load_data(filename)
@@ -35,7 +35,6 @@ class Ui_Dialog():
         self.tableWidget.setColumnCount(len(self.header))
         self.tableWidget.setRowCount(len(self.data))
         self.tableWidget.setHorizontalHeaderLabels(self.header)
-        print([type(i) for i in self.data[0]])
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
                 if type(item) in (int, float):
