@@ -27,14 +27,27 @@ class data_manipulate:
             if coltype == 'object': self.dimension.append(colname)
             else : self.measure.append(colname)
     
+    def is_dimension(self, s):
+        return s in self.dimension
+
+    def is_measure(self, s):
+        return s in self.measure
+    
     def get_dimension(self):
         return self.dimension
 
     def get_measure(self):
         return self.measure
     
-    def get_groupby(self, col, *measure):
-        return data.groupby(col)[measure].sum()
+    def get_groupby(self, col, measure):
+        if len(measure) > 0:
+            data = self.data.groupby(col, as_index=False).agg(measure)
+        else:
+            data = self.data.groupby(col, as_index=False).mean()
+
+        def get_col():
+            return data.columns.tolist()
+        return {'data': data.values.tolist(), 'col': get_col()}
 
 
 
@@ -44,6 +57,14 @@ if __name__ == "__main__":
     d.separated_dimension_measure()
     print('m',d.get_measure())
     print('d',d.get_dimension())
-    data = d.data
-    p = ['Sales', 'Discount']
-    print(data.groupby(['Region']).mean())
+    # data = d.data
+    # p = ['Sales', 'Discount']
+    # print(data.groupby(['Region']).mean())
+    di = ['State', 'City']
+    # me = { 'Sales': 'sum', 'Discount':'sum' }
+    me = {}
+    x = d.get_groupby(di, me)
+    print(x)
+    print(x.keys())
+    print(x['col'])
+
