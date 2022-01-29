@@ -38,13 +38,6 @@ class DimensionList(QtWidgets.QListWidget):
                     textList.append(value)
         return textList
     
-    # def isExist(self, s):
-    #     for i in range(self.count()):
-    #         if s == self.item(i).text():
-    #             return True
-    #     return False
-
-
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
         col = self.readData(e.mimeData())[0]
         if self.dt.is_dimension(col):
@@ -54,8 +47,6 @@ class DimensionList(QtWidgets.QListWidget):
 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         col = self.readData(event.mimeData())[0]
-        # if self.isExist(col):
-        #     return
         super().dropEvent(event)
         self.main.tableWidget.make_table()
 
