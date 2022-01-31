@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>App</class>
+ <widget class="QMainWindow" name="App">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1080</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Tableauu</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/images/icons8-bookmark-384.png</normaloff>:/icons/images/icons8-bookmark-384.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Table Detail</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="2" column="0">
+         <widget class="QTableWidget" name="tableDetail">
+          <column>
+           <property name="text">
+            <string>New Column</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>New Column</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>New Column</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEdit"/>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="lineEdit_2"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Column</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Row</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>filter</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Chart</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="0" column="0">
+         <widget class="QStackedWidget" name="stackedWidget">
+          <widget class="QWidget" name="page"/>
+          <widget class="QWidget" name="page_2"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1080</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="menuOpen"/>
+    <addaction name="menuSave"/>
+    <addaction name="separator"/>
+    <addaction name="menuExit"/>
+   </widget>
+   <widget class="QMenu" name="menuData">
+    <property name="title">
+     <string>Data</string>
+    </property>
+    <addaction name="menuImport"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuData"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dataWidget">
+   <property name="windowTitle">
+    <string>Data Source</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0" colspan="2">
+      <widget class="QComboBox" name="dataCombo">
+       <item>
+        <property name="text">
+         <string>Data Source</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>filter</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="searchEntry"/>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QListWidget" name="objectList"/>
+     </item>
+     <item row="3" column="0" colspan="2">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QListWidget" name="valueList"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="menuOpen">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/images/icons8-opened-folder-384.png</normaloff>:/icons/images/icons8-opened-folder-384.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="menuSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="menuExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="menuImport">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/images/icons8-document-384.png</normaloff>:/icons/images/icons8-document-384.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
