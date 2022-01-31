@@ -31,6 +31,9 @@
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="2" column="0">
          <widget class="QTableWidget" name="tableDetail">
+          <property name="acceptDrops">
+           <bool>true</bool>
+          </property>
           <column>
            <property name="text">
             <string>New Column</string>
@@ -58,31 +61,58 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit"/>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_2"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>Column</string>
+              <string>filter</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
+           <item row="2" column="2">
+            <widget class="Line" name="line_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Row</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_3">
+           <item row="0" column="1">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Column</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QWidget" name="widget" native="true"/>
+           </item>
+           <item row="2" column="3">
+            <widget class="QWidget" name="widget_2" native="true"/>
+           </item>
+           <item row="0" column="2">
+            <widget class="Line" name="line_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="label_4">
              <property name="text">
               <string>filter</string>
              </property>
             </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLineEdit" name="filterRow"/>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLineEdit" name="filterColumn"/>
            </item>
           </layout>
          </widget>
@@ -93,11 +123,211 @@
        <attribute name="title">
         <string>Chart</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_9">
-        <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QFrame" name="frame_6">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QFormLayout" name="formLayout_3">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Selection Chart</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="comboBox_3">
+             <item>
+              <property name="text">
+               <string>Percentage Bar Chart</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Nested Donut Chart</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Line Charts</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Bar Chart</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QStackedWidget" name="stackedWidget">
-          <widget class="QWidget" name="page"/>
-          <widget class="QWidget" name="page_2"/>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="page">
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="1" column="0">
+             <widget class="QFrame" name="frame_3">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignTop">
+             <widget class="QFrame" name="frame_9">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QFormLayout" name="formLayout_6">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Percentage Bar Chart</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_2">
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="1" column="0">
+             <widget class="QFrame" name="frame_5">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignTop">
+             <widget class="QFrame" name="frame_8">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QFormLayout" name="formLayout_5">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Nested Donut Chart</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_3">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item alignment="Qt::AlignTop">
+             <widget class="QFrame" name="frame_10">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QFormLayout" name="formLayout_7">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Line Charts</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_7">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_4">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item alignment="Qt::AlignTop">
+             <widget class="QFrame" name="frame_11">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QFormLayout" name="formLayout_8">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Bar Chart</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_12">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -129,6 +359,7 @@
      <string>Data</string>
     </property>
     <addaction name="menuImport"/>
+    <addaction name="actionUnion"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuData"/>
@@ -163,7 +394,17 @@
       <widget class="QLineEdit" name="searchEntry"/>
      </item>
      <item row="2" column="0" colspan="2">
-      <widget class="QListWidget" name="objectList"/>
+      <widget class="QListWidget" name="DimensionWidget">
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
+      </widget>
      </item>
      <item row="3" column="0" colspan="2">
       <widget class="Line" name="line">
@@ -173,7 +414,17 @@
       </widget>
      </item>
      <item row="4" column="0" colspan="2">
-      <widget class="QListWidget" name="valueList"/>
+      <widget class="QListWidget" name="MeasureWidget">
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -206,9 +457,47 @@
     <string>Import</string>
    </property>
   </action>
+  <action name="actionUnion">
+   <property name="text">
+    <string>Union</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>comboBox_3</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>stackedWidget</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>560</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1039</x>
+     <y>135</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stackedWidget</sender>
+   <signal>currentChanged(int)</signal>
+   <receiver>comboBox_3</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1030</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>969</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
