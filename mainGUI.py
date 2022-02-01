@@ -26,9 +26,9 @@ from PyQt5.QtCore import Qt
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self)
-        self.ui = Ui_App()
-        self.ui.setupUi(self)
         self.dt = data_manipulate()
+        self.ui = Ui_App(self.dt)
+        self.ui.setupUi(self)
         self.path = "Path"
         self.dataCombo = []
 
@@ -84,10 +84,12 @@ class MainWindow(QMainWindow):
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
         for i in dimension:
-            item = QListWidgetItem("Aa {}".format(i))
+            # item = QListWidgetItem("Aa {}".format(i))
+            item = QListWidgetItem("{}".format(i))
             self.ui.DimensionWidget.addItem(item)
         for i in measure:
-            item = QListWidgetItem("# {}".format(i))
+            item = QListWidgetItem("{}".format(i))
+            # item = QListWidgetItem("# {}".format(i))
             self.ui.MeasureWidget.addItem(item)
 
     def changeDataCombo(self):

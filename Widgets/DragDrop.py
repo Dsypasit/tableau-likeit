@@ -22,7 +22,7 @@ class DimensionList(QtWidgets.QListWidget):
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.count():
             self.takeItem(self.currentRow())
-            self.main.tableWidget.make_table()
+            self.main.tableDetail.make_table()
 
     def readData(self, mime: QtCore.QMimeData) -> list:
         stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
@@ -47,7 +47,7 @@ class DimensionList(QtWidgets.QListWidget):
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         col = self.readData(event.mimeData())[0]
         super().dropEvent(event)
-        self.main.tableWidget.make_table()
+        self.main.tableDetail.make_table()
 
 class MeasureList(QtWidgets.QListWidget):
     def __init__(self, main, parent):
@@ -58,7 +58,7 @@ class MeasureList(QtWidgets.QListWidget):
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.count():
             self.takeItem(self.currentRow())
-            self.main.tableWidget.make_table()
+            self.main.tableDetail.make_table()
 
     def readData(self, mime: QtCore.QMimeData) -> list:
         stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
@@ -95,7 +95,7 @@ class MeasureList(QtWidgets.QListWidget):
         item = QListWidgetItem()
         item.setText(col)
         self.addItem(item)
-        self.main.tableWidget.make_table()
+        self.main.tableDetail.make_table()
 
 class TableGroupby(QtWidgets.QTableWidget):
     def __init__(self, main, parent):
@@ -108,11 +108,11 @@ class TableGroupby(QtWidgets.QTableWidget):
     def make_table(self):
         self.setColumnCount(0)
         self.setRowCount(0)
-        self.dimension = self.get_widget_item(self.main.DimensionList)
-        self.measure_raw = self.get_widget_item(self.main.MeasureList)
+        self.dimension = self.get_widget_item(self.main.filterColumn)
+        self.measure_raw = self.get_widget_item(self.main.filterRow)
         self.measure = self.to_measure_dict(self.measure_raw)
         if not(len(self.dimension) > 0 ):
-            self.main.MeasureList.clear()
+            self.main.filterRow.clear()
             return
         self.data_groupby = self.dt.get_groupby(self.dimension, self.measure)
         self.header = self.data_groupby['col']
@@ -147,11 +147,11 @@ class TableGroupby(QtWidgets.QTableWidget):
             item = QListWidgetItem()
             item.setText(col)
             item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsDropEnabled|QtCore.Qt.ItemIsDragEnabled|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-            self.main.MeasureList.addItem(item)
+            self.main.filterRow.addItem(item)
             e.accept()
         elif self.dt.is_dimension(col):
             self.dimension.append(col)
-            self.main.DimensionList.addItem(col)
+            self.main.filterColumn.addItem(col)
             e.accept()
     
     def dropEvent(self, event: QtGui.QDropEvent) -> None:

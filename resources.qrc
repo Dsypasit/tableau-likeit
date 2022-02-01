@@ -1,9 +1,10 @@
 <RCC>
   <qresource prefix="icons">
+    <file>images/icons8-close-384.png</file>
+    <file>images/icons8-menu-384.png</file>
     <file>images/icons8-bookmark-384.png</file>
     <file>images/icons8-document-384.png</file>
     <file>images/icons8-info-384.png</file>
-    <file>images/icons8-menu-384.png</file>
     <file>images/icons8-opened-folder-384.png</file>
   </qresource>
 </RCC>
