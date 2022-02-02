@@ -10,12 +10,15 @@
 import os
 import sys
 import re
+
 from DataManipulate import data_manipulate
 from Widgets.DateItem import DateWidgetItem
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 ########################################################################
 # IMPORT GUI FILE
-from ui_interface import *
-from PyQt5.QtWidgets import QFileDialog, QListWidget, QTableWidgetItem, QApplication, QMainWindow, qApp, QListWidgetItem
+from ui_interfaceDemo import *
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 ########################################################################
 
@@ -57,8 +60,8 @@ class MainWindow(QMainWindow):
             self.ui.dataCombo.addItems(self.dataCombo)
 
             self.make_table()
-            #self.ui.dataCombo.setText(filename)
             self.dimension()
+            self.Graph()
 
     def make_table(self):
         self.header = self.dt.get_column()
@@ -91,8 +94,21 @@ class MainWindow(QMainWindow):
             # item = QListWidgetItem("# {}".format(i))
             self.ui.MeasureWidget.addItem(item)
 
-    def changeDataCombo(self):
-        pass
+    def Graph(self):
+        # create list for y-axis
+        y1 = [5, 5, 7, 10, 3, 8, 9, 1, 6, 2]
+        # create horizontal list i.e x-axis
+        x = ["bleo", 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        # create pyqt5graph bar graph item
+        # with width = 0.6
+        # with bar colors = green
+        bargraph = pg.BarGraphItem(x = x, height = y1, width = 0.6, brush ='g')
+ 
+        # add item to plot window
+        # adding bargraph item to the plot window
+        self.ui.BarChartWidget.addItem(bargraph)
+    
+        
     ########################################################################
 
 ########################################################################

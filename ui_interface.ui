@@ -22,7 +22,7 @@
     <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -45,7 +45,68 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="2" column="1" colspan="4">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Dimension</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" rowspan="2" colspan="2">
+            <widget class="QListWidget" name="DimensionList">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+               <horstretch>2</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="acceptDrops">
+              <bool>true</bool>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="lineWidth">
+              <number>1</number>
+             </property>
+             <property name="dragEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="dragDropMode">
+              <enum>QAbstractItemView::DragDrop</enum>
+             </property>
+             <property name="defaultDropAction">
+              <enum>Qt::MoveAction</enum>
+             </property>
+             <property name="flow">
+              <enum>QListView::LeftToRight</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" rowspan="2">
+            <widget class="QLabel" name="label_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>filter</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2" rowspan="2">
+            <widget class="QPushButton" name="btnClearDimension">
+             <property name="text">
+              <string>Clear Dimension</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="filterDimension"/>
+           </item>
+           <item row="3" column="1" rowspan="2" colspan="2">
             <widget class="QListWidget" name="MeasureList">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
@@ -79,90 +140,29 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0" alignment="Qt::AlignLeft">
-            <widget class="QLabel" name="label_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>filter</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" alignment="Qt::AlignLeft">
+           <item row="4" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Measure</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1" colspan="3">
-            <widget class="QLineEdit" name="filterRow"/>
-           </item>
-           <item row="3" column="4">
-            <widget class="QPushButton" name="pushButton_2">
-             <property name="text">
-              <string>Clear Row</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" alignment="Qt::AlignLeft">
+           <item row="5" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
               <string>filter</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0" alignment="Qt::AlignLeft">
-            <widget class="QLabel" name="label">
+           <item row="5" column="1">
+            <widget class="QLineEdit" name="filterMeasure"/>
+           </item>
+           <item row="5" column="2">
+            <widget class="QPushButton" name="btnClearMeasure">
              <property name="text">
-              <string>Dimension</string>
+              <string>Clear Measure</string>
              </property>
             </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QPushButton" name="btnClearColumn">
-             <property name="text">
-              <string>Clear Column</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1" colspan="4">
-            <widget class="QListWidget" name="DimensionList">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-               <horstretch>2</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="acceptDrops">
-              <bool>true</bool>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="lineWidth">
-              <number>1</number>
-             </property>
-             <property name="dragEnabled">
-              <bool>true</bool>
-             </property>
-             <property name="dragDropMode">
-              <enum>QAbstractItemView::DragDrop</enum>
-             </property>
-             <property name="defaultDropAction">
-              <enum>Qt::MoveAction</enum>
-             </property>
-             <property name="flow">
-              <enum>QListView::LeftToRight</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1" colspan="3">
-            <widget class="QLineEdit" name="filterColumn"/>
            </item>
           </layout>
          </widget>
@@ -182,45 +182,18 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QFormLayout" name="formLayout">
+          <layout class="QGridLayout" name="gridLayout_17">
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Measure</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="label_7">
              <property name="text">
               <string>Selection Chart</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="comboBox_3">
-             <property name="editable">
-              <bool>false</bool>
-             </property>
-             <item>
-              <property name="text">
-               <string>Percentage Bar Chart</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Nested Donut Chart</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Line Charts</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Bar Chart</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Dimension</string>
              </property>
             </widget>
            </item>
@@ -255,14 +228,7 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Measure</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
+           <item row="3" column="1">
             <widget class="QListWidget" name="MeasureList_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
@@ -296,11 +262,62 @@
              </property>
             </widget>
            </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Dimension</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QPushButton" name="btnClearMeasure_3">
+             <property name="text">
+              <string>Clear Measure</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="btnClearDimension_3">
+             <property name="text">
+              <string>Clear Dimension</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="2">
+            <widget class="QComboBox" name="comboBox_3">
+             <property name="editable">
+              <bool>false</bool>
+             </property>
+             <item>
+              <property name="text">
+               <string>Percentage Bar Chart</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Nested Donut Chart</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Line Charts</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Bar Chart</string>
+              </property>
+             </item>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
+          <property name="midLineWidth">
+           <number>0</number>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>
@@ -383,8 +400,8 @@
            </layout>
           </widget>
           <widget class="QWidget" name="page_3">
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item alignment="Qt::AlignTop">
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="0" column="0" alignment="Qt::AlignTop">
              <widget class="QFrame" name="frame_10">
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
@@ -403,7 +420,7 @@
               </layout>
              </widget>
             </item>
-            <item>
+            <item row="1" column="0">
              <widget class="QFrame" name="frame_7">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -422,8 +439,24 @@
            </layout>
           </widget>
           <widget class="QWidget" name="page_4">
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item alignment="Qt::AlignTop">
+           <layout class="QGridLayout" name="gridLayout_8">
+            <item row="1" column="0">
+             <widget class="QFrame" name="frame_12">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignTop">
              <widget class="QFrame" name="frame_11">
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
@@ -440,22 +473,6 @@
                 </widget>
                </item>
               </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="frame_12">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
              </widget>
             </item>
            </layout>
