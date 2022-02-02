@@ -28,6 +28,7 @@ class data_manipulate:
         else :
             return False
     
+    
     def separated_dimension_measure(self):
         self.dimension = []
         self.measure = []
@@ -59,6 +60,10 @@ class data_manipulate:
         def get_col():
             return data.columns.tolist()
         return {'data': data.values.tolist(), 'col': get_col()}
+
+    def test_group(self, col, measure):
+        data = self.data.groupby(col, as_index=False)[measure].mean()
+        return data
     
     def separated_date(self):
         self.data_separated_date = self.data.copy()
@@ -69,3 +74,21 @@ class data_manipulate:
                     self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month
                     self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year
         print(self.data_separated_date.head())
+    
+    def unioun_data(self, filename):
+        union_data = None
+        try:
+            union_data = pd.read_csv(filename, encoding='windows-1252')
+        except UnicodeDecodeError:
+            union_data = pd.read_csv(filename, encoding='utf8')
+        self.data = pd.concat([self.data, union_data])
+
+
+if __name__ == "__main__":
+    d = data_manipulate()
+    d.load_data('data1.csv')
+    print(len(d.data))
+    d.unioun_data('data2.csv')
+    print(len(d.data))
+    
+

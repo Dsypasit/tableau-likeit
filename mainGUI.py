@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         #######################################################################
         self.ui.menuImport.triggered.connect(self.open_file)
         self.ui.menuExit.triggered.connect(qApp.quit)
+        self.ui.actionUnion.triggered.connect(self.union_file)
 
         #######################################################################
         # SHOW WINDOW
@@ -46,6 +47,20 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## FUNCTION
     ########################################################################
+    def union_file(self):
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        if filename:
+            self.path = filename
+            self.dt.unioun_data(filename)
+
+            self.dataCombo.append(filename)
+            self.ui.dataCombo.clear()
+            self.ui.dataCombo.addItems(self.dataCombo)
+
+            self.make_table()
+            #self.ui.dataCombo.setText(filename)
+            self.dimension()
+
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
         if filename:
