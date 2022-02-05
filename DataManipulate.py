@@ -34,7 +34,13 @@ class data_manipulate:
         self.measure = []
 
         for colname, coltype in self.data.dtypes.iteritems():
-            if coltype == 'object' or self.check_dimension_name(colname): self.dimension.append(colname)
+            if coltype == 'object' or self.check_dimension_name(colname): 
+                self.dimension.append(colname)
+            elif self.check_dimension_name(colname):
+                self.data[colname] = self.data[colname].astype(int)
+                self.data[colname] = self.data[colname].astype(str)
+                self.dimension.append(colname)
+
             else : self.measure.append(colname)
     
     def is_dimension(self, s):
@@ -49,13 +55,21 @@ class data_manipulate:
     def get_measure(self):
         return self.measure
     
-    def get_groupby(self, col, measure):
+    def get_groupby(self, col, measure, fil):
         if len(measure) > 0:
             data = self.data.groupby(col, as_index=False).agg(measure)
         else:
             data = self.data.groupby(col, as_index=False).mean()
             data = data.iloc[:,:len(col)]
             # data = self.data[col]
+        querylist = []
+        for i, col in enumerate(fil):
+            querylist.append(f'(`{col}` == {fil[col]})')
+        querylist = " & ".join(querylist)
+        print(querylist)
+        data = data.query(querylist)
+        # data = data.loc[data[col].isin(fil[col])]
+        print(data)
 
         def get_col():
             return data.columns.tolist()
@@ -73,7 +87,6 @@ class data_manipulate:
                     self.data_separated_date[col] = pd.to_datetime(self.data[col])
                     self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month
                     self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year
-        print(self.data_separated_date.head())
     
     def unioun_data(self, filename):
         union_data = None
@@ -83,12 +96,13 @@ class data_manipulate:
             union_data = pd.read_csv(filename, encoding='utf8')
         self.data = pd.concat([self.data, union_data])
 
+    def get_unique(self, col):
+        return pd.unique(self.data[col]).tolist()
 
 if __name__ == "__main__":
     d = data_manipulate()
     d.load_data('data1.csv')
-    print(len(d.data))
-    d.unioun_data('data2.csv')
-    print(len(d.data))
+    print(d.get_column())
+    print(d.test_group('Segment', 'Sales'))
     
 
