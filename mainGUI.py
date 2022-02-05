@@ -78,9 +78,9 @@ class MainWindow(QMainWindow):
     def make_table(self):
         self.header = self.dt.get_column()
         self.data = self.dt.get_data()
-        self.ui.tableDetail.setColumnCount(len(self.header))
-        self.ui.tableDetail.setRowCount(len(self.data))
-        self.ui.tableDetail.setHorizontalHeaderLabels(self.header)
+        self.ui.tableWidget.setColumnCount(len(self.header))
+        self.ui.tableWidget.setRowCount(len(self.data))
+        self.ui.tableWidget.setHorizontalHeaderLabels(self.header)
         print([type(i) for i in self.data[0]])
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
                     newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
-                self.ui.tableDetail.setItem(row, col, newItem)
+                self.ui.tableWidget.setItem(row, col, newItem)
 
     def dimension(self):
         self.dt.separated_dimension_measure()

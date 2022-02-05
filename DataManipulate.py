@@ -66,10 +66,8 @@ class data_manipulate:
         for i, col in enumerate(fil):
             querylist.append(f'(`{col}` == {fil[col]})')
         querylist = " & ".join(querylist)
-        print(querylist)
         data = data.query(querylist)
         # data = data.loc[data[col].isin(fil[col])]
-        print(data)
 
         def get_col():
             return data.columns.tolist()
