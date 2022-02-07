@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
 
         self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
         self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
-        self.ui.MeasureList.itemChanged.connect(lambda: self.tableWidget.make_table())
+        self.ui.MeasureList.itemChanged.connect(lambda: self.ui.tableWidget.make_table())
 
         #######################################################################
         # SHOW WINDOW
