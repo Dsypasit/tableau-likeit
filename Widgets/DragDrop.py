@@ -135,8 +135,10 @@ class Popup2(QtWidgets.QDialog):
 
 class Popup(QtWidgets.QDialog):
     def closeEvent(self, event):
-        self.parent.main.tableWidget.make_table()
-        # self.parent.test()
+        if(isinstance(self.parent, PlotList)):
+            self.parent.test()
+        else:
+            self.parent.main.tableWidget.make_table()
 
     def testCheck(self, item):
         fil = item.text()
