@@ -1,18 +1,9 @@
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
+
 from io import StringIO
 
-import sys
-
-import altair as alt
-from vega_datasets import data
-import altair_viewer
 
 class WebEngineView(QtWebEngineWidgets.QWebEngineView):
-    # Disabling MaxRowsError
-    alt.data_transformers.disable_max_rows()
-    altair_viewer._global_viewer._use_bundled_js = False
-    alt.data_transformers.enable('data_server')
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.page().profile().downloadRequested.connect(self.onDownloadRequested)
@@ -42,5 +33,32 @@ class WebEngineView(QtWebEngineWidgets.QWebEngineView):
 
     def updateChart(self, chart, **kwargs):
         output = StringIO()
-        chart.save(output,'html', **kwargs, embed_options={'renderer':'svg'})
+        chart.save(output, "html", **kwargs)
         self.setHtml(output.getvalue())
+
+
+if __name__ == "__main__":
+    import sys
+
+    import altair as alt
+    from vega_datasets import data
+
+    app = QtWidgets.QApplication(sys.argv)
+    w = QtWidgets.QMainWindow()
+
+    cars = data.cars()
+
+    chart = (
+        alt.Chart(cars)
+        .mark_bar()
+        .encode(x=alt.X("Miles_per_Gallon", bin=True), y="count()",)
+        .properties(title="A bar chart")
+        .configure_title(anchor="start")
+    )
+
+    view = WebEngineView()
+    view.updateChart(chart)
+    w.setCentralWidget(view)
+    w.resize(640, 480)
+    w.show()
+    sys.exit(app.exec_())

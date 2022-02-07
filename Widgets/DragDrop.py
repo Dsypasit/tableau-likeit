@@ -11,16 +11,108 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QDataStream, Qt
 from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem 
 from matplotlib.pyplot import text
-from DataManipulate import data_manipulate
+from Widgets.DataManipulate import data_manipulate
+
+class Popup(QtWidgets.QDialog):
+    def closeEvent(self, event):
+        self.parent.main.tableDetail.make_table()
+
+    def testCheck(self, item):
+        fil = item.text()
+        self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
+
+    def __init__(self, name, parent):
+        super().__init__(parent)
+        self.resize(400, 300)
+        self.name = name
+        self.parent = parent
+        self.label = QtWidgets.QLabel(self)
+        self.label.setGeometry(QtCore.QRect(76, 30, 241, 20))
+        self.label.setText(name)
+        self.label.setAlignment(Qt.AlignCenter)
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.setGeometry(QtCore.QRect(70, 80, 256, 192))
+        self.listWidget.itemChanged.connect(self.testCheck)
+        self.selectButton = QtWidgets.QPushButton(self)
+        self.selectButton.setGeometry(50, 50, 75, 20)
+        self.selectButton.clicked.connect(self.selectFilter)
+        self.selectButton.setText("select")
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setGeometry(250, 50, 75, 20)
+        self.clearButton.clicked.connect(self.clearFilter)
+        self.clearButton.setText("clear")
+        self.listWidget.setSortingEnabled(True)
+        self.searchEdit = QtWidgets.QLineEdit(self)
+        self.searchEdit.setGeometry(130, 50, 113, 20)
+        self.createFilter()
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+
+        self.searchEdit.textEdited.connect(self.search)
+    
+    def search(self, e):
+        if e == "":
+            self.createFilter()
+            return 
+        for i in range(self.listWidget.count()):
+            self.listWidget.takeItem(0)
+        data = self.parent.dimension[self.name]
+        for fil in data:
+            if e in fil:
+                item = QtWidgets.QListWidgetItem()
+                item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+                if data[fil]:
+                    item.setCheckState(QtCore.Qt.Checked)
+                else:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+                item.setData(QtCore.Qt.DisplayRole, fil)
+                self.listWidget.addItem(item)
+
+        
+    
+    def selectFilter(self):
+        data = self.parent.dimension[self.name]
+        for fil in data:
+            self.parent.dimension[self.name][fil] = True
+        self.createFilter()
+
+    def clearFilter(self):
+        data = self.parent.dimension[self.name]
+        for fil in data:
+            self.parent.dimension[self.name][fil] = False
+        self.createFilter()
+    
+    def createFilter(self):
+        for i in range(self.listWidget.count()):
+            self.listWidget.takeItem(0)
+            # self.listWidget.
+
+        data = self.parent.dimension[self.name]
+        for i in data:
+            item = QtWidgets.QListWidgetItem()
+            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+            if data[i]:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
+            item.setData(QtCore.Qt.DisplayRole, i)
+            self.listWidget.addItem(item)
 
 class DimensionList(QtWidgets.QListWidget):
     def __init__(self, main, parent):
         super(DimensionList, self).__init__(parent)
         self.dt = main.dt
         self.main = main
+        self.dimension = {}
+
+        self.itemDoubleClicked.connect(self.launchFilter)
+    
+    def launchFilter(self, item):
+        pop = Popup(item.text(), self)
+        pop.show()
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.count():
+            del self.dimension[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
             self.main.tableDetail.make_table()
 
@@ -43,9 +135,26 @@ class DimensionList(QtWidgets.QListWidget):
             e.accept()
         else:
             e.ignore()
+    
+    def getFilter(self):
+        result = {}
+        for col in self.dimension:
+            result[col] = []
+            for fil in self.dimension[col]:
+                if self.dimension[col][fil]:
+                    result[col].append(fil)
+        return result
+    
+    def addFilter(self, name:str) -> None:
+        if name not in self.dimension.keys():
+            self.dimension[name] = {}
+            fil = self.dt.get_unique(name)
+            for i in fil:
+                self.dimension[name][i] = True
 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         col = self.readData(event.mimeData())[0]
+        self.addFilter(col)
         super().dropEvent(event)
         self.main.tableDetail.make_table()
 
@@ -108,13 +217,15 @@ class TableGroupby(QtWidgets.QTableWidget):
     def make_table(self):
         self.setColumnCount(0)
         self.setRowCount(0)
-        self.dimension = self.get_widget_item(self.main.filterColumn)
-        self.measure_raw = self.get_widget_item(self.main.filterRow)
+        self.dimension = self.get_widget_item(self.main.DimensionList)
+        self.dimension_filter = self.main.DimensionList.getFilter()
+        self.measure_raw = self.get_widget_item(self.main.MeasureList)
         self.measure = self.to_measure_dict(self.measure_raw)
+        # print(self.dimension_filter)
         if not(len(self.dimension) > 0 ):
-            self.main.filterRow.clear()
+            self.main.MeasureList.clear()
             return
-        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure)
+        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, self.dimension_filter)
         self.header = self.data_groupby['col']
         self.data = self.data_groupby['data']
         self.setColumnCount(len(self.header))
@@ -147,11 +258,12 @@ class TableGroupby(QtWidgets.QTableWidget):
             item = QListWidgetItem()
             item.setText(col)
             item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsDropEnabled|QtCore.Qt.ItemIsDragEnabled|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-            self.main.filterRow.addItem(item)
+            self.main.MeasureList.addItem(item)
             e.accept()
         elif self.dt.is_dimension(col):
             self.dimension.append(col)
-            self.main.filterColumn.addItem(col)
+            self.main.DimensionList.addFilter(col)
+            self.main.DimensionList.addItem(col)
             e.accept()
     
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
