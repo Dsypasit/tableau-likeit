@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Widgets.DragDrop import DimensionList, MeasureList, TableGroupby
+from Widgets.DragDrop import DimensionList, MeasureList, TableGroupby, PlotList
 from Widgets.Chart import WebEngineView
 
 
@@ -125,7 +125,7 @@ class Ui_App(object):
         self.btnClearMeasure_3.setObjectName("btnClearMeasure_3")
         self.gridLayout_17.addWidget(self.btnClearMeasure_3, 3, 2, 1, 1)
         
-        self.DimensionList_2 = DimensionList(self, self.frame_6)
+        self.DimensionList_2 = PlotList(self, self.frame_6)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(2)
         sizePolicy.setVerticalStretch(0)
@@ -144,7 +144,7 @@ class Ui_App(object):
         self.btnClearDimension_3.setObjectName("btnClearDimension_3")
         self.gridLayout_17.addWidget(self.btnClearDimension_3, 1, 2, 1, 1)
         
-        self.MeasureList_2 = MeasureList(self, self.frame_6)
+        self.MeasureList_2 = PlotList(self, self.frame_6)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

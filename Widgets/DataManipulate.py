@@ -25,9 +25,7 @@ class data_manipulate:
         for i in l:
             if i in s:
                 return True
-        else :
-            return False
-    
+        return False
     
     def separated_dimension_measure(self):
         self.dimension = []
@@ -73,8 +71,17 @@ class data_manipulate:
             return data.columns.tolist()
         return {'data': data.values.tolist(), 'col': get_col()}
 
-    def test_group(self, col, measure):
-        data = self.data.groupby(col, as_index=False)[measure].mean()
+    def data_filter(self, item1, item2, fil1, fil2):
+        item = item1+item2
+        fil = fil1.copy()
+        fil.update(fil2)
+        data = self.data.copy()
+        data = data[item]
+        querylist = []
+        for i, col in enumerate(fil):
+            querylist.append(f'(`{col}` == {fil[col]})')
+        querylist = " & ".join(querylist)
+        data = data.query(querylist)
         return data
     
     def separated_date(self):
@@ -108,7 +115,7 @@ class data_manipulate:
 if __name__ == "__main__":
     d = data_manipulate()
     d.load_data('data1.csv')
-    print(d.get_column())
-    print(d.test_group('Segment', 'Sales'))
+    print(d.data.head())
+    # print(d.data_filter('Segment'))
     
 

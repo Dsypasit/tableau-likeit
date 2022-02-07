@@ -13,89 +13,89 @@ from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem
 from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
 
-class Popup(QtWidgets.QDialog):
-    def closeEvent(self, event):
-        self.parent.main.tableDetail.make_table()
+class PlotList(QtWidgets.QListWidget):
+    def __init__(self, main, parent):
+        super().__init__(parent)
+        self.item_plot = []
+        self.main = main
+        self.dt = main.dt
+        self.dimension = {}
+        self.measure = {}
+        self.setDefaultDropAction(QtCore.Qt.MoveAction)
+        self.itemDoubleClicked.connect(self.launchPopup)
 
-    def testCheck(self, item):
-        fil = item.text()
-        self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
+    def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
+        if self.count():
+            del self.dimension[self.item(self.currentRow()).text()]
+            self.takeItem(self.currentRow())
+            self.clearSelection()
+    
+    def launchPopup(self, item):
+        if self.dt.is_dimension(item.text()):
+            pop = Popup(item.text(), self)
+            pop.show()
+        else:
+            pop2 = Popup2(item.text(), self)
+            pop2.show()
 
+    def readData(self, mime: QtCore.QMimeData) -> list:
+        stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
+        textList = []
+        while not stream.atEnd():
+            # we're not using row and columns, but we *must* read them
+            row = stream.readInt()
+            col = stream.readInt()
+            for dataSize in range(stream.readInt()):
+                role, value = stream.readInt(), stream.readQVariant()
+                if role == Qt.DisplayRole:
+                    textList.append(value)
+        return textList
+    
+    def get_plot_item(self):
+        return self.item_plot, self.dimension
+
+    def addFilter(self, name:str) -> None:
+        if(self.dt.is_dimension(name)):
+            if name not in self.dimension.keys():
+                self.dimension[name] = {}
+                fil = self.dt.get_unique(name)
+                for i in fil:
+                    self.dimension[name][i] = True
+        else:
+            if name not in self.measure.keys():
+                self.measure[name] = 'sum'
+                
+
+
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        item = self.readData(event.mimeData())[0]
+        self.addFilter(item)
+        super().dropEvent(event)
+
+class Popup2(QtWidgets.QDialog):
     def __init__(self, name, parent):
         super().__init__(parent)
-        self.resize(400, 300)
         self.name = name
         self.parent = parent
         self.label = QtWidgets.QLabel(self)
-        self.label.setGeometry(QtCore.QRect(76, 30, 241, 20))
+        self.label.setGeometry(170, 30, 50, 13)
         self.label.setText(name)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.listWidget = QtWidgets.QListWidget(self)
-        self.listWidget.setGeometry(QtCore.QRect(70, 80, 256, 192))
-        self.listWidget.itemChanged.connect(self.testCheck)
-        self.selectButton = QtWidgets.QPushButton(self)
-        self.selectButton.setGeometry(50, 50, 75, 20)
-        self.selectButton.clicked.connect(self.selectFilter)
-        self.selectButton.setText("select")
-        self.clearButton = QtWidgets.QPushButton(self)
-        self.clearButton.setGeometry(250, 50, 75, 20)
-        self.clearButton.clicked.connect(self.clearFilter)
-        self.clearButton.setText("clear")
-        self.listWidget.setSortingEnabled(True)
-        self.searchEdit = QtWidgets.QLineEdit(self)
-        self.searchEdit.setGeometry(130, 50, 113, 20)
-        self.createFilter()
-        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
-
-        self.searchEdit.textEdited.connect(self.search)
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.setGeometry(160, 60, 70, 20)
+        self.comboBox.addItem("sum")
+        self.comboBox.addItem("mean")
+        self.comboBox.addItem("median")
+        self.comboBox.addItem("min")
+        self.comboBox.addItem("max")
+        self.comboBox.addItem("count")
+        self.comboBox.setCurrentText(self.parent.measure[name])
+        self.comboBox.currentIndexChanged.connect(self.selectionchange)
     
-    def search(self, e):
-        if e == "":
-            self.createFilter()
-            return 
-        for i in range(self.listWidget.count()):
-            self.listWidget.takeItem(0)
-        data = self.parent.dimension[self.name]
-        for fil in data:
-            if e in fil:
-                item = QtWidgets.QListWidgetItem()
-                item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-                if data[fil]:
-                    item.setCheckState(QtCore.Qt.Checked)
-                else:
-                    item.setCheckState(QtCore.Qt.Unchecked)
-                item.setData(QtCore.Qt.DisplayRole, fil)
-                self.listWidget.addItem(item)
+    def selectionchange(self,i):
+      print("Current index",i,"selection changed ",self.comboBox.currentText())
+      self.parent.measure[self.name] = self.comboBox.currentText()
+      print(self.parent.measure)
 
-        
-    
-    def selectFilter(self):
-        data = self.parent.dimension[self.name]
-        for fil in data:
-            self.parent.dimension[self.name][fil] = True
-        self.createFilter()
-
-    def clearFilter(self):
-        data = self.parent.dimension[self.name]
-        for fil in data:
-            self.parent.dimension[self.name][fil] = False
-        self.createFilter()
-    
-    def createFilter(self):
-        for i in range(self.listWidget.count()):
-            self.listWidget.takeItem(0)
-            # self.listWidget.
-
-        data = self.parent.dimension[self.name]
-        for i in data:
-            item = QtWidgets.QListWidgetItem()
-            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-            if data[i]:
-                item.setCheckState(QtCore.Qt.Checked)
-            else:
-                item.setCheckState(QtCore.Qt.Unchecked)
-            item.setData(QtCore.Qt.DisplayRole, i)
-            self.listWidget.addItem(item)
 
 class Popup(QtWidgets.QDialog):
     def closeEvent(self, event):

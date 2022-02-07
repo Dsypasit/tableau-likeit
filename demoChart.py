@@ -47,6 +47,7 @@ class MainWindow(QMainWindow):
         # ADD FUNCTION ELEMENT
         #######################################################################
         self.ui.menuImport.triggered.connect(self.open_file)
+        self.ui.actionUnion.triggered.connect(self.union_file)
         self.ui.menuExit.triggered.connect(qApp.quit)
 
         self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
@@ -69,6 +70,20 @@ class MainWindow(QMainWindow):
     def to_measure(self, item):
         self.dt.change_to_measure(item.text())
         self.dimension()
+
+    def union_file(self):
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        if filename:
+            self.path = filename
+            self.dt.unioun_data(filename)
+
+            self.dataCombo.append(filename)
+            self.ui.dataCombo.clear()
+            self.ui.dataCombo.addItems(self.dataCombo)
+
+            self.make_table()
+            #self.ui.dataCombo.setText(filename)
+            self.dimension()
 
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
