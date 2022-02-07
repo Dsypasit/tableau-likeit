@@ -96,6 +96,14 @@ class data_manipulate:
 
     def get_unique(self, col):
         return pd.unique(self.data[col]).tolist()
+    
+    def change_to_dimension(self, name):
+        self.dimension.append(name)
+        self.measure.remove(name)
+
+    def change_to_measure(self, name):
+        self.dimension.remove(name)
+        self.measure.append(name)
 
 if __name__ == "__main__":
     d = data_manipulate()

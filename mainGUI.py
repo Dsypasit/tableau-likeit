@@ -38,6 +38,9 @@ class MainWindow(QMainWindow):
         self.ui.menuExit.triggered.connect(qApp.quit)
         self.ui.actionUnion.triggered.connect(self.union_file)
 
+        self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
+        self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
+
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -47,6 +50,14 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## FUNCTION
     ########################################################################
+    def to_dimension(self, item):
+        self.dt.change_to_dimension(item.text())
+        self.dimension()
+
+    def to_measure(self, item):
+        self.dt.change_to_measure(item.text())
+        self.dimension()
+
     def union_file(self):
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
         if filename:
@@ -73,6 +84,7 @@ class MainWindow(QMainWindow):
 
             self.make_table()
             #self.ui.dataCombo.setText(filename)
+            self.dt.separated_dimension_measure()
             self.dimension()
 
     def make_table(self):
@@ -94,7 +106,10 @@ class MainWindow(QMainWindow):
                 self.ui.tableWidget.setItem(row, col, newItem)
 
     def dimension(self):
-        self.dt.separated_dimension_measure()
+        for i in range(self.ui.DimensionWidget.count()):
+            self.ui.DimensionWidget.takeItem(0)
+        for i in range(self.ui.MeasureWidget.count()):
+            self.ui.MeasureWidget.takeItem(0)
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
         for i in dimension:
