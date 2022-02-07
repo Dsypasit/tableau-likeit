@@ -102,11 +102,12 @@ class PlotList(QtWidgets.QListWidget):
                     break
 
     def test(self):
-        item1, col1, _ = self.main.MeasureList_2.get_plot_item()
+        item1, col1, measure = self.main.MeasureList_2.get_plot_item()
         item2, col2, _ = self.main.DimensionList_2.get_plot_item()
-        if(len(item1)>0 and len(item2)>0):
-            test = self.dt.data_filter(item1, item2, col1, col2)
-            print(test)
+        # if(len(item1)>0 and len(item2)>0):
+            # test = self.dt.data_filter(item1, item2, col1, col2)
+            # print(test)
+        print(measure)
 
 
 

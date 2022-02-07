@@ -136,6 +136,9 @@ class MainWindow(QMainWindow):
             self.ui.MeasureWidget.addItem(item)
 
     def Graph(self):
+        item1, fil1, measure1 = self.ui.MeasureList_2.get_plot_item()
+        item2, fil2, measure2 = self.ui.DimensionList_2.get_plot_item()
+
         barchart = alt.Chart(self.dt.data).mark_bar().encode(
             y = alt.Y('sum(Profit)'),
             x = alt.X('Sub-Category', title=None),
