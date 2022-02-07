@@ -11,7 +11,91 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QDataStream, Qt
 from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem 
 from matplotlib.pyplot import text
-from DataManipulate import data_manipulate
+from Widgets.DataManipulate import data_manipulate
+
+class Popup(QtWidgets.QDialog):
+    def closeEvent(self, event):
+        self.parent.main.tableDetail.make_table()
+
+    def testCheck(self, item):
+        fil = item.text()
+        self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
+
+    def __init__(self, name, parent):
+        super().__init__(parent)
+        self.resize(400, 300)
+        self.name = name
+        self.parent = parent
+        self.label = QtWidgets.QLabel(self)
+        self.label.setGeometry(QtCore.QRect(76, 30, 241, 20))
+        self.label.setText(name)
+        self.label.setAlignment(Qt.AlignCenter)
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.setGeometry(QtCore.QRect(70, 80, 256, 192))
+        self.listWidget.itemChanged.connect(self.testCheck)
+        self.selectButton = QtWidgets.QPushButton(self)
+        self.selectButton.setGeometry(50, 50, 75, 20)
+        self.selectButton.clicked.connect(self.selectFilter)
+        self.selectButton.setText("select")
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setGeometry(250, 50, 75, 20)
+        self.clearButton.clicked.connect(self.clearFilter)
+        self.clearButton.setText("clear")
+        self.listWidget.setSortingEnabled(True)
+        self.searchEdit = QtWidgets.QLineEdit(self)
+        self.searchEdit.setGeometry(130, 50, 113, 20)
+        self.createFilter()
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+
+        self.searchEdit.textEdited.connect(self.search)
+    
+    def search(self, e):
+        if e == "":
+            self.createFilter()
+            return 
+        for i in range(self.listWidget.count()):
+            self.listWidget.takeItem(0)
+        data = self.parent.dimension[self.name]
+        for fil in data:
+            if e in fil:
+                item = QtWidgets.QListWidgetItem()
+                item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+                if data[fil]:
+                    item.setCheckState(QtCore.Qt.Checked)
+                else:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+                item.setData(QtCore.Qt.DisplayRole, fil)
+                self.listWidget.addItem(item)
+
+        
+    
+    def selectFilter(self):
+        data = self.parent.dimension[self.name]
+        for fil in data:
+            self.parent.dimension[self.name][fil] = True
+        self.createFilter()
+
+    def clearFilter(self):
+        data = self.parent.dimension[self.name]
+        for fil in data:
+            self.parent.dimension[self.name][fil] = False
+        self.createFilter()
+    
+    def createFilter(self):
+        for i in range(self.listWidget.count()):
+            self.listWidget.takeItem(0)
+            # self.listWidget.
+
+        data = self.parent.dimension[self.name]
+        for i in data:
+            item = QtWidgets.QListWidgetItem()
+            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+            if data[i]:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
+            item.setData(QtCore.Qt.DisplayRole, i)
+            self.listWidget.addItem(item)
 
 class Popup(QtWidgets.QDialog):
     def closeEvent(self, event):

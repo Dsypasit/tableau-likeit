@@ -8,17 +8,26 @@
 ## IMPORTS
 ########################################################################
 import os
-import sys
+import sys, random
 import re
 
-from DataManipulate import data_manipulate
+import altair as alt
+from vega_datasets import data
+import pandas as pd
+import numpy as np
+
+# Disabling MaxRowsError
+alt.data_transformers.disable_max_rows()
+
+from Widgets.DataManipulate import data_manipulate
 from Widgets.DateItem import DateWidgetItem
-from pyqtgraph import PlotWidget, plot
-import pyqtgraph as pg
+from Widgets.Chart import WebEngineView
+
 ########################################################################
 # IMPORT GUI FILE
 from ui_interfaceDemo import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtChart import QChart, QChartView, QValueAxis, QBarCategoryAxis, QBarSet, QBarSeries
 from PyQt5.QtCore import Qt
 ########################################################################
 
@@ -40,6 +49,9 @@ class MainWindow(QMainWindow):
         self.ui.menuImport.triggered.connect(self.open_file)
         self.ui.menuExit.triggered.connect(qApp.quit)
 
+        self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
+        self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
+
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -49,6 +61,14 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## FUNCTION
     ########################################################################
+    def to_dimension(self, item):
+        self.dt.change_to_dimension(item.text())
+        self.dimension()
+
+    def to_measure(self, item):
+        self.dt.change_to_measure(item.text())
+        self.dimension()
+
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
         if filename:
@@ -60,15 +80,17 @@ class MainWindow(QMainWindow):
             self.ui.dataCombo.addItems(self.dataCombo)
 
             self.make_table()
+            self.dt.separated_dimension_measure()
             self.dimension()
+
             self.Graph()
 
     def make_table(self):
         self.header = self.dt.get_column()
         self.data = self.dt.get_data()
-        self.ui.tableDetail.setColumnCount(len(self.header))
-        self.ui.tableDetail.setRowCount(len(self.data))
-        self.ui.tableDetail.setHorizontalHeaderLabels(self.header)
+        self.ui.tableWidget.setColumnCount(len(self.header))
+        self.ui.tableWidget.setRowCount(len(self.data))
+        self.ui.tableWidget.setHorizontalHeaderLabels(self.header)
         print([type(i) for i in self.data[0]])
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
@@ -79,10 +101,13 @@ class MainWindow(QMainWindow):
                     newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
-                self.ui.tableDetail.setItem(row, col, newItem)
+                self.ui.tableWidget.setItem(row, col, newItem)
 
     def dimension(self):
-        self.dt.separated_dimension_measure()
+        for i in range(self.ui.DimensionWidget.count()):
+            self.ui.DimensionWidget.takeItem(0)
+        for i in range(self.ui.MeasureWidget.count()):
+            self.ui.MeasureWidget.takeItem(0)
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
         for i in dimension:
@@ -95,20 +120,34 @@ class MainWindow(QMainWindow):
             self.ui.MeasureWidget.addItem(item)
 
     def Graph(self):
-        # create list for y-axis
-        y1 = [5, 5, 7, 10, 3, 8, 9, 1, 6, 2]
-        # create horizontal list i.e x-axis
-        x = ["bleo", 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        # create pyqt5graph bar graph item
-        # with width = 0.6
-        # with bar colors = green
-        bargraph = pg.BarGraphItem(x = x, height = y1, width = 0.6, brush ='g')
- 
-        # add item to plot window
-        # adding bargraph item to the plot window
-        self.ui.BarChartWidget.addItem(bargraph)
-    
-        
+        barchart = alt.Chart(self.dt.data).mark_bar().encode(
+            y = alt.Y('sum(Profit)'),
+            x = alt.X('Sub-Category', title=None),
+            column = ('Category'),
+            tooltip=['sum(Profit)'],
+        ).resolve_scale(
+        x='independent'
+        )
+
+        piechart = alt.Chart(self.dt.data).mark_arc().encode(
+            theta="sum(Sales):Q",
+            color="Sub-Category",
+            tooltip=['sum(Sales)'],
+        )
+
+        linechart = alt.Chart(self.dt.data).mark_line().encode(
+            y = alt.Y('sum(Profit)'),
+            x = alt.X('Sub-Category', title=None),
+            column = ('Category'),
+            tooltip=['sum(Profit)'],
+        ).resolve_scale(
+        x='independent'
+        )
+
+        self.ui.barChart.updateChart(barchart)
+        self.ui.pieChart.updateChart(piechart)
+        self.ui.lineChart.updateChart(linechart)
+
     ########################################################################
 
 ########################################################################
