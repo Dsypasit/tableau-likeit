@@ -7,6 +7,7 @@
 ########################################################################
 ## IMPORTS
 ########################################################################
+from json import tool
 import os
 import sys, random
 import re
@@ -53,7 +54,6 @@ class MainWindow(QMainWindow):
         self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
         self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
         self.ui.MeasureList.itemChanged.connect(lambda: self.ui.tableWidget.make_table())
-
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -139,26 +139,55 @@ class MainWindow(QMainWindow):
         item1, fil1, measure1 = self.ui.DimensionList_2.get_plot_item()
         item2, fil2, measure2 = self.ui.MeasureList_2.get_plot_item()
         data = None
-        print(item1, item2)
         test = []
+        tooltip = []
         if(len(item1)>0 or len(item2)>0):
             data = self.dt.data_filter(item1, item2, fil1, fil2)
-            print((type(data)))
             # for i in item1:
         
             if(len(item1)>=1):
-                test.append(alt.X(item1[0]))
+                if item1[0] in measure1.keys():
+                    test.append(alt.X(f'{measure1[item1[0]]}({item1[0]})'))
+                    tooltip.append(f'{measure1[item1[0]]}({item1[0]})')
+                else:
+                    test.append(alt.X(item1[0]))
+                    tooltip.append(item1[0])
             if(len(item2)>=1):
-                test.append(alt.Y(item2[0]))
+                if item2[0] in measure2.keys():
+                    test.append(alt.Y(f'{measure2[item2[0]]}({item2[0]})'))
+                    tooltip.append(f'{measure2[item2[0]]}({item2[0]})')
+                else:
+                    test.append(alt.Y(item2[0]))
+                    tooltip.append(item2[0])
             if(len(item1)>=2):
-                test.append(alt.Column(item1[1]))
+                if item1[1] in measure1.keys():
+                    test.append(alt.Column(f'{measure1[item1[1]]}({item1[1]})'))
+                    tooltip.append(f'{measure1[item1[1]]}({item1[1]})')
+                else:
+                    test.append(alt.Column(item1[1]))
+                    tooltip.append(item1[1])
             if(len(item2)>=2):
-                test.append(alt.Row(item2[1]))
+                if item2[1] in measure2.keys():
+                    test.append(alt.Row(f'{measure2[item2[1]]}({item2[1]})'))
+                    tooltip.append(f'{measure2[item2[1]]}({item2[1]})')
+                else:
+                    test.append(alt.Row(item2[1]))
+                    tooltip.append(item2[1])
             if(len(item1)>=3):
-                test.append(alt.Color(item1[2]))
+                if item1[2] in measure1.keys():
+                    test.append(alt.Color(f'{measure1[item1[2]]}({item1[2]})'))
+                    tooltip.append(f'{measure1[item1[2]]}({item1[2]})')
+                else:
+                    test.append(alt.Color(item1[2]))
+                    tooltip.append(item1[2])
             if(len(item2)>=3):
-                test.append(alt.Color(item2[2]))
-            test.append(alt.Tooltip(item1+item2))
+                if item2[2] in measure2.keys():
+                    test.append(alt.Color(f'{measure2[item2[2]]}({item2[2]})'))
+                    tooltip.append(f'{measure2[item2[2]]}({item2[2]})')
+                else:
+                    test.append(alt.Color(item2[2]))
+                    tooltip.append(item2[2])
+            test.append(alt.Tooltip(tooltip))
             # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
             # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
             print(test)

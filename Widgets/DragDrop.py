@@ -36,17 +36,20 @@ class PlotList(QtWidgets.QListWidget):
 
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
-        print('test')
         if self.item(self.currentRow())== None:
             return
+        # if self.item(self.currentRow()) != name:
+        #     return
         if self.count():
             item = self.item(self.currentRow()).text()
+            self.clearSelection()
             self.item_plot.remove(item)
             if self.dt.is_dimension(item) and item in self.dimension.keys():
                 del self.dimension[self.item(self.currentRow()).text()]
             elif self.dt.is_measure(item) and item in self.measure.keys():
                 del self.measure[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
+            self.removeItemWidget(self.currentItem())
             super().dragLeaveEvent(e)
             self.main.app.Graph()
     
@@ -57,6 +60,7 @@ class PlotList(QtWidgets.QListWidget):
         else:
             pop2 = Popup2(item.text(), self)
             pop2.show()
+        self.clearSelection()
 
     def readData(self, mime: QtCore.QMimeData) -> list:
         stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
