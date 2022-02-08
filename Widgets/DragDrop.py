@@ -133,6 +133,12 @@ class Popup2(QtWidgets.QDialog):
     def selectionchange(self,i):
       self.parent.measure[self.name] = self.comboBox.currentText()
 
+    def closeEvent(self, event):
+        if(isinstance(self.parent, PlotList)):
+            self.parent.test()
+        else:
+            self.parent.main.tableWidget.make_table()
+
 
 class Popup(QtWidgets.QDialog):
     def closeEvent(self, event):
@@ -287,10 +293,18 @@ class MeasureList(QtWidgets.QListWidget):
         super(MeasureList, self).__init__(parent)
         self.dt = main.dt
         self.main = main
+        self.measure = {}
+        self.itemDoubleClicked.connect(self.launchFilter)
+    
+    def launchFilter(self, item):
+        pop = Popup2(item.text(), self)
+        pop.show()
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.count():
+            del self.measure[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
+            self.main.tableWidget.make_table()
             self.main.tableWidget.make_table()
 
     def readData(self, mime: QtCore.QMimeData) -> list:
@@ -314,17 +328,23 @@ class MeasureList(QtWidgets.QListWidget):
     
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
         col = self.readData(e.mimeData())[0]
-        val = col.split('.')[0]
-        if self.dt.is_measure(val):
+        # val = col.split('.')[0]
+        if self.dt.is_measure(col):
             e.accept()
         else:
             e.ignore()
     
+    def addFilter(self, item):
+        if item not in self.measure.keys():
+            self.measure[item] = 'sum'
+
+    
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         # super().dropEvent(event)
-        col = self.readData(event.mimeData())[0]+".sum"
+        col = self.readData(event.mimeData())[0]
         if self.isExist(col):
             return
+        self.addFilter(col)
         item = QListWidgetItem()
         item.setText(col)
         self.addItem(item)
@@ -337,6 +357,8 @@ class TableGroupby(QtWidgets.QTableWidget):
         self.dt = main.dt
         self.dimension = []
         self.measure = {}
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+        self.setSortingEnabled(True)
 
     def make_table(self):
         self.setColumnCount(0)
@@ -344,7 +366,7 @@ class TableGroupby(QtWidgets.QTableWidget):
         self.dimension = self.get_widget_item(self.main.DimensionList)
         self.dimension_filter = self.main.DimensionList.getFilter()
         self.measure_raw = self.get_widget_item(self.main.MeasureList)
-        self.measure = self.to_measure_dict(self.measure_raw)
+        self.measure = self.main.MeasureList.measure
         # print(self.dimension_filter)
         if not(len(self.dimension) > 0 ):
             self.main.MeasureList.clear()
@@ -377,12 +399,13 @@ class TableGroupby(QtWidgets.QTableWidget):
     def add_listbox(self, e):
         col = self.readData(e.mimeData())[0]
         if self.dt.is_measure(col) and len(self.dimension) > 0:
-            self.measure[col] = 'sum'
-            col = col+'.sum'
+            # self.measure[col] = 'sum'
+            # col = col+'.sum'
             item = QListWidgetItem()
             item.setText(col)
             item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsDropEnabled|QtCore.Qt.ItemIsDragEnabled|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
             self.main.MeasureList.addItem(item)
+            self.main.MeasureList.addFilter(col)
             e.accept()
         elif self.dt.is_dimension(col):
             self.dimension.append(col)

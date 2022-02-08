@@ -117,7 +117,11 @@ class data_manipulate:
 if __name__ == "__main__":
     d = data_manipulate()
     d.load_data('data1.csv')
-    print(d.data.head())
+    print(d.get_column())
+    df = d.data.set_index(['State', 'City'])
+    print(df.head())
+    df = df.reset_index()
+    print(df.head())
     # print(d.data_filter('Segment'))
     
 
