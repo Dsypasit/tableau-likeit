@@ -14,6 +14,9 @@ from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem
 from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
 
+########################################################################
+## PLOTLIST CLASS
+########################################################################
 class PlotList(QtWidgets.QListWidget):
     def __init__(self, main, parent):
         super().__init__(parent)
@@ -30,6 +33,10 @@ class PlotList(QtWidgets.QListWidget):
     def allow_drag(self):
         self.allow = True
 
+  
+    ########################################################################
+    ## FUNCTION
+    ########################################################################
     def getFilter(self):
         result = {}
         for col in self.dimension:
@@ -161,38 +168,215 @@ class Popup(QtWidgets.QDialog):
         else:
             self.parent.main.tableWidget.make_table()
 
-    def testCheck(self, item):
-        fil = item.text()
-        self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
 
+    def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
+        if self.item(self.currentRow())== None:
+            return
+        # if self.item(self.currentRow()) != name:
+        #     return
+        if self.count():
+            item = self.item(self.currentRow()).text()
+            self.clearSelection()
+            self.item_plot.remove(item)
+            if self.dt.is_dimension(item) and item in self.dimension.keys():
+                del self.dimension[self.item(self.currentRow()).text()]
+            elif self.dt.is_measure(item) and item in self.measure.keys():
+                del self.measure[self.item(self.currentRow()).text()]
+            self.takeItem(self.currentRow())
+            self.removeItemWidget(self.currentItem())
+            super().dragLeaveEvent(e)
+            self.main.app.Graph()
+    
+    def launchPopup(self, item):
+        if self.dt.is_dimension(item.text()):
+            pop = Popup(item.text(), self)
+            pop.show()
+        else:
+            pop2 = Popup2(item.text(), self)
+            pop2.show()
+        self.clearSelection()
+
+    def readData(self, mime: QtCore.QMimeData) -> list:
+        stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
+        textList = []
+        while not stream.atEnd():
+            # we're not using row and columns, but we *must* read them
+            row = stream.readInt()
+            col = stream.readInt()
+            for dataSize in range(stream.readInt()):
+                role, value = stream.readInt(), stream.readQVariant()
+                if role == Qt.DisplayRole:
+                    textList.append(value)
+        return textList
+    
+    def get_plot_item(self):
+        item_plot = []
+        for i in range(self.count()):
+            # if self.item(i).text != a:
+            item_plot.append(self.item(i).text())
+        fil = self.getFilter()
+        return item_plot, fil, self.measure
+
+    def addFilter(self, name:str) -> None:
+        if(self.dt.is_dimension(name)):
+            if name not in self.dimension.keys():
+                self.dimension[name] = {}
+                fil = self.dt.get_unique(name)
+                for i in fil:
+                    self.dimension[name][i] = True
+        else:
+            if name not in self.measure.keys():
+                self.measure[name] = 'sum'
+                
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        item = self.readData(event.mimeData())[0]
+        self.addFilter(item)
+        self.item_plot.append(item)
+        super().dropEvent(event)
+        c = 0
+        for i in range(self.count()):
+            if self.item(i).text() == item:
+                c+= 1
+        if c>1:
+            for i in range(self.count()-1, -1, -1):
+                if self.item(i).text() == item:
+                    self.takeItem(i)
+                    break
+        self.main.app.Graph()
+
+    def test(self):
+        item1, col1, measure = self.main.MeasureList_2.get_plot_item()
+        item2, col2, _ = self.main.DimensionList_2.get_plot_item()
+        # if(len(item1)>0 and len(item2)>0):
+            # test = self.dt.data_filter(item1, item2, col1, col2)
+            # print(test)
+
+
+########################################################################
+## POPUP MEASURE WINDOW CLASS
+########################################################################
+class Popup2(QtWidgets.QDialog):
     def __init__(self, name, parent):
         super().__init__(parent)
-        self.resize(400, 300)
+        self.resize(300, 100)
         self.name = name
         self.parent = parent
+
+        self.setWindowTitle("Filter "+name)
+        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout.setObjectName("gridLayout")
+
         self.label = QtWidgets.QLabel(self)
-        self.label.setGeometry(QtCore.QRect(76, 30, 241, 20))
+        self.label.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 4)
         self.label.setText(name)
-        self.label.setAlignment(Qt.AlignCenter)
+
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.addItem("sum")
+        self.comboBox.addItem("mean")
+        self.comboBox.addItem("median")
+        self.comboBox.addItem("min")
+        self.comboBox.addItem("max")
+        self.comboBox.addItem("count")
+        self.comboBox.setCurrentText(self.parent.measure[name])
+        self.comboBox.currentIndexChanged.connect(self.selectionchange)
+        self.gridLayout.addWidget(self.comboBox, 1, 0, 1, 4)
+
+        self.cancelButton = QtWidgets.QPushButton(self)
+        self.cancelButton.setObjectName("cancelButton")
+        self.gridLayout.addWidget(self.cancelButton, 2, 2, 1, 2)
+        self.cancelButton.setText("Cancel")
+
+        self.doneButton = QtWidgets.QPushButton(self)
+        self.doneButton.setObjectName("doneButton")
+        self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
+        self.doneButton.setText("Done")
+    
+    ########################################################################
+    ## FUNCTION
+    ########################################################################    
+    def selectionchange(self,i):
+      self.parent.measure[self.name] = self.comboBox.currentText()
+
+    def closeEvent(self, event):
+        if(isinstance(self.parent, PlotList)):
+            self.parent.main.app.Graph()
+        else:
+            self.parent.main.tableDetail.make_table()
+
+
+########################################################################
+## POPUP DIMENSION WINDOW CLASS
+########################################################################
+class Popup(QtWidgets.QDialog):
+    def __init__(self, name, parent):
+        super().__init__(parent)
+        self.resize(442, 370)
+        self.name = name
+        self.parent = parent
+
+        self.setWindowTitle("Filter "+name)
+        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout.setObjectName("gridLayout")
         self.listWidget = QtWidgets.QListWidget(self)
-        self.listWidget.setGeometry(QtCore.QRect(70, 80, 256, 192))
+        self.listWidget.setObjectName("listWidget")
+        self.gridLayout.addWidget(self.listWidget, 2, 0, 1, 4)
+        # function listwidget
         self.listWidget.itemChanged.connect(self.testCheck)
-        self.selectButton = QtWidgets.QPushButton(self)
-        self.selectButton.setGeometry(50, 50, 75, 20)
-        self.selectButton.clicked.connect(self.selectFilter)
-        self.selectButton.setText("select")
-        self.clearButton = QtWidgets.QPushButton(self)
-        self.clearButton.setGeometry(250, 50, 75, 20)
-        self.clearButton.clicked.connect(self.clearFilter)
-        self.clearButton.setText("clear")
         self.listWidget.setSortingEnabled(True)
+
+        self.label = QtWidgets.QLabel(self)
+        self.label.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 4)
+        self.label.setText(name)
+
+        self.selectButton = QtWidgets.QPushButton(self)
+        self.selectButton.setObjectName("selectButton")
+        self.gridLayout.addWidget(self.selectButton, 1, 0, 1, 1)
+        self.selectButton.clicked.connect(self.selectFilter)
+        self.selectButton.setText("All Select")
+
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setObjectName("clearButton")
+        self.gridLayout.addWidget(self.clearButton, 1, 3, 1, 1)
+        self.clearButton.clicked.connect(self.clearFilter)
+        self.clearButton.setText("All Clear")
+
         self.searchEdit = QtWidgets.QLineEdit(self)
-        self.searchEdit.setGeometry(130, 50, 113, 20)
+        self.searchEdit.setObjectName("searchEdit")
+        self.gridLayout.addWidget(self.searchEdit, 1, 1, 1, 2)
+        self.searchEdit.textEdited.connect(self.search)
+
+        self.cancelButton = QtWidgets.QPushButton(self)
+        self.cancelButton.setObjectName("cancelButton")
+        self.gridLayout.addWidget(self.cancelButton, 3, 2, 1, 2)
+        self.cancelButton.setText("Cancel")
+
+        self.doneButton = QtWidgets.QPushButton(self)
+        self.doneButton.setObjectName("doneButton")
+        self.gridLayout.addWidget(self.doneButton, 3, 0, 1, 2)
+        self.doneButton.setText("Done")
+
         self.createFilter()
         self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
 
-        self.searchEdit.textEdited.connect(self.search)
-    
+    ########################################################################
+    ## FUNCTION
+    ########################################################################
+    def closeEvent(self, event):
+        if(isinstance(self.parent, PlotList)):
+            self.parent.main.app.Graph()
+        else:
+            self.parent.main.tableDetail.make_table()
+
+    def testCheck(self, item):
+        fil = item.text()
+        self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
+        
     def search(self, e):
         if e == "":
             self.createFilter()
@@ -210,8 +394,6 @@ class Popup(QtWidgets.QDialog):
                     item.setCheckState(QtCore.Qt.Unchecked)
                 item.setData(QtCore.Qt.DisplayRole, fil)
                 self.listWidget.addItem(item)
-
-        
     
     def selectFilter(self):
         data = self.parent.dimension[self.name]
@@ -240,6 +422,7 @@ class Popup(QtWidgets.QDialog):
                 item.setCheckState(QtCore.Qt.Unchecked)
             item.setData(QtCore.Qt.DisplayRole, i)
             self.listWidget.addItem(item)
+
 
 class DimensionList(QtWidgets.QListWidget):
     def __init__(self, main, parent):
