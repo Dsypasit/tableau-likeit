@@ -77,12 +77,12 @@ class data_manipulate:
         fil.update(fil2)
         data = self.data.copy()
         data = data[item]
+        if not fil:
+            return data
         querylist = []
         for i, col in enumerate(fil):
             querylist.append(f'(`{col}` == {fil[col]})')
         querylist = " & ".join(querylist)
-        print(querylist)
-        print(data)
         data = data.query(querylist)
         return data
     

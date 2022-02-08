@@ -136,17 +136,40 @@ class MainWindow(QMainWindow):
             self.ui.MeasureWidget.addItem(item)
 
     def Graph(self):
-        item1, fil1, measure1 = self.ui.MeasureList_2.get_plot_item()
-        item2, fil2, measure2 = self.ui.DimensionList_2.get_plot_item()
+        item1, fil1, measure1 = self.ui.DimensionList_2.get_plot_item()
+        item2, fil2, measure2 = self.ui.MeasureList_2.get_plot_item()
+        data = None
+        print(item1, item2)
+        test = []
+        if(len(item1)>0 or len(item2)>0):
+            data = self.dt.data_filter(item1, item2, fil1, fil2)
+            print((type(data)))
+            # for i in item1:
+        
+            if(len(item1)>=1):
+                test.append(alt.X(item1[0]))
+            if(len(item2)>=1):
+                test.append(alt.Y(item2[0]))
+            if(len(item1)>=2):
+                test.append(alt.Column(item1[1]))
+            if(len(item2)>=2):
+                test.append(alt.Row(item2[1]))
+            if(len(item1)>=3):
+                test.append(alt.Color(item1[2]))
+            if(len(item2)>=3):
+                test.append(alt.Color(item2[2]))
+            test.append(alt.Tooltip(item1+item2))
+            # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
+            # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
+            print(test)
 
-        barchart = alt.Chart(self.dt.data).mark_bar().encode(
-            y = alt.Y('sum(Profit)'),
-            x = alt.X('Sub-Category', title=None),
-            column = ('Category'),
-            tooltip=['sum(Profit)'],
-        ).resolve_scale(
-        x='independent'
-        )
+
+            barchart = alt.Chart(data).mark_bar().encode(
+                *test
+            ).resolve_scale(
+            x='independent'
+            )
+            self.ui.barChart.updateChart(barchart)
 
         piechart = alt.Chart(self.dt.data).mark_arc().encode(
             theta="sum(Sales):Q",
@@ -163,7 +186,6 @@ class MainWindow(QMainWindow):
         x='independent'
         )
 
-        self.ui.barChart.updateChart(barchart)
         self.ui.pieChart.updateChart(piechart)
         self.ui.lineChart.updateChart(linechart)
 

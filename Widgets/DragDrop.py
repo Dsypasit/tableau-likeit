@@ -36,16 +36,19 @@ class PlotList(QtWidgets.QListWidget):
 
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
+        print('test')
         if self.item(self.currentRow())== None:
             return
         if self.count():
             item = self.item(self.currentRow()).text()
+            self.item_plot.remove(item)
             if self.dt.is_dimension(item) and item in self.dimension.keys():
                 del self.dimension[self.item(self.currentRow()).text()]
             elif self.dt.is_measure(item) and item in self.measure.keys():
                 del self.measure[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
             super().dragLeaveEvent(e)
+            self.main.app.Graph()
     
     def launchPopup(self, item):
         if self.dt.is_dimension(item.text()):
@@ -90,6 +93,7 @@ class PlotList(QtWidgets.QListWidget):
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         item = self.readData(event.mimeData())[0]
         self.addFilter(item)
+        self.item_plot.append(item)
         super().dropEvent(event)
         c = 0
         for i in range(self.count()):
@@ -100,6 +104,7 @@ class PlotList(QtWidgets.QListWidget):
                 if self.item(i).text() == item:
                     self.takeItem(i)
                     break
+        self.main.app.Graph()
 
     def test(self):
         item1, col1, measure = self.main.MeasureList_2.get_plot_item()
@@ -107,7 +112,6 @@ class PlotList(QtWidgets.QListWidget):
         # if(len(item1)>0 and len(item2)>0):
             # test = self.dt.data_filter(item1, item2, col1, col2)
             # print(test)
-        print(measure)
 
 
 
@@ -135,7 +139,7 @@ class Popup2(QtWidgets.QDialog):
 
     def closeEvent(self, event):
         if(isinstance(self.parent, PlotList)):
-            self.parent.test()
+            self.parent.main.app.Graph()
         else:
             self.parent.main.tableWidget.make_table()
 
@@ -143,7 +147,7 @@ class Popup2(QtWidgets.QDialog):
 class Popup(QtWidgets.QDialog):
     def closeEvent(self, event):
         if(isinstance(self.parent, PlotList)):
-            self.parent.test()
+            self.parent.main.app.Graph()
         else:
             self.parent.main.tableWidget.make_table()
 

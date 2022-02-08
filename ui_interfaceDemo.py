@@ -18,6 +18,7 @@ class Ui_App(object):
         self.dt = data
         
     def setupUi(self, App):
+        self.app = App
         App.setObjectName("App")
         App.resize(1080, 800)
         icon = QtGui.QIcon()
