@@ -32,9 +32,11 @@ class data_manipulate:
         self.measure = []
 
         for colname, coltype in self.data.dtypes.iteritems():
-            if coltype == 'object' or self.check_dimension_name(colname): 
+            if coltype == 'object': 
+                self.data[colname] = self.data[colname].astype(str)
                 self.dimension.append(colname)
             elif self.check_dimension_name(colname):
+                # print(colname)
                 self.data[colname] = self.data[colname].astype(int)
                 self.data[colname] = self.data[colname].astype(str)
                 self.dimension.append(colname)

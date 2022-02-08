@@ -38,19 +38,20 @@ class PlotList(QtWidgets.QListWidget):
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.item(self.currentRow())== None:
             return
-        # if self.item(self.currentRow()) != name:
-        #     return
+        print('test')
+        d = self.currentRow()
         if self.count():
             item = self.item(self.currentRow()).text()
-            self.clearSelection()
+            # self.clearSelection()
             self.item_plot.remove(item)
             if self.dt.is_dimension(item) and item in self.dimension.keys():
                 del self.dimension[self.item(self.currentRow()).text()]
             elif self.dt.is_measure(item) and item in self.measure.keys():
                 del self.measure[self.item(self.currentRow()).text()]
-            self.takeItem(self.currentRow())
-            self.removeItemWidget(self.currentItem())
-            super().dragLeaveEvent(e)
+            self.takeItem(d)
+            self.clearSelection()
+            # self.removeItemWidget(self.currentItem())
+            # super().dragLeaveEvent(e)
             self.main.app.Graph()
     
     def launchPopup(self, item):
@@ -99,15 +100,7 @@ class PlotList(QtWidgets.QListWidget):
         self.addFilter(item)
         self.item_plot.append(item)
         super().dropEvent(event)
-        c = 0
-        for i in range(self.count()):
-            if self.item(i).text() == item:
-                c+= 1
-        if c>1:
-            for i in range(self.count()-1, -1, -1):
-                if self.item(i).text() == item:
-                    self.takeItem(i)
-                    break
+        self.clearSelection()
         self.main.app.Graph()
 
     def test(self):
@@ -313,7 +306,6 @@ class MeasureList(QtWidgets.QListWidget):
             del self.measure[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
             self.main.tableWidget.make_table()
-            self.main.tableWidget.make_table()
 
     def readData(self, mime: QtCore.QMimeData) -> list:
         stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
@@ -378,6 +370,7 @@ class TableGroupby(QtWidgets.QTableWidget):
         # print(self.dimension_filter)
         if not(len(self.dimension) > 0 ):
             self.main.MeasureList.clear()
+            self.main.MeasureList.measure = {}
             return
         self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, self.dimension_filter)
         self.header = self.data_groupby['col']

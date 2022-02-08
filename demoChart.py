@@ -43,6 +43,8 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.path = "Path"
         self.dataCombo = []
+        self.i1 = None
+        self.i2 = None
 
         #######################################################################
         # ADD FUNCTION ELEMENT
@@ -107,7 +109,6 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.setColumnCount(len(self.header))
         self.ui.tableWidget.setRowCount(len(self.data))
         self.ui.tableWidget.setHorizontalHeaderLabels(self.header)
-        print([type(i) for i in self.data[0]])
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
                 if type(item) in (int, float):
@@ -135,10 +136,27 @@ class MainWindow(QMainWindow):
             # item = QListWidgetItem("# {}".format(i))
             self.ui.MeasureWidget.addItem(item)
 
+    def check_dup(self, i1, i2):
+        it1 = i1
+        it2 = i2
+        if self.i1 == i1 and self.i2 != i2:
+            for i in i1:
+                if i in i2:
+                    it1.remove(i)
+        elif self.i2 == i2 and self.i1 != i1:
+            for i in i2:
+                if i in i1:
+                    it2.remove(i)
+        return it1, it2
+
     def Graph(self):
         item1, fil1, measure1 = self.ui.DimensionList_2.get_plot_item()
         item2, fil2, measure2 = self.ui.MeasureList_2.get_plot_item()
+        item1, item2 = self.check_dup(item1, item2)
         data = None
+        print(item1, item2)
+        self.i1 = item1
+        self.i2 = item2
         test = []
         tooltip = []
         if(len(item1)>0 or len(item2)>0):
@@ -190,7 +208,6 @@ class MainWindow(QMainWindow):
             test.append(alt.Tooltip(tooltip))
             # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
             # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
-            print(test)
 
 
             barchart = alt.Chart(data).mark_bar().encode(
