@@ -17,6 +17,7 @@ class WebEngineView(QtWebEngineWidgets.QWebEngineView):
         super().__init__(parent)
         self.page().profile().downloadRequested.connect(self.onDownloadRequested)
         self.windows = []
+        self.setZoomFactor(1.24) # 0.25 to 5
 
     @QtCore.pyqtSlot(QtWebEngineWidgets.QWebEngineDownloadItem)
     def onDownloadRequested(self, download):
