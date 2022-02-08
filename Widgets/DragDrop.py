@@ -24,6 +24,11 @@ class PlotList(QtWidgets.QListWidget):
         self.measure = {}
         self.setDefaultDropAction(QtCore.Qt.TargetMoveAction)
         self.itemDoubleClicked.connect(self.launchPopup)
+        self.itemClicked.connect(self.allow_drag)
+        self.allow = False
+    
+    def allow_drag(self):
+        self.allow = True
 
     def getFilter(self):
         result = {}
@@ -34,13 +39,20 @@ class PlotList(QtWidgets.QListWidget):
                     result[col].append(fil)
         return result
 
+    def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
+        item = self.readData(e.mimeData())[0]
+        if item in self.dimension.keys() or item in self.measure.keys():
+            self.allow = True
+        else:
+            self.allow = False
+        return super().dragEnterEvent(e)
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.item(self.currentRow())== None:
             return
         print('test')
         d = self.currentRow()
-        if self.count():
+        if self.count() and self.allow:
             item = self.item(self.currentRow()).text()
             # self.clearSelection()
             self.item_plot.remove(item)
@@ -50,9 +62,9 @@ class PlotList(QtWidgets.QListWidget):
                 del self.measure[self.item(self.currentRow()).text()]
             self.takeItem(d)
             self.clearSelection()
-            # self.removeItemWidget(self.currentItem())
-            # super().dragLeaveEvent(e)
+            super().dragLeaveEvent(e)
             self.main.app.Graph()
+            self.allow = False
     
     def launchPopup(self, item):
         if self.dt.is_dimension(item.text()):
@@ -102,6 +114,7 @@ class PlotList(QtWidgets.QListWidget):
         super().dropEvent(event)
         self.clearSelection()
         self.main.app.Graph()
+        self.allow = False
 
     def test(self):
         item1, col1, measure = self.main.MeasureList_2.get_plot_item()

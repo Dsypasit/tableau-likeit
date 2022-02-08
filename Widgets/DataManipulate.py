@@ -30,6 +30,7 @@ class data_manipulate:
     def separated_dimension_measure(self):
         self.dimension = []
         self.measure = []
+        self.data = self.data.dropna()
 
         for colname, coltype in self.data.dtypes.iteritems():
             if coltype == 'object': 
@@ -62,12 +63,12 @@ class data_manipulate:
             data = self.data.groupby(col, as_index=False).mean()
             data = data.iloc[:,:len(col)]
             # data = self.data[col]
-        querylist = []
-        for i, col in enumerate(fil):
-            querylist.append(f'(`{col}` == {fil[col]})')
-        querylist = " & ".join(querylist)
-        data = data.query(querylist)
-        # data = data.loc[data[col].isin(fil[col])]
+        if fil:
+            querylist = []
+            for i, col in enumerate(fil):
+                querylist.append(f'(`{col}` == {fil[col]})')
+            querylist = " & ".join(querylist)
+            data = data.query(querylist)
 
         def get_col():
             return data.columns.tolist()
@@ -79,13 +80,12 @@ class data_manipulate:
         fil.update(fil2)
         data = self.data.copy()
         data = data[item]
-        if not fil:
-            return data
-        querylist = []
-        for i, col in enumerate(fil):
-            querylist.append(f'(`{col}` == {fil[col]})')
-        querylist = " & ".join(querylist)
-        data = data.query(querylist)
+        if fil:
+            querylist = []
+            for i, col in enumerate(fil):
+                querylist.append(f'(`{col}` == {fil[col]})')
+            querylist = " & ".join(querylist)
+            data = data.query(querylist)
         return data
     
     def separated_date(self):
