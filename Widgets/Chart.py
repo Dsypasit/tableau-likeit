@@ -43,5 +43,5 @@ class WebEngineView(QtWebEngineWidgets.QWebEngineView):
 
     def updateChart(self, chart, **kwargs):
         output = StringIO()
-        chart.save(output,'html', **kwargs, embed_options={'renderer':'svg'})
+        chart.save(output,'html', embed_options={'renderer':'svg'})
         self.setHtml(output.getvalue())

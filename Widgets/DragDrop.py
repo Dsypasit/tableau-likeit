@@ -309,6 +309,10 @@ class MeasureList(QtWidgets.QListWidget):
         self.main = main
         self.measure = {}
         self.itemDoubleClicked.connect(self.launchFilter)
+        self.allow = False
+    
+    def allow_drag(self):
+        self.allow = True
     
     def launchFilter(self, item):
         pop = Popup2(item.text(), self)
