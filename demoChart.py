@@ -45,6 +45,10 @@ class MainWindow(QMainWindow):
         self.dataCombo = []
         self.i1 = None
         self.i2 = None
+        self.ip1 = None
+        self.ip2 = None
+        self.il1 = None
+        self.il2 = None
 
         #######################################################################
         # ADD FUNCTION ELEMENT
@@ -57,6 +61,9 @@ class MainWindow(QMainWindow):
         self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
         self.ui.MeasureList.itemChanged.connect(lambda: self.ui.tableWidget.make_table())
         self.ui.dataCombo.currentIndexChanged.connect(self.change_data)
+
+        self.ui.filterData.textEdited.connect(self.searchDimensionMeasure)
+        self.ui.btnClearFilterData.clicked.connect(self.clearFilter)
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -145,29 +152,56 @@ class MainWindow(QMainWindow):
             item = QListWidgetItem("{}".format(i))
             self.ui.MeasureWidget.addItem(item)
 
-    def check_dup(self, i1, i2):
+    def check_dup(self, i1, i2, old_i1, old_i2):
         """ This method will check duplicate between two list and compare previouse two list """
         it1 = i1
         it2 = i2
-        if self.i1 == i1 and self.i2 != i2:
+        if old_i1 == i1 and old_i2 != i2:
             for i in i1:
                 if i in i2:
                     it1.remove(i)
-        elif self.i2 == i2 and self.i1 != i1:
+        elif old_i2 == i2 and old_i1 != i1:
             for i in i2:
                 if i in i1:
                     it2.remove(i)
         return it1, it2
 
+    def searchDimensionMeasure(self,e):
+        if e == "":
+            self.dimension()
+            return 
+        # set dimension & measure
+        dimension = self.dt.get_dimension()
+        measure = self.dt.get_measure()
+        # clear data when edit
+        for i in range(self.ui.DimensionWidget.count()):   
+            self.ui.DimensionWidget.takeItem(0)
+        for i in range(self.ui.MeasureWidget.count()):   
+            self.ui.MeasureWidget.takeItem(0)    
+        # add item in DimensionWidget
+        for fil in dimension:
+            if e.lower() in fil.lower():
+                item = QtWidgets.QListWidgetItem(fil)
+                self.ui.DimensionWidget.addItem(item)
+        # add item in MeasureWidget
+        for fil in measure:
+            if e.lower() in fil.lower():
+                item = QtWidgets.QListWidgetItem(fil)
+                self.ui.MeasureWidget.addItem(item)
+
+    def clearFilter(self):
+        self.ui.filterData.clear()
+        self.dimension()
+        
+
     def Graph(self):
         # Bar Chart
         item_BarColumn, fil_BarColumn, measure_BarColumn = self.ui.ColumnList_bar.get_plot_item()
         item_BarRow, fil_BarRow, measure_BarRow  = self.ui.RowList_bar.get_plot_item()
-        item_BarColumn, item_BarRow = self.check_dup(item_BarColumn, item_BarRow)
+        item_BarColumn, item_BarRow = self.check_dup(item_BarColumn, item_BarRow, self.i1, self.i2)
         data = None
         self.i1 = item_BarColumn
         self.i2 = item_BarRow
-        data = None
         test_bar = []
         tooltip_bar = []
         if(len(item_BarColumn)>0 or len(item_BarRow)>0):
@@ -226,6 +260,32 @@ class MainWindow(QMainWindow):
             self.ui.barChart.updateChart(barchart)
 
         # Pie Chart
+        # item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
+        # item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
+        # test_pie = []
+        # tooltip_pie = []
+        # if(len(item_Theta)>0 and len(item_Color)>0):
+        #     data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
+        #     # for i in item1:
+        #     if(len(item_Theta)>=1):
+        #         if item_Theta[0] in measure_Theta.keys():
+        #             test_bar.append(alt.Theta(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})'))
+        #             tooltip_bar.append(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})')
+        #         else:
+        #             test_bar.append(alt.Theta(item_Theta[0]))
+        #             tooltip_bar.append(item_Theta[0])
+        #     if(len(item_Color)>=1):
+        #         if item_Color[0] in measure_Color.keys():
+        #             test_bar.append(alt.Color(f'{measure_Color[item_Color[0]]}({item_Color[0]})'))
+        #             tooltip_bar.append(f'{measure_Color[item_Color[0]]}({item_Color[0]})')
+        #         else:
+        #             test_bar.append(alt.Color(item_Color[0]))
+        #             tooltip_bar.append(item_Color[0])
+        #     test_pie.append(alt.Tooltip(tooltip_pie))
+        #     piechart = alt.Chart(self.dt.data).mark_arc().encode(
+        #         *test_pie
+        #     )
+        #     self.ui.pieChart.updateChart(piechart)
         item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
         item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
         data = None
@@ -241,6 +301,9 @@ class MainWindow(QMainWindow):
         # Line Chart
         item_LineColumn, fil_LineColumn, measure_LineColumn = self.ui.ColumnList_line.get_plot_item()
         item_LineRow, fil_LineRow, measure_LineRow  = self.ui.RowList_line.get_plot_item()
+        item_LineColumn, item_LineRow = self.check_dup(item_LineColumn, item_LineRow, self.il1, self.il2)
+        self.il1 = item_LineColumn
+        self.il2 = item_LineRow
         data = None
         test_line = []
         tooltip_line = []
@@ -296,11 +359,10 @@ class MainWindow(QMainWindow):
 
         linechart = alt.Chart(self.dt.data).mark_line(point=True).encode(
             *test_line
-        ).resolve_scale(
-            x='independent'
         )
 
         self.ui.lineChart.updateChart(linechart)
+        
 
     ########################################################################
 

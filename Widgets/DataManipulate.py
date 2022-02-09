@@ -253,7 +253,7 @@ class data_manipulate:
         if fil:     # if filter have item
             querylist = []
             for i, col in enumerate(fil):
-                if col in item:
+                if col in item and col != "":
                     querylist.append(f'(`{col}` == {fil[col]})')
             querylist = " & ".join(querylist)
             data = data.query(querylist)    # query data
