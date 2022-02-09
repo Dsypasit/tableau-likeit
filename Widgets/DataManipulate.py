@@ -1,4 +1,6 @@
 import pandas as pd
+
+from Widgets.History import History
 class data_manipulate:
     def __init__(self):
         self.data = None
@@ -6,14 +8,25 @@ class data_manipulate:
         self.data_separated_date = None
         self.dimension = []
         self.measure = []
+        self.hist = History()
+        self.filename = ""
 
     def load_data(self, filename):
-        try:
-            self.data = pd.read_csv(filename, encoding='windows-1252')
+        self.filename = filename
+        if filename.split('.')[-1] == "csv":
+            try:
+                self.data = pd.read_csv(filename, encoding='windows-1252')
+                self.column = self.data.columns
+                self.data = self.data.dropna()
+            except UnicodeDecodeError:
+                self.data = pd.read_csv(filename, encoding='utf8')
+                self.column = self.data.columns
+                self.data = self.data.dropna()
+        else:
+            self.data = pd.read_excel(filename)
             self.column = self.data.columns
-        except UnicodeDecodeError:
-            self.data = pd.read_csv(filename, encoding='utf8')
-            self.column = self.data.columns
+            self.data = self.data.dropna()
+
 
     
     def get_data(self):
@@ -30,21 +43,30 @@ class data_manipulate:
         return False
     
     def separated_dimension_measure(self):
-        self.dimension = []
-        self.measure = []
-        self.data = self.data.dropna()
+        hist_dict = self.hist.get_hist()
+        if self.filename in hist_dict.keys():
+            self.dimension = hist_dict[self.filename]['dimension']
+            self.measure = hist_dict[self.filename]['measure']
+        else:
+            self.dimension = []
+            self.measure = []
 
-        for colname, coltype in self.data.dtypes.iteritems():
-            if coltype == 'object': 
-                self.data[colname] = self.data[colname].astype(str)
-                self.dimension.append(colname)
-            elif self.check_dimension_name(colname):
-                # print(colname)
-                self.data[colname] = self.data[colname].astype(int)
-                self.data[colname] = self.data[colname].astype(str)
-                self.dimension.append(colname)
+            for colname, coltype in self.data.dtypes.iteritems():
+                if coltype == 'object': 
+                    self.data[colname] = self.data[colname].astype(str)
+                    self.dimension.append(colname)
+                elif self.check_dimension_name(colname):
+                    # print(colname)
+                    self.data[colname] = self.data[colname].astype(int)
+                    self.data[colname] = self.data[colname].astype(str)
+                    self.dimension.append(colname)
+                else : self.measure.append(colname)
+                self.save_hist()
 
-            else : self.measure.append(colname)
+    def save_hist(self):
+        new_dict = {'dimension': self.dimension, 'measure': self.measure}
+        self.hist.creat_hist(self.filename, new_dict)
+
     
     def is_dimension(self, s):
         return s in self.dimension
@@ -113,10 +135,12 @@ class data_manipulate:
     def change_to_dimension(self, name):
         self.dimension.append(name)
         self.measure.remove(name)
+        self.save_hist()
 
     def change_to_measure(self, name):
         self.dimension.remove(name)
         self.measure.append(name)
+        self.save_hist()
 
 if __name__ == "__main__":
     d = data_manipulate()

@@ -97,9 +97,10 @@ class MainWindow(QMainWindow):
             self.make_table()
             #self.ui.dataCombo.setText(filename)
             self.dimension()
+            self.Graph()
     
     def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
             self.dt.load_data(filename)
@@ -111,8 +112,7 @@ class MainWindow(QMainWindow):
             self.make_table()
             self.dt.separated_dimension_measure()
             self.dimension()
-
-            #self.Graph()
+            self.Graph()
 
     def make_table(self):
         self.header = self.dt.get_column()
