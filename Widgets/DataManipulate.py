@@ -5,6 +5,10 @@ class data_manipulate:
         self.column = None
         self.data_separated_date = None
 
+        self.dimension = []
+        self.measure = []
+
+
     def load_data(self, filename):
         try:
             self.data = pd.read_csv(filename, encoding='windows-1252')
@@ -25,14 +29,11 @@ class data_manipulate:
         for i in l:
             if i in s:
                 return True
-        else :
-            return False
-    
+        return False
     
     def separated_dimension_measure(self):
         self.dimension = []
         self.measure = []
-
         for colname, coltype in self.data.dtypes.iteritems():
             if coltype == 'object' or self.check_dimension_name(colname): 
                 self.dimension.append(colname)
@@ -125,4 +126,5 @@ if __name__ == "__main__":
     df = df.reset_index()
     print(df.head())
     # print(d.data_filter('Segment'))
+    
 

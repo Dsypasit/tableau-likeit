@@ -54,6 +54,9 @@ class MainWindow(QMainWindow):
         self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
         self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
         self.ui.MeasureList.itemChanged.connect(lambda: self.ui.tableWidget.make_table())
+
+        self.ui.filterData.textEdited.connect(self.searchDimensionMeasure)
+        self.ui.btnClearFilterData.clicked.connect(self.clearFilter)
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -96,6 +99,7 @@ class MainWindow(QMainWindow):
             self.ui.dataCombo.addItems(self.dataCombo)
 
             self.make_table()
+            self.dt.separated_dimension_measure()
             self.dimension()
 
             #self.Graph()
@@ -119,17 +123,48 @@ class MainWindow(QMainWindow):
                 self.ui.tableDetail.setItem(row, col, newItem)
 
     def dimension(self):
-        self.dt.separated_dimension_measure()
+        for i in range(self.ui.DimensionWidget.count()):
+            self.ui.DimensionWidget.takeItem(0)
+        for i in range(self.ui.MeasureWidget.count()):
+            self.ui.MeasureWidget.takeItem(0)
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
-        for i in dimension:
+        for item in dimension:
             # item = QListWidgetItem("Aa {}".format(i))
-            item = QListWidgetItem("{}".format(i))
+            item = QListWidgetItem(item)
             self.ui.DimensionWidget.addItem(item)
-        for i in measure:
-            item = QListWidgetItem("{}".format(i))
+        for item in measure:
+            item = QListWidgetItem(item)
             # item = QListWidgetItem("# {}".format(i))
             self.ui.MeasureWidget.addItem(item)
+
+    def searchDimensionMeasure(self,e):
+        if e == "":
+            self.dimension()
+            return 
+        # set dimension & measure
+        dimension = self.dt.get_dimension()
+        measure = self.dt.get_measure()
+        # clear data when edit
+        for i in range(self.ui.DimensionWidget.count()):   
+            self.ui.DimensionWidget.takeItem(0)
+        for i in range(self.ui.MeasureWidget.count()):   
+            self.ui.MeasureWidget.takeItem(0)    
+        # add item in DimensionWidget
+        for fil in dimension:
+            if e.lower() in fil.lower():
+                item = QtWidgets.QListWidgetItem(fil)
+                self.ui.DimensionWidget.addItem(item)
+        # add item in MeasureWidget
+        for fil in measure:
+            if e.lower() in fil.lower():
+                item = QtWidgets.QListWidgetItem(fil)
+                self.ui.MeasureWidget.addItem(item)
+
+    def clearFilter(self):
+        self.ui.filterData.clear()
+        self.dimension()
+        
 
     def Graph(self):
         # Bar Chart
@@ -201,6 +236,8 @@ class MainWindow(QMainWindow):
         data = None
         test_pie = []
         tooltip_pie = []
+        if(len(item_BarColumn)>=1):
+            pass
         piechart = alt.Chart(self.dt.data).mark_arc().encode(
             theta="sum(Sales):Q",
             color="Sub-Category",
@@ -266,11 +303,10 @@ class MainWindow(QMainWindow):
 
         linechart = alt.Chart(self.dt.data).mark_line(point=True).encode(
             *test_line
-        ).resolve_scale(
-            x='independent'
         )
 
         self.ui.lineChart.updateChart(linechart)
+        
 
     ########################################################################
 

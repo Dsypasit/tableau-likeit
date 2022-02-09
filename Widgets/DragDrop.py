@@ -159,11 +159,13 @@ class Popup2(QtWidgets.QDialog):
         self.cancelButton = QtWidgets.QPushButton(self)
         self.cancelButton.setObjectName("cancelButton")
         self.gridLayout.addWidget(self.cancelButton, 2, 2, 1, 2)
+        # self.cancelButton.clicked.connect(self.clearFilter)
         self.cancelButton.setText("Cancel")
 
         self.doneButton = QtWidgets.QPushButton(self)
         self.doneButton.setObjectName("doneButton")
         self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
+        # self.doneButton.clicked.connect(self.clearFilter)
         self.doneButton.setText("Done")
     
     ########################################################################
@@ -226,11 +228,13 @@ class Popup(QtWidgets.QDialog):
         self.cancelButton = QtWidgets.QPushButton(self)
         self.cancelButton.setObjectName("cancelButton")
         self.gridLayout.addWidget(self.cancelButton, 3, 2, 1, 2)
+        # self.cancelButton.clicked.connect(self.clearFilter)
         self.cancelButton.setText("Cancel")
 
         self.doneButton = QtWidgets.QPushButton(self)
         self.doneButton.setObjectName("doneButton")
         self.gridLayout.addWidget(self.doneButton, 3, 0, 1, 2)
+        # self.doneButton.clicked.connect(self.clearFilter)
         self.doneButton.setText("Done")
 
         self.createFilter()
@@ -249,7 +253,7 @@ class Popup(QtWidgets.QDialog):
         fil = item.text()
         self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
         
-    def search(self, e):
+    def search(self, e): 
         if e == "":
             self.createFilter()
             return 
