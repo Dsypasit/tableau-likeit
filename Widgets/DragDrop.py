@@ -31,7 +31,7 @@ class PlotList(QtWidgets.QListWidget):
         self.itemClicked.connect(self.allow_drag)
         self.allow = False
     
-    def allow_drag(self):
+    def allow_drag(self, e):
         self.allow = True
 
   
@@ -58,7 +58,6 @@ class PlotList(QtWidgets.QListWidget):
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.item(self.currentRow())== None:
             return
-        print('test')
         d = self.currentRow()
         if self.count() and self.allow:
             item = self.item(self.currentRow()).text()
@@ -123,13 +122,6 @@ class PlotList(QtWidgets.QListWidget):
         self.clearSelection()
         self.main.app.Graph()
         self.allow = False
-
-    def test(self):
-        item1, col1, measure = self.main.MeasureList_2.get_plot_item()
-        item2, col2, _ = self.main.DimensionList_2.get_plot_item()
-        # if(len(item1)>0 and len(item2)>0):
-            # test = self.dt.data_filter(item1, item2, col1, col2)
-            # print(test)
 
 
 

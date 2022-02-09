@@ -1,5 +1,6 @@
 import json
 import os
+import copy
 
 class History:
     def __init__(self):
@@ -13,7 +14,7 @@ class History:
 
     def get_hist(self):
         self.load_hist()
-        return self.hist
+        return copy.deepcopy(self.hist)
 
     def save_hist(self):
         with open(self.filename, 'w') as file:
