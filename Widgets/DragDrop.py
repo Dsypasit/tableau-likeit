@@ -13,6 +13,7 @@ from PyQt5.QtCore import QDataStream, Qt
 from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem 
 from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
+import copy as cp
 
 ########################################################################
 ## PLOTLIST CLASS
@@ -261,6 +262,7 @@ class Popup2(QtWidgets.QDialog):
         self.resize(300, 100)
         self.name = name
         self.parent = parent
+        self.measure = cp.deepcopy(self.parent.measure)
 
         self.setWindowTitle("Filter "+name)
         self.gridLayout = QtWidgets.QGridLayout(self)
@@ -293,18 +295,25 @@ class Popup2(QtWidgets.QDialog):
         self.doneButton.setObjectName("doneButton")
         self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
         self.doneButton.setText("Done")
+
+        self.doneButton.clicked.connect(self.changeFilter)
+        self.cancelButton.clicked.connect(self.close)
     
     ########################################################################
     ## FUNCTION
     ########################################################################    
+    def changeFilter(self, e):
+        self.parent.measure = self.measure
+        self.close()
+    
     def selectionchange(self,i):
-      self.parent.measure[self.name] = self.comboBox.currentText()
+      self.measure[self.name] = self.comboBox.currentText()
 
     def closeEvent(self, event):
         if(isinstance(self.parent, PlotList)):
             self.parent.main.app.Graph()
         else:
-            self.parent.main.tableDetail.make_table()
+            self.parent.main.tableWidget.make_table()
 
 
 ########################################################################
@@ -316,6 +325,7 @@ class Popup(QtWidgets.QDialog):
         self.resize(442, 370)
         self.name = name
         self.parent = parent
+        self.dimension = cp.deepcopy(self.parent.dimension)
 
         self.setWindowTitle("Filter "+name)
         self.gridLayout = QtWidgets.QGridLayout(self)
@@ -364,18 +374,24 @@ class Popup(QtWidgets.QDialog):
         self.createFilter()
         self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
 
+        # self.cancelButton.clicked.connect(self.resetDimension)
+        self.cancelButton.clicked.connect(self.close)
+        self.doneButton.clicked.connect(self.changeFilter)
+
     ########################################################################
     ## FUNCTION
     ########################################################################
-    def closeEvent(self, event):
+    def changeFilter(self, event):
+        self.parent.dimension = self.dimension
         if(isinstance(self.parent, PlotList)):
             self.parent.main.app.Graph()
         else:
-            self.parent.main.tableDetail.make_table()
+            self.parent.main.tableWidget.make_table()
+        self.close()
 
     def testCheck(self, item):
         fil = item.text()
-        self.parent.dimension[self.name][fil] = not self.parent.dimension[self.name][fil]
+        self.dimension[self.name][fil] = not self.dimension[self.name][fil]
         
     def search(self, e):
         if e == "":
@@ -396,15 +412,15 @@ class Popup(QtWidgets.QDialog):
                 self.listWidget.addItem(item)
     
     def selectFilter(self):
-        data = self.parent.dimension[self.name]
+        data = self.dimension[self.name]
         for fil in data:
-            self.parent.dimension[self.name][fil] = True
+            self.dimension[self.name][fil] = True
         self.createFilter()
 
     def clearFilter(self):
-        data = self.parent.dimension[self.name]
+        data = self.dimension[self.name]
         for fil in data:
-            self.parent.dimension[self.name][fil] = False
+            self.dimension[self.name][fil] = False
         self.createFilter()
     
     def createFilter(self):
@@ -412,7 +428,7 @@ class Popup(QtWidgets.QDialog):
             self.listWidget.takeItem(0)
             # self.listWidget.
 
-        data = self.parent.dimension[self.name]
+        data = self.dimension[self.name]
         for i in data:
             item = QtWidgets.QListWidgetItem()
             item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
