@@ -4,6 +4,8 @@ class data_manipulate:
         self.data = None
         self.column = None
         self.data_separated_date = None
+        self.dimension = []
+        self.measure = []
 
     def load_data(self, filename):
         try:

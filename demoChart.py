@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
         self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
         self.ui.MeasureList.itemChanged.connect(lambda: self.ui.tableWidget.make_table())
+        self.ui.dataCombo.currentIndexChanged.connect(self.change_data)
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -65,6 +66,15 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## FUNCTION
     ########################################################################
+    def change_data(self, index):
+        if self.ui.dataCombo.count() and self.dimension:
+            self.ui.dataCombo.setCurrentIndex(index)
+            self.dt.load_data(self.ui.dataCombo.itemText(index))
+            self.dt.separated_dimension_measure()
+            self.make_table()
+            self.dimension()
+            self.Graph()
+
     def to_dimension(self, item):
         self.dt.change_to_dimension(item.text())
         self.dimension()
@@ -82,6 +92,7 @@ class MainWindow(QMainWindow):
             self.dataCombo.append(filename)
             self.ui.dataCombo.clear()
             self.ui.dataCombo.addItems(self.dataCombo)
+            self.ui.dataCombo.setCurrentIndex(self.ui.dataCombo.count())
 
             self.make_table()
             #self.ui.dataCombo.setText(filename)
