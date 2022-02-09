@@ -260,42 +260,43 @@ class MainWindow(QMainWindow):
             self.ui.barChart.updateChart(barchart)
 
         # Pie Chart
-        # item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
-        # item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
-        # test_pie = []
-        # tooltip_pie = []
-        # if(len(item_Theta)>0 and len(item_Color)>0):
-        #     data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
-        #     # for i in item1:
-        #     if(len(item_Theta)>=1):
-        #         if item_Theta[0] in measure_Theta.keys():
-        #             test_bar.append(alt.Theta(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})'))
-        #             tooltip_bar.append(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})')
-        #         else:
-        #             test_bar.append(alt.Theta(item_Theta[0]))
-        #             tooltip_bar.append(item_Theta[0])
-        #     if(len(item_Color)>=1):
-        #         if item_Color[0] in measure_Color.keys():
-        #             test_bar.append(alt.Color(f'{measure_Color[item_Color[0]]}({item_Color[0]})'))
-        #             tooltip_bar.append(f'{measure_Color[item_Color[0]]}({item_Color[0]})')
-        #         else:
-        #             test_bar.append(alt.Color(item_Color[0]))
-        #             tooltip_bar.append(item_Color[0])
-        #     test_pie.append(alt.Tooltip(tooltip_pie))
-        #     piechart = alt.Chart(self.dt.data).mark_arc().encode(
-        #         *test_pie
-        #     )
-        #     self.ui.pieChart.updateChart(piechart)
         item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
         item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
-        data = None
         test_pie = []
         tooltip_pie = []
-        piechart = alt.Chart(self.dt.data).mark_arc().encode(
-            theta="sum(Sales):Q",
-            color="Sub-Category",
-            tooltip=['sum(Sales)'],
-        )
+        if(len(item_Theta)>0 and len(item_Color)>0):
+            data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
+            # for i in item1:
+            if(len(item_Theta)>=1):
+                if item_Theta[0] in measure_Theta.keys():
+                    test_pie.append(alt.Theta(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})'))
+                    tooltip_pie.append(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})')
+                else:
+                    test_pie.append(alt.Theta(item_Theta[0]))
+                    tooltip_pie.append(item_Theta[0])
+            if(len(item_Color)>=1):
+                if item_Color[0] in measure_Color.keys():
+                    test_pie.append(alt.Color(f'{measure_Color[item_Color[0]]}({item_Color[0]})'))
+                    tooltip_pie.append(f'{measure_Color[item_Color[0]]}({item_Color[0]})')
+                else:
+                    test_pie.append(alt.Color(item_Color[0]))
+                    tooltip_pie.append(item_Color[0])
+            test_pie.append(alt.Tooltip(tooltip_pie))
+            print(test_pie)
+            piechart = alt.Chart(self.dt.data).mark_arc().encode(
+                *test_pie
+            )
+            self.ui.pieChart.updateChart(piechart)
+        # item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
+        # item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
+        # data = None
+        # test_pie = []
+        # tooltip_pie = []
+        # piechart = alt.Chart(self.dt.data).mark_arc().encode(
+        #     theta="sum(Sales):Q",
+        #     color="Sub-Category",
+        #     tooltip=['sum(Sales)'],
+        # )
         #self.ui.pieChart.updateChart(piechart)
 
         # Line Chart
@@ -326,7 +327,7 @@ class MainWindow(QMainWindow):
                     tooltip_line.append(item_LineRow[0])
             if(len(item_LineColumn)>=2):
                 if item_LineColumn[1] in measure_LineColumn.keys():
-                    test_line.append(alt.Column(f'{measure_LineColumn[item_LineColumn[1]]}({item_BarColumn[1]})'))
+                    test_line.append(alt.Column(f'{measure_LineColumn[item_LineColumn[1]]}({item_LineColumn[1]})'))
                     tooltip_line.append(f'{measure_LineColumn[item_LineColumn[1]]}({item_LineColumn[1]})')
                 else:
                     test_line.append(alt.Column(item_LineColumn[1]))
