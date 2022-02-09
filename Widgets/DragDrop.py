@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QListWidgetItem, QTableWidgetItem
 from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
 import copy as cp
+import pandas
 
 ########################################################################
 ## PLOTLIST CLASS
@@ -21,33 +22,34 @@ import copy as cp
 class PlotList(QtWidgets.QListWidget):
     def __init__(self, main, parent):
         super().__init__(parent)
-        self.item_plot = []
-        self.main = main
-        self.dt = main.dt
-        self.dimension = {}
-        self.measure = {}
+        self.item_plot : list = []
+        self.main : QtWidgets.QMainWindow = main
+        self.dt : pandas.core.frame.DataFrame = main.dt
+        self.dimension : dict = {}
+        self.measure : dict = {}
         self.setDefaultDropAction(QtCore.Qt.TargetMoveAction)
         self.itemDoubleClicked.connect(self.launchPopup)
         self.itemClicked.connect(self.allow_drag)
         self.allow = False
     
-    def allow_drag(self, e):
-        self.allow = True
-
-  
     ########################################################################
     ## FUNCTION
     ########################################################################
-    def getFilter(self):
+    def allow_drag(self) -> None:
+        """ This method will allow drag"""
+        self.allow = True
+
+    def getFilter(self) -> dict:
+        """Thise method will return filter dict"""
         result = {}
-        for col in self.dimension:
+        for col in self.dimension:  # loop column in dimension
             result[col] = []
             for fil in self.dimension[col]:
-                if self.dimension[col][fil]:
+                if self.dimension[col][fil]:    # if item is true
                     result[col].append(fil)
         return result
 
-    def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
+    def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:     # when mouse drag in this area
         item = self.readData(e.mimeData())[0]
         if item in self.dimension.keys() or item in self.measure.keys():
             self.allow = True
@@ -61,7 +63,6 @@ class PlotList(QtWidgets.QListWidget):
         d = self.currentRow()
         if self.count() and self.allow:
             item = self.item(self.currentRow()).text()
-            # self.clearSelection()
             self.item_plot.remove(item)
             if self.dt.is_dimension(item) and item in self.dimension.keys():
                 del self.dimension[self.item(self.currentRow()).text()]
@@ -73,8 +74,8 @@ class PlotList(QtWidgets.QListWidget):
             self.main.app.Graph()
             self.allow = False
     
-    def launchPopup(self, item):
-        if self.dt.is_dimension(item.text()):
+    def launchPopup(self, item: QtWidgets.QWidgetItem):
+        if self.dt.is_dimension(item.text()): # if item is dimension
             pop = Popup(item.text(), self)
             pop.show()
         else:
@@ -82,7 +83,7 @@ class PlotList(QtWidgets.QListWidget):
             pop2.show()
         self.clearSelection()
 
-    def readData(self, mime: QtCore.QMimeData) -> list:
+    def readData(self, mime: QtCore.QMimeData) -> list:     # read event item
         stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
         textList = []
         while not stream.atEnd():
@@ -95,24 +96,25 @@ class PlotList(QtWidgets.QListWidget):
                     textList.append(value)
         return textList
     
-    def get_plot_item(self):
+    def get_plot_item(self) -> tuple:
+        """ This method will return important item to plot graph"""
         item_plot = []
         for i in range(self.count()):
-            # if self.item(i).text != a:
-            item_plot.append(self.item(i).text())
+            item_plot.append(self.item(i).text())   
         fil = self.getFilter()
         return item_plot, fil, self.measure
 
     def addFilter(self, name:str) -> None:
+        """ This method will add filter to dict"""
         if(self.dt.is_dimension(name)):
             if name not in self.dimension.keys():
                 self.dimension[name] = {}
                 fil = self.dt.get_unique(name)
                 for i in fil:
-                    self.dimension[name][i] = True
+                    self.dimension[name][i] = True # add column item
         else:
             if name not in self.measure.keys():
-                self.measure[name] = 'sum'
+                self.measure[name] = 'sum'  # set sum as default
                 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         item = self.readData(event.mimeData())[0]
@@ -125,130 +127,10 @@ class PlotList(QtWidgets.QListWidget):
 
 
 
-class Popup2(QtWidgets.QDialog):
-    def __init__(self, name, parent):
-        super().__init__(parent)
-        self.name = name
-        self.parent = parent
-        self.label = QtWidgets.QLabel(self)
-        self.label.setGeometry(170, 30, 50, 13)
-        self.label.setText(name)
-        self.comboBox = QtWidgets.QComboBox(self)
-        self.comboBox.setGeometry(160, 60, 70, 20)
-        self.comboBox.addItem("sum")
-        self.comboBox.addItem("mean")
-        self.comboBox.addItem("median")
-        self.comboBox.addItem("min")
-        self.comboBox.addItem("max")
-        self.comboBox.addItem("count")
-        self.comboBox.setCurrentText(self.parent.measure[name])
-        self.comboBox.currentIndexChanged.connect(self.selectionchange)
-    
-    def selectionchange(self,i):
-      self.parent.measure[self.name] = self.comboBox.currentText()
-
-    def closeEvent(self, event):
-        if(isinstance(self.parent, PlotList)):
-            self.parent.main.app.Graph()
-        else:
-            self.parent.main.tableWidget.make_table()
-
-
-class Popup(QtWidgets.QDialog):
-    def closeEvent(self, event):
-        if(isinstance(self.parent, PlotList)):
-            self.parent.main.app.Graph()
-        else:
-            self.parent.main.tableWidget.make_table()
-
-
-    def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
-        if self.item(self.currentRow())== None:
-            return
-        # if self.item(self.currentRow()) != name:
-        #     return
-        if self.count():
-            item = self.item(self.currentRow()).text()
-            self.clearSelection()
-            self.item_plot.remove(item)
-            if self.dt.is_dimension(item) and item in self.dimension.keys():
-                del self.dimension[self.item(self.currentRow()).text()]
-            elif self.dt.is_measure(item) and item in self.measure.keys():
-                del self.measure[self.item(self.currentRow()).text()]
-            self.takeItem(self.currentRow())
-            self.removeItemWidget(self.currentItem())
-            super().dragLeaveEvent(e)
-            self.main.app.Graph()
-    
-    def launchPopup(self, item):
-        if self.dt.is_dimension(item.text()):
-            pop = Popup(item.text(), self)
-            pop.show()
-        else:
-            pop2 = Popup2(item.text(), self)
-            pop2.show()
-        self.clearSelection()
-
-    def readData(self, mime: QtCore.QMimeData) -> list:
-        stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
-        textList = []
-        while not stream.atEnd():
-            # we're not using row and columns, but we *must* read them
-            row = stream.readInt()
-            col = stream.readInt()
-            for dataSize in range(stream.readInt()):
-                role, value = stream.readInt(), stream.readQVariant()
-                if role == Qt.DisplayRole:
-                    textList.append(value)
-        return textList
-    
-    def get_plot_item(self):
-        item_plot = []
-        for i in range(self.count()):
-            # if self.item(i).text != a:
-            item_plot.append(self.item(i).text())
-        fil = self.getFilter()
-        return item_plot, fil, self.measure
-
-    def addFilter(self, name:str) -> None:
-        if(self.dt.is_dimension(name)):
-            if name not in self.dimension.keys():
-                self.dimension[name] = {}
-                fil = self.dt.get_unique(name)
-                for i in fil:
-                    self.dimension[name][i] = True
-        else:
-            if name not in self.measure.keys():
-                self.measure[name] = 'sum'
-                
-    def dropEvent(self, event: QtGui.QDropEvent) -> None:
-        item = self.readData(event.mimeData())[0]
-        self.addFilter(item)
-        self.item_plot.append(item)
-        super().dropEvent(event)
-        c = 0
-        for i in range(self.count()):
-            if self.item(i).text() == item:
-                c+= 1
-        if c>1:
-            for i in range(self.count()-1, -1, -1):
-                if self.item(i).text() == item:
-                    self.takeItem(i)
-                    break
-        self.main.app.Graph()
-
-    def test(self):
-        item1, col1, measure = self.main.MeasureList_2.get_plot_item()
-        item2, col2, _ = self.main.DimensionList_2.get_plot_item()
-        # if(len(item1)>0 and len(item2)>0):
-            # test = self.dt.data_filter(item1, item2, col1, col2)
-            # print(test)
-
-
 ########################################################################
 ## POPUP MEASURE WINDOW CLASS
 ########################################################################
-class Popup2(QtWidgets.QDialog):
+class Popup2(QtWidgets.QDialog):    # popup for measure
     def __init__(self, name, parent):
         super().__init__(parent)
         self.resize(300, 100)
@@ -299,10 +181,10 @@ class Popup2(QtWidgets.QDialog):
         self.close()
     
     def selectionchange(self,i):
-      self.measure[self.name] = self.comboBox.currentText()
+      self.measure[self.name] = self.comboBox.currentText()     # change method of measure column
 
     def closeEvent(self, event):
-        if(isinstance(self.parent, PlotList)):
+        if(isinstance(self.parent, PlotList)):  # check parent class
             self.parent.main.app.Graph()
         else:
             self.parent.main.tableWidget.make_table()
@@ -311,7 +193,7 @@ class Popup2(QtWidgets.QDialog):
 ########################################################################
 ## POPUP DIMENSION WINDOW CLASS
 ########################################################################
-class Popup(QtWidgets.QDialog):
+class Popup(QtWidgets.QDialog):     # popup for dimension
     def __init__(self, name, parent):
         super().__init__(parent)
         self.resize(442, 370)
@@ -383,9 +265,10 @@ class Popup(QtWidgets.QDialog):
 
     def testCheck(self, item):
         fil = item.text()
-        self.dimension[self.name][fil] = not self.dimension[self.name][fil]
+        self.dimension[self.name][fil] = not self.dimension[self.name][fil]     # change item filter of column dimension
         
     def search(self, e):
+        """ This method will search item in listbox """
         if e == "":
             self.createFilter()
             return 
@@ -403,27 +286,26 @@ class Popup(QtWidgets.QDialog):
                 item.setData(QtCore.Qt.DisplayRole, fil)
                 self.listWidget.addItem(item)
     
-    def selectFilter(self):
+    def selectFilter(self): # select all item
         data = self.dimension[self.name]
         for fil in data:
             self.dimension[self.name][fil] = True
         self.createFilter()
 
-    def clearFilter(self):
+    def clearFilter(self):  # deselect all item
         data = self.dimension[self.name]
         for fil in data:
             self.dimension[self.name][fil] = False
         self.createFilter()
     
     def createFilter(self):
-        for i in range(self.listWidget.count()):
+        for i in range(self.listWidget.count()):    # clear all item
             self.listWidget.takeItem(0)
-            # self.listWidget.
 
         data = self.dimension[self.name]
         for i in data:
             item = QtWidgets.QListWidgetItem()
-            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled) # can check/uncheck
             if data[i]:
                 item.setCheckState(QtCore.Qt.Checked)
             else:
@@ -445,13 +327,13 @@ class DimensionList(QtWidgets.QListWidget):
         pop = Popup(item.text(), self)
         pop.show()
 
-    def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
+    def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:     # action when drag item out of area
         if self.count():
             del self.dimension[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
             self.main.tableWidget.make_table()
 
-    def readData(self, mime: QtCore.QMimeData) -> list:
+    def readData(self, mime: QtCore.QMimeData) -> list:     # read event item
         stream = QDataStream(mime.data('application/x-qabstractitemmodeldatalist'))
         textList = []
         while not stream.atEnd():
@@ -471,16 +353,18 @@ class DimensionList(QtWidgets.QListWidget):
         else:
             e.ignore()
     
-    def getFilter(self):
+    def getFilter(self) -> dict:
+        """ This method will return filter dimension dict """
         result = {}
-        for col in self.dimension:
+        for col in self.dimension:  # column in list box
             result[col] = []
             for fil in self.dimension[col]:
-                if self.dimension[col][fil]:
+                if self.dimension[col][fil]: # selected item
                     result[col].append(fil)
         return result
     
     def addFilter(self, name:str) -> None:
+        """ This method will create new dimension col and add unique item """
         if name not in self.dimension.keys():
             self.dimension[name] = {}
             fil = self.dt.get_unique(name)
@@ -536,7 +420,6 @@ class MeasureList(QtWidgets.QListWidget):
     
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
         col = self.readData(e.mimeData())[0]
-        # val = col.split('.')[0]
         if self.dt.is_measure(col):
             e.accept()
         else:
@@ -544,11 +427,10 @@ class MeasureList(QtWidgets.QListWidget):
     
     def addFilter(self, item):
         if item not in self.measure.keys():
-            self.measure[item] = 'sum'
+            self.measure[item] = 'sum'      # set sum method by default
 
     
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
-        # super().dropEvent(event)
         col = self.readData(event.mimeData())[0]
         if self.isExist(col):
             return
@@ -569,18 +451,17 @@ class TableGroupby(QtWidgets.QTableWidget):
         self.setSortingEnabled(True)
 
     def make_table(self):
-        self.setColumnCount(0)
-        self.setRowCount(0)
-        self.dimension = self.get_widget_item(self.main.DimensionList)
-        self.dimension_filter = self.main.DimensionList.getFilter()
-        self.measure_raw = self.get_widget_item(self.main.MeasureList)
+        """ This method will make table"""
+        self.setColumnCount(0)  # clear column and row count
+        self.setRowCount(0) 
+        self.dimension = self.get_widget_item(self.main.DimensionList)  # get dimension list
+        self.dimension_filter = self.main.DimensionList.getFilter()     # get dimensino filter
         self.measure = self.main.MeasureList.measure
-        # print(self.dimension_filter)
-        if not(len(self.dimension) > 0 ):
+        if not(len(self.dimension) > 0 ):   # if dimension has no item
             self.main.MeasureList.clear()
             self.main.MeasureList.measure = {}
             return
-        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, self.dimension_filter)
+        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, self.dimension_filter)    # use groupby and get dataframe data
         self.header = self.data_groupby['col']
         self.data = self.data_groupby['data']
         self.setColumnCount(len(self.header))
@@ -588,28 +469,19 @@ class TableGroupby(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(self.header)
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
-                if type(item) in (int, float):
+                if type(item) in (int, float):  # check type of item when add to table
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
                 else:
                     newItem = QTableWidgetItem(str(item))
-                self.setItem(row, col, newItem)
+                self.setItem(row, col, newItem)     # add item to table
     
     def get_widget_item(self, widget:QtWidgets.QListWidget) -> list :
         return [widget.item(i).text() for i in range(widget.count())]
-    
-    def to_measure_dict(self, measure: list):
-        result = {}
-        for i in measure:
-            col = i.split('.')
-            result[col[0]] = col[1]
-        return result
 
-    def add_listbox(self, e):
+    def add_listbox(self, e) -> None: # add item to measurelist or dimensin list
         col = self.readData(e.mimeData())[0]
-        if self.dt.is_measure(col) and len(self.dimension) > 0:
-            # self.measure[col] = 'sum'
-            # col = col+'.sum'
+        if self.dt.is_measure(col) and len(self.dimension) > 0:     # if col is measure
             item = QListWidgetItem()
             item.setText(col)
             item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsDropEnabled|QtCore.Qt.ItemIsDragEnabled|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
@@ -623,7 +495,7 @@ class TableGroupby(QtWidgets.QTableWidget):
             e.accept()
     
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
-        self.add_listbox(event)
+        self.add_listbox(event)     # add item to measurelist or dimensin list
         if len(self.dimension) >0:
             self.make_table()
 

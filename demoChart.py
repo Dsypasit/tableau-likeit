@@ -66,40 +66,38 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## FUNCTION
     ########################################################################
-    def change_data(self, index):
-        if self.ui.dataCombo.count() and self.dimension:
+    def change_data(self, index: int) -> None:
+        """ This method working when change file"""
+        if self.ui.dataCombo.count():
             self.ui.dataCombo.setCurrentIndex(index)
-            self.dt.load_data(self.ui.dataCombo.itemText(index))
-            self.dt.separated_dimension_measure()
+            self.dt.load_data(self.ui.dataCombo.itemText(index))    # load selected data
+            self.dt.separated_dimension_measure()   # separated measure, dimension
             self.make_table()
             self.dimension()
             self.Graph()
 
-    def to_dimension(self, item):
+    def to_dimension(self, item: QtWidgets.QWidgetItem) -> None:
+        """Thise method will change measure item to dimension item"""
         self.dt.change_to_dimension(item.text())
         self.dimension()
 
-    def to_measure(self, item):
+    def to_measure(self, item: QtWidgets.QWidgetItem):
+        """Thise method will change measure item to measure item"""
         self.dt.change_to_measure(item.text())
         self.dimension()
 
     def union_file(self):
-        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        """ This method will union selected file to current file"""
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
             self.dt.unioun_data(filename)
-
-            self.dataCombo.append(filename)
-            self.ui.dataCombo.clear()
-            self.ui.dataCombo.addItems(self.dataCombo)
-            self.ui.dataCombo.setCurrentIndex(self.ui.dataCombo.count())
-
             self.make_table()
-            #self.ui.dataCombo.setText(filename)
             self.dimension()
             self.Graph()
     
     def open_file(self):
+        """ This method will load file to vitualize"""
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
@@ -115,39 +113,40 @@ class MainWindow(QMainWindow):
             self.Graph()
 
     def make_table(self):
-        self.header = self.dt.get_column()
+        """ This method will make table """
+        self.header = self.dt.get_column() # get column and data
         self.data = self.dt.get_data()
         self.ui.tableWidget.setColumnCount(len(self.header))
         self.ui.tableWidget.setRowCount(len(self.data))
         self.ui.tableWidget.setHorizontalHeaderLabels(self.header)
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
-                if type(item) in (int, float):
+                if type(item) in (int, float):  # check item type
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
-                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', item):
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', item): # check date column
                     newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
                 self.ui.tableWidget.setItem(row, col, newItem)
 
     def dimension(self):
-        for i in range(self.ui.DimensionWidget.count()):
+        """ This method will make measure list widget and dimension list widget"""
+        for i in range(self.ui.DimensionWidget.count()):    # clear dimension widget item
             self.ui.DimensionWidget.takeItem(0)
-        for i in range(self.ui.MeasureWidget.count()):
+        for i in range(self.ui.MeasureWidget.count()):      # clear measure widget item
             self.ui.MeasureWidget.takeItem(0)
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
         for i in dimension:
-            # item = QListWidgetItem("Aa {}".format(i))
             item = QListWidgetItem("{}".format(i))
             self.ui.DimensionWidget.addItem(item)
         for i in measure:
             item = QListWidgetItem("{}".format(i))
-            # item = QListWidgetItem("# {}".format(i))
             self.ui.MeasureWidget.addItem(item)
 
     def check_dup(self, i1, i2):
+        """ This method will check duplicate between two list and compare previouse two list """
         it1 = i1
         it2 = i2
         if self.i1 == i1 and self.i2 != i2:
@@ -217,8 +216,6 @@ class MainWindow(QMainWindow):
                     test_bar.append(alt.Color(item_BarRow[2]))
                     tooltip_bar.append(item_BarRow[2])
             test_bar.append(alt.Tooltip(tooltip_bar))
-            # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
-            # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
             print(test_bar)
 
             barchart = alt.Chart(data).mark_bar().encode(
