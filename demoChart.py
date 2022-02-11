@@ -43,6 +43,12 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.path = "Path"
         self.dataCombo = []
+        self.i1 = None
+        self.i2 = None
+        self.ip1 = None
+        self.ip2 = None
+        self.il1 = None
+        self.il2 = None
 
         #######################################################################
         # ADD FUNCTION ELEMENT
@@ -54,9 +60,10 @@ class MainWindow(QMainWindow):
         self.ui.DimensionWidget.itemDoubleClicked.connect(self.to_measure)
         self.ui.MeasureWidget.itemDoubleClicked.connect(self.to_dimension)
         self.ui.MeasureList.itemChanged.connect(lambda: self.ui.tableWidget.make_table())
+        self.ui.dataCombo.currentIndexChanged.connect(self.change_data)
 
         self.ui.filterData.textEdited.connect(self.searchDimensionMeasure)
-        self.ui.btnClearFilterData.clicked.connect(self.clearFilter)
+        self.ui.btnClearFilterData.clicked.connect(self.clearSearch)
         #######################################################################
         # SHOW WINDOW
         #######################################################################
@@ -66,30 +73,39 @@ class MainWindow(QMainWindow):
     ########################################################################
     ## FUNCTION
     ########################################################################
-    def to_dimension(self, item):
+    def change_data(self, index: int) -> None:
+        """ This method working when change file"""
+        if self.ui.dataCombo.count():
+            self.ui.dataCombo.setCurrentIndex(index)
+            self.dt.load_data(self.ui.dataCombo.itemText(index))    # load selected data
+            self.dt.separated_dimension_measure()   # separated measure, dimension
+            self.make_table()
+            self.dimension()
+            self.Graph()
+
+    def to_dimension(self, item: QtWidgets.QWidgetItem) -> None:
+        """Thise method will change measure item to dimension item"""
         self.dt.change_to_dimension(item.text())
         self.dimension()
 
-    def to_measure(self, item):
+    def to_measure(self, item: QtWidgets.QWidgetItem):
+        """Thise method will change measure item to measure item"""
         self.dt.change_to_measure(item.text())
         self.dimension()
 
     def union_file(self):
-        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        """ This method will union selected file to current file"""
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
             self.dt.unioun_data(filename)
-
-            self.dataCombo.append(filename)
-            self.ui.dataCombo.clear()
-            self.ui.dataCombo.addItems(self.dataCombo)
-
             self.make_table()
-            #self.ui.dataCombo.setText(filename)
             self.dimension()
+            self.Graph()
     
     def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv)")
+        """ This method will load file to vitualize"""
+        filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
             self.dt.load_data(filename)
@@ -101,44 +117,57 @@ class MainWindow(QMainWindow):
             self.make_table()
             self.dt.separated_dimension_measure()
             self.dimension()
-
-            #self.Graph()
+            self.Graph()
 
     def make_table(self):
-        self.header = self.dt.get_column()
+        """ This method will make table """
+        self.header = self.dt.get_column() # get column and data
         self.data = self.dt.get_data()
-        self.ui.tableDetail.setColumnCount(len(self.header))
-        self.ui.tableDetail.setRowCount(len(self.data))
-        self.ui.tableDetail.setHorizontalHeaderLabels(self.header)
-        print([type(i) for i in self.data[0]])
+        self.ui.tableWidget.setColumnCount(len(self.header))
+        self.ui.tableWidget.setRowCount(len(self.data))
+        self.ui.tableWidget.setHorizontalHeaderLabels(self.header)
         for row in range(len(self.data)):
             for col, item in enumerate(self.data[row]):
-                if type(item) in (int, float):
+                if type(item) in (int, float):  # check item type
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
-                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', item):
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', item): # check date column
                     newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
-                self.ui.tableDetail.setItem(row, col, newItem)
+                self.ui.tableWidget.setItem(row, col, newItem)
 
     def dimension(self):
-        for i in range(self.ui.DimensionWidget.count()):
+        """ This method will make measure list widget and dimension list widget"""
+        for i in range(self.ui.DimensionWidget.count()):    # clear dimension widget item
             self.ui.DimensionWidget.takeItem(0)
-        for i in range(self.ui.MeasureWidget.count()):
+        for i in range(self.ui.MeasureWidget.count()):      # clear measure widget item
             self.ui.MeasureWidget.takeItem(0)
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
-        for item in dimension:
-            # item = QListWidgetItem("Aa {}".format(i))
-            item = QListWidgetItem(item)
+        for i in dimension:
+            item = QListWidgetItem("{}".format(i))
             self.ui.DimensionWidget.addItem(item)
-        for item in measure:
-            item = QListWidgetItem(item)
-            # item = QListWidgetItem("# {}".format(i))
+        for i in measure:
+            item = QListWidgetItem("{}".format(i))
             self.ui.MeasureWidget.addItem(item)
 
+    def check_dup(self, i1, i2, old_i1, old_i2):
+        """ This method will check duplicate between two list and compare previouse two list """
+        it1 = i1
+        it2 = i2
+        if old_i1 == i1 and old_i2 != i2:
+            for i in i1:
+                if i in i2:
+                    it1.remove(i)
+        elif old_i2 == i2 and old_i1 != i1:
+            for i in i2:
+                if i in i1:
+                    it2.remove(i)
+        return it1, it2
+
     def searchDimensionMeasure(self,e):
+        """This method will search Dimension Measure in data source"""
         if e == "":
             self.dimension()
             return 
@@ -160,8 +189,8 @@ class MainWindow(QMainWindow):
             if e.lower() in fil.lower():
                 item = QtWidgets.QListWidgetItem(fil)
                 self.ui.MeasureWidget.addItem(item)
-
-    def clearFilter(self):
+    def clearSearch(self):
+        """This method will clear search Dimension Measure in data source"""
         self.ui.filterData.clear()
         self.dimension()
         
@@ -170,84 +199,160 @@ class MainWindow(QMainWindow):
         # Bar Chart
         item_BarColumn, fil_BarColumn, measure_BarColumn = self.ui.ColumnList_bar.get_plot_item()
         item_BarRow, fil_BarRow, measure_BarRow  = self.ui.RowList_bar.get_plot_item()
+        item_BarColumn, item_BarRow = self.check_dup(item_BarColumn, item_BarRow, self.i1, self.i2)
         data = None
+        self.i1 = item_BarColumn
+        self.i2 = item_BarRow
         test_bar = []
         tooltip_bar = []
+        check_colrow = {'row':False, 'column':False, 'resolve_scale':True, 'moreme':False}
+
         if(len(item_BarColumn)>0 or len(item_BarRow)>0):
             data = self.dt.data_filter(item_BarColumn, item_BarRow , fil_BarColumn, fil_BarRow )
-            # for i in item1:
-            if(len(item_BarColumn)>=1):
-                if item_BarColumn[0] in measure_BarColumn.keys():
-                    test_bar.append(alt.X(f'{measure_BarColumn[item_BarColumn[0]]}({item_BarColumn[0]})'))
-                    tooltip_bar.append(f'{measure_BarColumn[item_BarColumn[0]]}({item_BarColumn[0]})')
-                else:
-                    test_bar.append(alt.X(item_BarColumn[0]))
-                    tooltip_bar.append(item_BarColumn[0])
-            if(len(item_BarRow)>=1):
-                if item_BarRow[0] in measure_BarRow.keys():
-                    test_bar.append(alt.Y(f'{measure_BarRow[item_BarRow[0]]}({item_BarRow[0]})'))
-                    tooltip_bar.append(f'{measure_BarRow[item_BarRow[0]]}({item_BarRow[0]})')
-                else:
-                    test_bar.append(alt.Y(item_BarRow[0]))
-                    tooltip_bar.append(item_BarRow[0])
-            if(len(item_BarColumn)>=2):
-                if item_BarColumn[1] in measure_BarColumn.keys():
-                    test_bar.append(alt.Column(f'{measure_BarColumn[item_BarColumn[1]]}({item_BarColumn[1]})'))
-                    tooltip_bar.append(f'{measure_BarColumn[item_BarColumn[1]]}({item_BarColumn[1]})')
-                else:
-                    test_bar.append(alt.Column(item_BarColumn[1]))
-                    tooltip_bar.append(item_BarColumn[1])
-            if(len(item_BarRow)>=2):
-                if item_BarRow[1] in measure_BarRow.keys():
-                    test_bar.append(alt.Row(f'{measure_BarRow[item_BarRow[1]]}({item_BarRow[1]})'))
-                    tooltip_bar.append(f'{measure_BarRow[item_BarRow[1]]}({item_BarRow[1]})')
-                else:
-                    test_bar.append(alt.Row(item_BarRow[1]))
-                    tooltip_bar.append(item_BarRow[1])
-            if(len(item_BarColumn)>=3):
-                if item_BarColumn[2] in measure_BarColumn.keys():
-                    test_bar.append(alt.Color(f'{measure_BarColumn[item_BarColumn[2]]}({item_BarColumn[2]})'))
-                    tooltip_bar.append(f'{measure_BarColumn[item_BarColumn[2]]}({item_BarColumn[2]})')
-                else:
-                    test_bar.append(alt.Color(item_BarColumn[2]))
-                    tooltip_bar.append(item_BarColumn[2])
-            if(len(item_BarRow)>=3):
-                if item_BarRow[2] in measure_BarRow.keys():
-                    test_bar.append(alt.Color(f'{measure_BarRow[item_BarRow[2]]}({item_BarRow[2]})'))
-                    tooltip_bar.append(f'{measure_BarRow[item_BarRow[2]]}({item_BarRow[2]})')
-                else:
-                    test_bar.append(alt.Color(item_BarRow[2]))
-                    tooltip_bar.append(item_BarRow[2])
-            test_bar.append(alt.Tooltip(tooltip_bar))
-            # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
-            # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
-            print(test_bar)
+           
+            coll_Di = {'row':{'count':0, 'list':[]},'column':{'count':0, 'list':[]}}
+            coll_Me = {'row':{'count':0, 'list':[]},'column':{'count':0, 'list':[]}}
+            for i in item_BarColumn:
+                if i in measure_BarColumn.keys() : 
+                    coll_Me['column']['count'] += 1
+                    coll_Me['column']['list'].append(i)
+                else : 
+                    coll_Di['column']['count'] += 1
+                    coll_Di['column']['list'].append(i)
+            for i in item_BarRow:
+                if i in measure_BarRow.keys() : 
+                    coll_Me['row']['count'] += 1
+                    coll_Me['row']['list'].append(i)
+                else : 
+                    coll_Di['row']['count'] += 1
+                    coll_Di['row']['list'].append(i)
 
-            barchart = alt.Chart(data).mark_bar().encode(
-                *test_bar
-            ).resolve_scale(
-                x='independent'
-            )
+            print("coll_Di['row']",coll_Di['row']," \
+                coll_Di['column']",coll_Di['column'])
+            print("coll_Me['row']",coll_Me['row']," \
+                coll_Me['column']",coll_Me['column']) 
+
+            # Check 1 Measure in ROW/COLUMN
+           
+            if coll_Me['column']['count'] == 1 : #todo: a Measure in column
+                test_bar.append(alt.X(f"{measure_BarColumn[coll_Me['column']['list'][0]]}({coll_Me['column']['list'][0]})"))
+                tooltip_bar.append(f"{measure_BarColumn[coll_Me['column']['list'][0]]}({coll_Me['column']['list'][0]})")
+                check_colrow['column'] = True
+            elif coll_Me['row']['count'] == 1 : #todo: a Measure in row
+                test_bar.append(alt.Y(f"{measure_BarRow[coll_Me['row']['list'][0]]}({coll_Me['row']['list'][0]})"))
+                tooltip_bar.append(f"{measure_BarRow[coll_Me['row']['list'][0]]}({coll_Me['row']['list'][0]})")
+                check_colrow['row'] = True
+
+            ## dimension&measure in same ROW/COLUMN 
+            # a Dimension Measure in column
+            if (coll_Me['column']['count'] == 1) and (coll_Di['column']['count'] == 1) and (coll_Di['row']['count'] == 0):
+                test_bar.append(alt.Column(coll_Di['column']['list'][0]))
+                tooltip_bar.append(coll_Di['column']['list'][0])
+            # a Dimension Measure in row
+            elif (coll_Me['row']['count'] == 1) and (coll_Di['column']['count'] == 0) and (coll_Di['row']['count'] == 1) :
+                test_bar.append(alt.Row(coll_Di['row']['list'][0]))
+                tooltip_bar.append(coll_Di['row']['list'][0])
+
+            else :   
+                # Part Dimension ROW
+                if coll_Di['row']['count'] >= 1:
+                    if check_colrow['row'] :
+                        test_bar.append(alt.Row(coll_Di['row']['list'][0]))
+                        tooltip_bar.append(coll_Di['row']['list'][0])
+                        check_colrow['resolve_scale'] = False
+                    else:
+                        test_bar.append(alt.Y(coll_Di['row']['list'][0]))
+                        tooltip_bar.append(coll_Di['row']['list'][0])
+                if coll_Di['row']['count'] >= 2:
+                    test_bar.append(alt.Row(coll_Di['row']['list'][1]))
+                    tooltip_bar.append(coll_Di['row']['list'][1])
+                if coll_Di['row']['count'] >= 3:
+                    pass
+
+                # Part Dimension COLUMN
+                if coll_Di['column']['count'] >= 1:
+                    if check_colrow['column'] :
+                        test_bar.append(alt.Column(coll_Di['column']['list'][0]))
+                        tooltip_bar.append(coll_Di['column']['list'][0])
+                        check_colrow['resolve_scale'] = False
+                    else:
+                        test_bar.append(alt.X(coll_Di['column']['list'][0]))
+                        tooltip_bar.append(coll_Di['column']['list'][0])
+                if coll_Di['column']['count'] >= 2:
+                    test_bar.append(alt.Column(coll_Di['column']['list'][1]))
+                    tooltip_bar.append(coll_Di['column']['list'][1])
+                if coll_Di['column']['count'] >= 3:
+                    test_bar.append(alt.Color(coll_Di['column']['list'][2]))
+                    tooltip_bar.append(coll_Di['column']['list'][2])
+                
+            if (coll_Me['row']['count'] > 1) or (coll_Me['column']['count'] > 1) : # >1 measure 
+                bar_charts = []
+                # Row
+                if  coll_Me['row']['count'] > 1 :
+                    for i in range(coll_Me['row']['count']):
+                        bar_charts.append(alt.Chart(data).mark_bar().encode(*test_bar, 
+                        alt.Y(f"{measure_BarRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})")).resolve_scale(
+                        x='independent',
+                        y='independent'
+                    ))
+                    barchart = alt.vconcat(*bar_charts)
+                # Column
+                elif coll_Me['column']['count'] > 1 : 
+                    for i in range(coll_Me['column']['count']):
+                        bar_charts.append(alt.Chart(data).mark_bar().encode(*test_bar, 
+                        alt.X(f"{measure_BarColumn[coll_Me['column']['list'][i]]}({coll_Me['column']['list'][i]})")).resolve_scale(
+                        x='independent',
+                        y='independent'
+                    ))
+                    barchart = alt.hconcat(*bar_charts)
+
+            else : 
+                # Create Bar Chart        
+                test_bar.append(alt.Tooltip(tooltip_bar))
+                if  check_colrow['resolve_scale'] :
+                    barchart = alt.Chart(data).mark_bar().encode(*test_bar).resolve_scale(
+                        x='independent',
+                        y='independent'
+                    )
+                else : barchart = alt.Chart(data).mark_bar().encode(*test_bar)
+
             self.ui.barChart.updateChart(barchart)
-
+        #######################################################################
         # Pie Chart
         item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
         item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
-        data = None
         test_pie = []
         tooltip_pie = []
-        if(len(item_BarColumn)>=1):
-            pass
-        piechart = alt.Chart(self.dt.data).mark_arc().encode(
-            theta="sum(Sales):Q",
-            color="Sub-Category",
-            tooltip=['sum(Sales)'],
-        )
-        #self.ui.pieChart.updateChart(piechart)
-
+        if(len(item_Theta)>0 and len(item_Color)>0):
+            data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
+            # for i in item1:
+            if(len(item_Theta)>=1):
+                if item_Theta[0] in measure_Theta.keys():
+                    test_pie.append(alt.Theta(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})'))
+                    tooltip_pie.append(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})')
+                else:
+                    test_pie.append(alt.Theta(item_Theta[0]))
+                    tooltip_pie.append(item_Theta[0])
+            if(len(item_Color)>=1):
+                if item_Color[0] in measure_Color.keys():
+                    test_pie.append(alt.Color(f'{measure_Color[item_Color[0]]}({item_Color[0]})'))
+                    tooltip_pie.append(f'{measure_Color[item_Color[0]]}({item_Color[0]})')
+                else:
+                    test_pie.append(alt.Color(item_Color[0]))
+                    tooltip_pie.append(item_Color[0])
+            test_pie.append(alt.Tooltip(tooltip_pie))
+            print(test_pie)
+            piechart = alt.Chart(self.dt.data).mark_arc().encode(
+                *test_pie
+            )
+            self.ui.pieChart.updateChart(piechart)
+        #######################################################################
         # Line Chart
         item_LineColumn, fil_LineColumn, measure_LineColumn = self.ui.ColumnList_line.get_plot_item()
         item_LineRow, fil_LineRow, measure_LineRow  = self.ui.RowList_line.get_plot_item()
+        item_LineColumn, item_LineRow = self.check_dup(item_LineColumn, item_LineRow, self.il1, self.il2)
+        self.il1 = item_LineColumn
+        self.il2 = item_LineRow
         data = None
         test_line = []
         tooltip_line = []
@@ -270,7 +375,7 @@ class MainWindow(QMainWindow):
                     tooltip_line.append(item_LineRow[0])
             if(len(item_LineColumn)>=2):
                 if item_LineColumn[1] in measure_LineColumn.keys():
-                    test_line.append(alt.Column(f'{measure_LineColumn[item_LineColumn[1]]}({item_BarColumn[1]})'))
+                    test_line.append(alt.Column(f'{measure_LineColumn[item_LineColumn[1]]}({item_LineColumn[1]})'))
                     tooltip_line.append(f'{measure_LineColumn[item_LineColumn[1]]}({item_LineColumn[1]})')
                 else:
                     test_line.append(alt.Column(item_LineColumn[1]))
