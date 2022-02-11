@@ -273,9 +273,9 @@ class data_manipulate:
                         querylist.append(f'(`{col}` == {fil[col]})')
             querylist = " & ".join(querylist)
             data = data.query(querylist)    # query data
-        # data = data[item]
-        # data = self.date_to_string(data)
-        data = self.select_plot_data(item, fil, data)
+        data = data[item]
+        data = self.date_to_string(data)
+        # data = self.select_plot_data(item, fil, data)
         return data
     
     def select_plot_data(self, item , fil, data):
@@ -298,9 +298,9 @@ class data_manipulate:
         for col in self.column:
             if self.check_date_col(col):
                 self.data_separated_date[col] = pd.to_datetime(self.data[col])
-                self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day
-                self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month
-                self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year
+                self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day.astype(str)
+                self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month.astype(str)
+                self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year.astype(str)
     
     def unioun_data(self, filename:str) -> None:
         """
