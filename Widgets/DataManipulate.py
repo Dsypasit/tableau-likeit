@@ -124,6 +124,7 @@ class data_manipulate:
                     self.dimension.append(colname)
                 else : self.measure.append(colname)
                 self.save_hist()    # save to history file
+        self.separated_date()
 
     def save_hist(self) -> None:
         """
@@ -208,22 +209,37 @@ class data_manipulate:
             data -> values of data
             col -> column of data
         """
-        if len(measure) > 0:    # if measure have item
-            data = self.data.groupby(col, as_index=False).agg(measure)
-        else:
-            data = self.data.groupby(col, as_index=False).mean()
-            data = data.iloc[:,:len(col)]   # select dimension column only
+        data = self.data_separated_date
         if fil:     # if fileter have item
             querylist = []  # list of query string
-            for i, col in enumerate(fil):
-                querylist.append(f'(`{col}` == {fil[col]})')
+            for _, name in enumerate(fil):
+                if self.check_date_col(name):
+                    # print(fil[col])
+                    for method in fil[name]:
+                        querylist.append(f'(`{name}_{method}` == {fil[name][method]})')
+                        # print(f'(`{col}_{method}` == {i})')
+                else:
+                    querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string
             data = data.query(querylist)    #queryl
+        print(data.head())
+        if len(measure) > 0:    # if measure have item
+            data = data.groupby(col, as_index=False).agg(measure)
+        else:
+            data = data.groupby(col, as_index=False).mean()
+            data = data.iloc[:,:len(col)]   # select dimension column only
+        data = self.date_to_string(data)
 
         def get_col():
             """ This method will return column of data"""
             return data.columns.tolist()
         return {'data': data.values.tolist(), 'col': get_col()}
+    
+    def date_to_string(self, data: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+        for col in data.columns:
+            if self.check_date_col(col):
+                data[col] = data[col].dt.strftime('%d/%m/%Y')
+        return data
 
     def data_filter(self, item1: list, item2: list, fil1: dict, fil2: dict) -> pd.core.frame.DataFrame:
         """
@@ -259,14 +275,21 @@ class data_manipulate:
             data = data.query(querylist)    # query data
         return data
     
+    def check_date_col(self, name:str) -> bool:
+        return 'date' in name.lower()
+    
     def separated_date(self):
         self.data_separated_date = self.data.copy()
         for col in self.column:
-            for word in ['Date', 'date', 'DATE']:
-                if word in col:
-                    self.data_separated_date[col] = pd.to_datetime(self.data[col])
-                    self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month
-                    self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year
+            if self.check_date_col(col):
+                # self.data[col] = pd.to_datetime(self.data[col])
+                # self.data_separated_date[col+'_day'] = self.data[col].dt.day
+                # self.data_separated_date[col+'_month'] = self.data[col].dt.month
+                # self.data_separated_date[col+'_year'] = self.data[col].dt.year
+                self.data_separated_date[col] = pd.to_datetime(self.data[col])
+                self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day
+                self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month
+                self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year
     
     def unioun_data(self, filename:str) -> None:
         """
@@ -283,6 +306,11 @@ class data_manipulate:
         except UnicodeDecodeError:
             union_data = pd.read_csv(filename, encoding='utf8')
         self.data = pd.concat([self.data, union_data])
+    
+    def get_unique_date(self, col, method) -> list:
+        data = pd.unique(self.data_separated_date[f'{col}_{method}']).tolist()
+        data = sorted(data)
+        return data
 
     def get_unique(self, col:str) -> list:
         """
@@ -327,13 +355,13 @@ class data_manipulate:
         self.save_hist()
 
 if __name__ == "__main__":
+    from History import History
     d = data_manipulate()
     d.load_data('data1.csv')
     print(d.get_column())
-    df = d.data.set_index(['State', 'City'])
-    print(df.head())
-    df = df.reset_index()
-    print(df.head())
-    # print(d.data_filter('Segment'))
-    
+    d.separated_date()
+    print(d.data_separated_date.head())
+    print(d.data_separated_date['Order Date_day'].unique())
+    print(d.get_unique_date('Order Date', 'day'))
+    # print(d.check_date_col('ship Date'))
 

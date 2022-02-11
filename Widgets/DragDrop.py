@@ -15,6 +15,8 @@ from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
 import copy as cp
 import pandas
+import re
+from Widgets.DateItem import DateWidgetItem
 
 ########################################################################
 ## PLOTLIST CLASS
@@ -361,19 +363,35 @@ class DimensionList(QtWidgets.QListWidget):
         """ This method will return filter dimension dict """
         result = {}
         for col in self.dimension:  # column in list box
-            result[col] = []
-            for fil in self.dimension[col]:
-                if self.dimension[col][fil]: # selected item
-                    result[col].append(fil)
+            if self.dt.check_date_col(col):
+                result[col] = {}
+                for method in ['day', 'month', 'year']:
+                    result[col][method] = []
+                    for fil in self.dimension[col][method]:
+                        if self.dimension[col][method][fil]:
+                            result[col][method].append(fil)
+            else:
+                result[col] = []
+                for fil in self.dimension[col]:
+                    if self.dimension[col][fil]: # selected item
+                        result[col].append(fil)
         return result
     
     def addFilter(self, name:str) -> None:
         """ This method will create new dimension col and add unique item """
         if name not in self.dimension.keys():
-            self.dimension[name] = {}
-            fil = self.dt.get_unique(name)
-            for i in fil:
-                self.dimension[name][i] = True
+            if self.dt.check_date_col(name):
+                self.dimension[name] = {}
+                for method in ['day', 'month', 'year']:
+                    self.dimension[name][method] = {}
+                    fil = self.dt.get_unique_date(name, method)
+                    for i in fil:
+                        self.dimension[name][method][i] = True
+            else:
+                self.dimension[name] = {}
+                fil = self.dt.get_unique(name)
+                for i in fil:
+                    self.dimension[name][i] = True
 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         col = self.readData(event.mimeData())[0]
@@ -476,6 +494,8 @@ class TableGroupby(QtWidgets.QTableWidget):
                 if type(item) in (int, float):  # check type of item when add to table
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', str(item)): # check date column
+                    newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
                 self.setItem(row, col, newItem)     # add item to table

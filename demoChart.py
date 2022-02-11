@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
                 if type(item) in (int, float):  # check item type
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
-                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', item): # check date column
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', str(item)): # check date column
                     newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
@@ -250,7 +250,7 @@ class MainWindow(QMainWindow):
                     test_bar.append(alt.Color(item_BarRow[2]))
                     tooltip_bar.append(item_BarRow[2])
             test_bar.append(alt.Tooltip(tooltip_bar))
-            print(test_bar)
+            # print(test_bar)
 
             barchart = alt.Chart(data).mark_bar().encode(
                 *test_bar
@@ -282,7 +282,7 @@ class MainWindow(QMainWindow):
                     test_pie.append(alt.Color(item_Color[0]))
                     tooltip_pie.append(item_Color[0])
             test_pie.append(alt.Tooltip(tooltip_pie))
-            print(test_pie)
+            # print(test_pie)
             piechart = alt.Chart(self.dt.data).mark_arc().encode(
                 *test_pie
             )
@@ -356,7 +356,7 @@ class MainWindow(QMainWindow):
             test_line.append(alt.Tooltip(tooltip_line))
             # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
             # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
-            print(test_line)
+            # print(test_line)
 
         linechart = alt.Chart(self.dt.data).mark_line(point=True).encode(
             *test_line
