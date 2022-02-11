@@ -214,10 +214,8 @@ class data_manipulate:
             querylist = []  # list of query string
             for _, name in enumerate(fil):
                 if self.check_date_col(name):
-                    # print(fil[col])
-                    for method in fil[name]:
+                    for method in ['day', 'month', 'year']:
                         querylist.append(f'(`{name}_{method}` == {fil[name][method]})')
-                        # print(f'(`{col}_{method}` == {i})')
                 else:
                     querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string
@@ -261,25 +259,35 @@ class data_manipulate:
             filter data
         """
         item = item1+item2  # merge item
-        fil = fil1.copy()
-        fil.update(fil2)    # merge filter 
+        fil = {**fil1, **fil2}    # merge filter 
         data = self.data_separated_date.copy()
         if fil:     # if filter have item
             querylist = []
             for i, col in enumerate(fil):
                 if col in item and col != "":
                     if self.check_date_col(col):
-                        # print(fil[col])
-                        for method in fil[col]:
+                        for method in ['day', 'year', 'month']:
                             querylist.append(f'(`{col}_{method}` == {fil[col][method]})')
-                            # print(f'(`{col}_{method}` == {i})')
                     else:
                         querylist.append(f'(`{col}` == {fil[col]})')
             querylist = " & ".join(querylist)
             data = data.query(querylist)    # query data
-        data = data[item]
-        data = self.date_to_string(data)
+        # data = data[item]
+        # data = self.date_to_string(data)
+        data = self.select_plot_data(item, fil, data)
         return data
+    
+    def select_plot_data(self, item , fil, data):
+        l = []
+        data = data.copy()
+        for col in item:
+            if self.check_date_col(col):
+                data[col] = data[f'{col}_{fil[col]["graph"]}']
+                data[col] = data[col].astype(str)
+        data = data[item]
+        return data
+
+
     
     def check_date_col(self, name:str) -> bool:
         return 'date' in name.lower()

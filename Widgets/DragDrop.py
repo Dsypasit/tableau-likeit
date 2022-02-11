@@ -52,6 +52,7 @@ class PlotList(QtWidgets.QListWidget):
                     for fil in self.dimension[col][method]:
                         if self.dimension[col][method][fil]:
                             result[col][method].append(fil)
+                result[col]['graph'] = self.dimension[col]['graph']
             else:
                 result[col] = []
                 for fil in self.dimension[col]:
@@ -130,6 +131,7 @@ class PlotList(QtWidgets.QListWidget):
                         fil = self.dt.get_unique_date(name, method)
                         for i in fil:
                             self.dimension[name][method][i] = True
+                    self.dimension[name]['graph'] = 'year'
                 else:
                     self.dimension[name] = {}
                     fil = self.dt.get_unique(name)
@@ -156,10 +158,10 @@ class PlotList(QtWidgets.QListWidget):
 class Popup3(QtWidgets.QDialog):
     def __init__(self, name, parent):
         super().__init__(parent)
-        self.method = 'year'
         self.name = name
         self.parent = parent
         self.dimension = cp.deepcopy(self.parent.dimension)
+        self.method : str = self.dimension[self.name]['graph']
         self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.setWindowTitle("Filter "+name)
         self.selectButton = QtWidgets.QPushButton(self)
@@ -176,7 +178,7 @@ class Popup3(QtWidgets.QDialog):
         self.comboBox.addItem("Year")
         self.comboBox.addItem("Month")
         self.comboBox.addItem("Day")
-        self.comboBox.setCurrentIndex(0)
+        self.comboBox.setCurrentText(self.method.capitalize())
         self.comboBox.currentIndexChanged.connect(self.changeMethod)
 
         self.listWidget = QtWidgets.QListWidget(self)
@@ -196,6 +198,7 @@ class Popup3(QtWidgets.QDialog):
     
     def changeMethod(self, index):
         self.method = self.comboBox.currentText().lower()
+        self.dimension[self.name]['graph'] = self.method
         self.createFilter()
 
     def changeFilter(self, event):
@@ -481,6 +484,7 @@ class DimensionList(QtWidgets.QListWidget):
                     for fil in self.dimension[col][method]:
                         if self.dimension[col][method][fil]:
                             result[col][method].append(fil)
+                result[col]['graph'] = self.dimension[col]['graph']
             else:
                 result[col] = []
                 for fil in self.dimension[col]:
@@ -498,6 +502,7 @@ class DimensionList(QtWidgets.QListWidget):
                     fil = self.dt.get_unique_date(name, method)
                     for i in fil:
                         self.dimension[name][method][i] = True
+                self.dimension[name]['graph'] = 'year'
             else:
                 self.dimension[name] = {}
                 fil = self.dt.get_unique(name)
