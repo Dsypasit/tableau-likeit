@@ -107,7 +107,9 @@ class data_manipulate:
         This method will separated column to measure list, dimension list.
         if history have filename then use measure and dimension in history.
         """
+        self.separated_date()
         hist_dict = self.hist.get_hist()    # get dict of history
+        self.data = self.data_separated_date
         if self.filename in hist_dict.keys():   # check that filename in history
             self.dimension = hist_dict[self.filename]['dimension']
             self.measure = hist_dict[self.filename]['measure']
@@ -124,7 +126,6 @@ class data_manipulate:
                     self.dimension.append(colname)
                 else : self.measure.append(colname)
                 self.save_hist()    # save to history file
-        self.separated_date()
 
     def save_hist(self) -> None:
         """
@@ -290,16 +291,12 @@ class data_manipulate:
 
     
     def check_date_col(self, name:str) -> bool:
-        return 'date' in name.lower()
+        return 'date' in name.lower() and "_" not in name.lower()
     
     def separated_date(self):
         self.data_separated_date = self.data.copy()
         for col in self.column:
             if self.check_date_col(col):
-                # self.data[col] = pd.to_datetime(self.data[col])
-                # self.data_separated_date[col+'_day'] = self.data[col].dt.day
-                # self.data_separated_date[col+'_month'] = self.data[col].dt.month
-                # self.data_separated_date[col+'_year'] = self.data[col].dt.year
                 self.data_separated_date[col] = pd.to_datetime(self.data[col])
                 self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day
                 self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month
