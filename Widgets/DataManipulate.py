@@ -263,15 +263,22 @@ class data_manipulate:
         item = item1+item2  # merge item
         fil = fil1.copy()
         fil.update(fil2)    # merge filter 
-        data = self.data.copy()
-        data = data[item]
+        data = self.data_separated_date.copy()
         if fil:     # if filter have item
             querylist = []
             for i, col in enumerate(fil):
                 if col in item and col != "":
-                    querylist.append(f'(`{col}` == {fil[col]})')
+                    if self.check_date_col(col):
+                        # print(fil[col])
+                        for method in fil[col]:
+                            querylist.append(f'(`{col}_{method}` == {fil[col][method]})')
+                            # print(f'(`{col}_{method}` == {i})')
+                    else:
+                        querylist.append(f'(`{col}` == {fil[col]})')
             querylist = " & ".join(querylist)
             data = data.query(querylist)    # query data
+        data = data[item]
+        data = self.date_to_string(data)
         return data
     
     def check_date_col(self, name:str) -> bool:
