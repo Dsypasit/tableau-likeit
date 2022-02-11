@@ -217,6 +217,10 @@ class data_manipulate:
                 if self.check_date_col(name):
                     for method in ['day', 'month', 'year']:
                         querylist.append(f'(`{name}_{method}` == {fil[name][method]})')
+                elif self.is_measure(name):
+                    if fil[name]['state']:
+                        measure_query = self.measure_condition(name, fil[name]['condition'], fil[name]['value'])
+                        querylist.append(measure_query)
                 else:
                     querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string
@@ -226,6 +230,15 @@ class data_manipulate:
         else:
             data = data.groupby(col, as_index=False).mean()
             data = data.iloc[:,:len(col)]   # select dimension column only
+        querylist = []
+        for _, name in enumerate(fil):
+            if self.is_measure(name):
+                if fil[name]['state']:
+                    measure_query = self.measure_condition(name, fil[name]['condition'], fil[name]['value'])
+                    querylist.append(measure_query)
+        querylist = " & ".join(querylist)   # join to string
+        if querylist:
+            data = data.query(querylist)    #queryl
         data = self.date_to_string(data)
 
         def get_col():
@@ -288,7 +301,8 @@ class data_manipulate:
         data = data[item]
         return data
 
-
+    def measure_condition(self, col:str, condition:str, value:float) -> str:
+        return f'`{col}` {condition} {value}'
     
     def check_date_col(self, name:str) -> bool:
         return 'date' in name.lower() and "_" not in name.lower()

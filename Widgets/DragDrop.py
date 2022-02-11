@@ -249,6 +249,7 @@ class Popup2(QtWidgets.QDialog):    # popup for measure
         self.name = name
         self.parent = parent
         self.measure = cp.deepcopy(self.parent.measure)
+        self.measure_filter = cp.deepcopy(self.parent.measure_filter)
 
         self.setWindowTitle("Filter "+name)
         self.gridLayout = QtWidgets.QGridLayout(self)
@@ -272,15 +273,43 @@ class Popup2(QtWidgets.QDialog):    # popup for measure
         self.comboBox.currentIndexChanged.connect(self.selectionchange)
         self.gridLayout.addWidget(self.comboBox, 1, 0, 1, 4)
 
+        self.state = QtWidgets.QCheckBox(self)
+        self.state.setText("Filter")
+        self.state.setChecked(self.measure_filter[self.name]['state'])
+        self.state.stateChanged.connect(self.stateChange)
+        self.gridLayout.addWidget(self.state, 2, 0)
+
+        self.filterBox = QtWidgets.QComboBox(self)
+        self.filterBox.addItem("=")
+        self.filterBox.addItem("!=")
+        self.filterBox.addItem(">")
+        self.filterBox.addItem(">=")
+        self.filterBox.addItem("<")
+        self.filterBox.addItem("<=")
+        self.filterBox.setCurrentText(self.measure_filter[self.name]['condition'])
+        self.filterBox.currentIndexChanged.connect(self.selectionchange)
+        self.gridLayout.addWidget(self.filterBox, 3, 1, 1, 2)
+
+        self.labelData = QtWidgets.QLabel(self)
+        self.labelData.setText("data")
+        self.gridLayout.addWidget(self.labelData, 3,0)
+
+        self.valueEdit = QtWidgets.QLineEdit(self)
+        self.valueEdit.setObjectName("cancelButton")
+        self.gridLayout.addWidget(self.valueEdit, 3, 3)
+        self.valueEdit.setText(str(self.measure_filter[self.name]['value']))
+        self.valueEdit.textEdited.connect(self.valueChange)
+        # self.cancelButton.clicked.connect(self.clearFilter)
+
         self.cancelButton = QtWidgets.QPushButton(self)
         self.cancelButton.setObjectName("cancelButton")
-        self.gridLayout.addWidget(self.cancelButton, 2, 2, 1, 2)
+        self.gridLayout.addWidget(self.cancelButton, 4, 2, 1, 2)
         # self.cancelButton.clicked.connect(self.clearFilter)
         self.cancelButton.setText("Cancel")
 
         self.doneButton = QtWidgets.QPushButton(self)
         self.doneButton.setObjectName("doneButton")
-        self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
+        self.gridLayout.addWidget(self.doneButton, 4, 0, 1, 2)
         # self.doneButton.clicked.connect(self.clearFilter)
         self.doneButton.setText("Done")
 
@@ -290,12 +319,31 @@ class Popup2(QtWidgets.QDialog):    # popup for measure
     ########################################################################
     ## FUNCTION
     ########################################################################    
+    def stateChange(self, e):
+        if e:
+            self.measure_filter[self.name]['state'] = True
+        else:
+            self.measure_filter[self.name]['state'] = False
+    
+    def is_float(self, element: str) -> bool:
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
+    def valueChange(self, e:str):
+        if self.is_float(e):
+            self.measure_filter[self.name]['value'] = float(e)
+    
     def changeFilter(self, e):
         self.parent.measure = self.measure
+        self.parent.measure_filter = self.measure_filter
         self.close()
     
     def selectionchange(self,i):
       self.measure[self.name] = self.comboBox.currentText()     # change method of measure column
+      self.measure_filter[self.name]['condition'] = self.filterBox.currentText()     # change method of measure column
 
     def closeEvent(self, event):
         if(isinstance(self.parent, PlotList)):  # check parent class
@@ -521,6 +569,7 @@ class MeasureList(QtWidgets.QListWidget):
         self.dt = main.dt
         self.main = main
         self.measure = {}
+        self.measure_filter = {}
         self.itemDoubleClicked.connect(self.launchFilter)
         self.allow = False
     
@@ -563,9 +612,16 @@ class MeasureList(QtWidgets.QListWidget):
         else:
             e.ignore()
     
+    def getFilter(self):
+        return self.measure_filter
+    
     def addFilter(self, item):
         if item not in self.measure.keys():
             self.measure[item] = 'sum'      # set sum method by default
+            self.measure_filter[item] = dict()
+            self.measure_filter[item]['condition'] = '=='      # set sum method by default
+            self.measure_filter[item]['value'] = 0      # set sum method by default
+            self.measure_filter[item]['state'] = False      # set sum method by default
 
     
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
@@ -595,11 +651,13 @@ class TableGroupby(QtWidgets.QTableWidget):
         self.dimension = self.get_widget_item(self.main.DimensionList)  # get dimension list
         self.dimension_filter = self.main.DimensionList.getFilter()     # get dimensino filter
         self.measure = self.main.MeasureList.measure
+        self.measure_filter = self.main.MeasureList.measure_filter
         if not(len(self.dimension) > 0 ):   # if dimension has no item
             self.main.MeasureList.clear()
             self.main.MeasureList.measure = {}
             return
-        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, self.dimension_filter)    # use groupby and get dataframe data
+        fil = {**self.dimension_filter, **self.measure_filter}
+        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, fil)    # use groupby and get dataframe data
         self.header = self.data_groupby['col']
         self.data = self.data_groupby['data']
         self.setColumnCount(len(self.header))
