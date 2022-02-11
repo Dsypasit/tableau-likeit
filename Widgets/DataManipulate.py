@@ -218,9 +218,10 @@ class data_manipulate:
                     for method in ['day', 'month', 'year']:
                         querylist.append(f'(`{name}_{method}` == {fil[name][method]})')
                 elif self.is_measure(name):
-                    if fil[name]['state']:
-                        measure_query = self.measure_condition(name, fil[name]['condition'], fil[name]['value'])
-                        querylist.append(measure_query)
+                    continue
+                #     if fil[name]['state']:
+                #         measure_query = self.measure_condition(name, fil[name]['condition'], fil[name]['value'])
+                #         querylist.append(measure_query)
                 else:
                     querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string

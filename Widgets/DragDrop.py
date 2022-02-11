@@ -29,6 +29,7 @@ class PlotList(QtWidgets.QListWidget):
         self.dt : pandas.core.frame.DataFrame = main.dt
         self.dimension : dict = {}
         self.measure : dict = {}
+        self.measure_filter : dict = {}
         self.setDefaultDropAction(QtCore.Qt.TargetMoveAction)
         self.itemDoubleClicked.connect(self.launchPopup)
         self.itemClicked.connect(self.allow_drag)
@@ -79,6 +80,7 @@ class PlotList(QtWidgets.QListWidget):
                 del self.dimension[self.item(self.currentRow()).text()]
             elif self.dt.is_measure(item) and item in self.measure.keys():
                 del self.measure[self.item(self.currentRow()).text()]
+                del self.measure_filter[self.item(self.currentRow()).text()]
             self.takeItem(d)
             self.clearSelection()
             super().dragLeaveEvent(e)
@@ -140,6 +142,10 @@ class PlotList(QtWidgets.QListWidget):
         else:
             if name not in self.measure.keys():
                 self.measure[name] = 'sum'  # set sum as default
+                self.measure_filter[name] = dict()
+                self.measure_filter[name]['condition'] = '=='      # set sum method by default
+                self.measure_filter[name]['value'] = 0      # set sum method by default
+                self.measure_filter[name]['state'] = False      # set sum method by default
                 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         item = self.readData(event.mimeData())[0]
@@ -280,7 +286,7 @@ class Popup2(QtWidgets.QDialog):    # popup for measure
         self.gridLayout.addWidget(self.state, 2, 0)
 
         self.filterBox = QtWidgets.QComboBox(self)
-        self.filterBox.addItem("=")
+        self.filterBox.addItem("==")
         self.filterBox.addItem("!=")
         self.filterBox.addItem(">")
         self.filterBox.addItem(">=")
@@ -583,6 +589,7 @@ class MeasureList(QtWidgets.QListWidget):
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.count():
             del self.measure[self.item(self.currentRow()).text()]
+            del self.measure_filter[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
             self.main.tableWidget.make_table()
 

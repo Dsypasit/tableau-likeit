@@ -82,6 +82,12 @@ class MainWindow(QMainWindow):
             self.make_table()
             self.dimension()
             self.Graph()
+            self.clear_all()
+    
+    def clear_all(self):
+        self.ui.DimensionList.dimension = {}
+        self.ui.MeasureList.measure = {}
+        self.ui.MeasureList.measure_filter = {}
 
     def to_dimension(self, item: QtWidgets.QWidgetItem) -> None:
         """Thise method will change measure item to dimension item"""
