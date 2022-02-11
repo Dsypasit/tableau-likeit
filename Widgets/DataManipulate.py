@@ -222,7 +222,6 @@ class data_manipulate:
                     querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string
             data = data.query(querylist)    #queryl
-        print(data.head())
         if len(measure) > 0:    # if measure have item
             data = data.groupby(col, as_index=False).agg(measure)
         else:
