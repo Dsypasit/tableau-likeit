@@ -15,6 +15,8 @@ from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
 import copy as cp
 import pandas
+import re
+from Widgets.DateItem import DateWidgetItem
 
 ########################################################################
 ## PLOTLIST CLASS
@@ -40,13 +42,21 @@ class PlotList(QtWidgets.QListWidget):
         self.allow = True
 
     def getFilter(self) -> dict:
-        """Thise method will return filter dict"""
+        """ This method will return filter dimension dict """
         result = {}
-        for col in self.dimension:  # loop column in dimension
-            result[col] = []
-            for fil in self.dimension[col]:
-                if self.dimension[col][fil]:    # if item is true
-                    result[col].append(fil)
+        for col in self.dimension:  # column in list box
+            if self.dt.check_date_col(col):
+                result[col] = {}
+                for method in ['day', 'month', 'year']:
+                    result[col][method] = []
+                    for fil in self.dimension[col][method]:
+                        if self.dimension[col][method][fil]:
+                            result[col][method].append(fil)
+            else:
+                result[col] = []
+                for fil in self.dimension[col]:
+                    if self.dimension[col][fil]: # selected item
+                        result[col].append(fil)
         return result
 
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:     # when mouse drag in this area
@@ -76,8 +86,13 @@ class PlotList(QtWidgets.QListWidget):
     
     def launchPopup(self, item: QtWidgets.QWidgetItem):
         if self.dt.is_dimension(item.text()): # if item is dimension
-            pop = Popup(item.text(), self)
-            pop.show()
+            if self.dt.check_date_col(item.text()):
+                pop = Popup3(item.text(), self)
+                pop.show()
+            else:
+                pop = Popup(item.text(), self)
+                pop.show()
+
         else:
             pop2 = Popup2(item.text(), self)
             pop2.show()
@@ -108,10 +123,18 @@ class PlotList(QtWidgets.QListWidget):
         """ This method will add filter to dict"""
         if(self.dt.is_dimension(name)):
             if name not in self.dimension.keys():
-                self.dimension[name] = {}
-                fil = self.dt.get_unique(name)
-                for i in fil:
-                    self.dimension[name][i] = True # add column item
+                if self.dt.check_date_col(name):
+                    self.dimension[name] = {}
+                    for method in ['day', 'month', 'year']:
+                        self.dimension[name][method] = {}
+                        fil = self.dt.get_unique_date(name, method)
+                        for i in fil:
+                            self.dimension[name][method][i] = True
+                else:
+                    self.dimension[name] = {}
+                    fil = self.dt.get_unique(name)
+                    for i in fil:
+                        self.dimension[name][i] = True
         else:
             if name not in self.measure.keys():
                 self.measure[name] = 'sum'  # set sum as default
@@ -130,6 +153,92 @@ class PlotList(QtWidgets.QListWidget):
 ########################################################################
 ## POPUP MEASURE WINDOW CLASS
 ########################################################################
+class Popup3(QtWidgets.QDialog):
+    def __init__(self, name, parent):
+        super().__init__(parent)
+        self.method = 'year'
+        self.name = name
+        self.parent = parent
+        self.dimension = cp.deepcopy(self.parent.dimension)
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+        self.setWindowTitle("Filter "+name)
+        self.selectButton = QtWidgets.QPushButton(self)
+        self.selectButton.setGeometry(20, 20, 75, 23)
+        self.selectButton.setText('Select')
+        self.selectButton.clicked.connect(self.selectFilter)
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setGeometry(280, 20, 75, 23)
+        self.clearButton.setText('Clear')
+        self.clearButton.clicked.connect(self.clearFilter)
+
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.setGeometry(160, 20, 70, 23)
+        self.comboBox.addItem("Year")
+        self.comboBox.addItem("Month")
+        self.comboBox.addItem("Day")
+        self.comboBox.setCurrentIndex(0)
+        self.comboBox.currentIndexChanged.connect(self.changeMethod)
+
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.setGeometry(70, 50, 256, 192)
+        self.listWidget.itemChanged.connect(self.testCheck)
+
+        self.doneButton = QtWidgets.QPushButton(self)
+        self.doneButton.setGeometry(80, 250, 75, 23)
+        self.doneButton.setText('Done')
+        self.doneButton.clicked.connect(self.changeFilter)
+        self.cancelButton = QtWidgets.QPushButton(self)
+        self.cancelButton.setGeometry(250, 250, 75, 23)
+        self.cancelButton.setText('Cancel')
+        self.cancelButton.clicked.connect(self.close)
+
+        self.createFilter()
+    
+    def changeMethod(self, index):
+        self.method = self.comboBox.currentText().lower()
+        self.createFilter()
+
+    def changeFilter(self, event):
+        self.parent.dimension = self.dimension
+        if(isinstance(self.parent, PlotList)):
+            self.parent.main.app.Graph()
+        else:
+            self.parent.main.tableWidget.make_table()
+        self.close()
+
+    def testCheck(self, item):
+        fil = int(item.text())
+        self.dimension[self.name][self.method][fil] = not self.dimension[self.name][self.method][fil]     # change item filter of column dimension
+    
+    def selectFilter(self): # select all item
+        # print('hello')
+        data = self.dimension[self.name]
+        for fil in data[self.method]:
+            self.dimension[self.name][self.method][fil] = True
+        self.createFilter()
+
+    def clearFilter(self):  # deselect all item
+        data = self.dimension[self.name]
+        for fil in data[self.method]:
+            self.dimension[self.name][self.method][fil] = False
+        self.createFilter()
+    
+    def createFilter(self):
+        for i in range(self.listWidget.count()):    # clear all item
+            self.listWidget.takeItem(0)
+
+        data = self.dimension[self.name]
+        for i in data[self.method]:
+            item = QtWidgets.QListWidgetItem()
+            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled) # can check/uncheck
+            if data[self.method][i]:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
+            item.setData(QtCore.Qt.DisplayRole, i)
+            self.listWidget.addItem(item)
+
+
 class Popup2(QtWidgets.QDialog):    # popup for measure
     def __init__(self, name, parent):
         super().__init__(parent)
@@ -328,8 +437,12 @@ class DimensionList(QtWidgets.QListWidget):
         self.itemDoubleClicked.connect(self.launchFilter)
     
     def launchFilter(self, item):
-        pop = Popup(item.text(), self)
-        pop.show()
+        if self.dt.check_date_col(item.text()):
+            pop = Popup3(item.text(), self)
+            pop.show()
+        else:
+            pop = Popup(item.text(), self)
+            pop.show()
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:     # action when drag item out of area
         if self.count():
@@ -361,19 +474,35 @@ class DimensionList(QtWidgets.QListWidget):
         """ This method will return filter dimension dict """
         result = {}
         for col in self.dimension:  # column in list box
-            result[col] = []
-            for fil in self.dimension[col]:
-                if self.dimension[col][fil]: # selected item
-                    result[col].append(fil)
+            if self.dt.check_date_col(col):
+                result[col] = {}
+                for method in ['day', 'month', 'year']:
+                    result[col][method] = []
+                    for fil in self.dimension[col][method]:
+                        if self.dimension[col][method][fil]:
+                            result[col][method].append(fil)
+            else:
+                result[col] = []
+                for fil in self.dimension[col]:
+                    if self.dimension[col][fil]: # selected item
+                        result[col].append(fil)
         return result
     
     def addFilter(self, name:str) -> None:
         """ This method will create new dimension col and add unique item """
         if name not in self.dimension.keys():
-            self.dimension[name] = {}
-            fil = self.dt.get_unique(name)
-            for i in fil:
-                self.dimension[name][i] = True
+            if self.dt.check_date_col(name):
+                self.dimension[name] = {}
+                for method in ['day', 'month', 'year']:
+                    self.dimension[name][method] = {}
+                    fil = self.dt.get_unique_date(name, method)
+                    for i in fil:
+                        self.dimension[name][method][i] = True
+            else:
+                self.dimension[name] = {}
+                fil = self.dt.get_unique(name)
+                for i in fil:
+                    self.dimension[name][i] = True
 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         col = self.readData(event.mimeData())[0]
@@ -476,6 +605,8 @@ class TableGroupby(QtWidgets.QTableWidget):
                 if type(item) in (int, float):  # check type of item when add to table
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', str(item)): # check date column
+                    newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
                 self.setItem(row, col, newItem)     # add item to table
