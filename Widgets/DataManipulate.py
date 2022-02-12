@@ -238,7 +238,6 @@ class data_manipulate:
         if querylist:
             data = data.query(querylist)    #queryl
         data = self.date_to_string(data)
-        print(data[data['City'] == 'Houston'])
         def get_col():
             """ This method will return column of data"""
             return data.columns.tolist()
@@ -273,10 +272,7 @@ class data_manipulate:
         item = item1+item2  # merge item
         dimension = [i for i in item if self.is_dimension(i)]
         measure = {**measure1, **measure2}
-        print(item)
-        print(measure)
         fil = {**fil1, **fil2}    # merge filter 
-        print(fil)
         data_groupby = self.get_groupby(dimension, measure, fil)
         data = data_groupby['dataframe']
         return data

@@ -217,7 +217,8 @@ class Popup3(QtWidgets.QDialog):
         self.close()
 
     def testCheck(self, item):
-        fil = int(item.text())
+        fil = item.text()
+        print(self.dimension[self.name][self.method])
         self.dimension[self.name][self.method][fil] = not self.dimension[self.name][self.method][fil]     # change item filter of column dimension
     
     def selectFilter(self): # select all item

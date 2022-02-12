@@ -88,6 +88,22 @@ class MainWindow(QMainWindow):
         self.ui.DimensionList.dimension = {}
         self.ui.MeasureList.measure = {}
         self.ui.MeasureList.measure_filter = {}
+        for i in range(self.ui.DimensionWidget.count()):   
+            self.ui.DimensionWidget.takeItem(0)
+        for i in range(self.ui.MeasureWidget.count()):   
+            self.ui.MeasureWidget.takeItem(0)    
+        for i in range(self.ui.ColumnList_bar.count()):   
+            self.ui.ColumnList_bar.takeItem(0)
+        for i in range(self.ui.RowList_bar.count()):   
+            self.ui.RowList_bar.takeItem(0)    
+        for i in range(self.ui.ThetaList.count()):   
+            self.ui.ThetaList.takeItem(0)    
+        for i in range(self.ui.ColorList.count()):   
+            self.ui.ColorList.takeItem(0)    
+        for i in range(self.ui.ColumnList_line.count()):   
+            self.ui.ColumnList_line.takeItem(0)    
+        for i in range(self.ui.RowList_line.count()):   
+            self.ui.RowList_line.takeItem(0)    
 
     def to_dimension(self, item: QtWidgets.QWidgetItem) -> None:
         """Thise method will change measure item to dimension item"""
@@ -145,10 +161,10 @@ class MainWindow(QMainWindow):
 
     def dimension(self):
         """ This method will make measure list widget and dimension list widget"""
-        for i in range(self.ui.DimensionWidget.count()):    # clear dimension widget item
-            self.ui.DimensionWidget.takeItem(0)
-        for i in range(self.ui.MeasureWidget.count()):      # clear measure widget item
-            self.ui.MeasureWidget.takeItem(0)
+        for i in range(self.ui.DimensionList.count()):    # clear dimension widget item
+            self.ui.DimensionList.takeItem(0)
+        for i in range(self.ui.MeasureList.count()):      # clear measure widget item
+            self.ui.MeasureList.takeItem(0)
         dimension = self.dt.get_dimension()
         measure = self.dt.get_measure()
         for i in dimension:
