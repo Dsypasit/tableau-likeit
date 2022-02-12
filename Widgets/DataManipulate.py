@@ -210,7 +210,7 @@ class data_manipulate:
             data -> values of data
             col -> column of data
         """
-        data = self.data_separated_date
+        data = self.data_separated_date.copy()
         if fil:     # if fileter have item
             querylist = []  # list of query string
             for _, name in enumerate(fil):
@@ -219,9 +219,6 @@ class data_manipulate:
                         querylist.append(f'(`{name}_{method}` == {fil[name][method]})')
                 elif self.is_measure(name):
                     continue
-                #     if fil[name]['state']:
-                #         measure_query = self.measure_condition(name, fil[name]['condition'], fil[name]['value'])
-                #         querylist.append(measure_query)
                 else:
                     querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string
@@ -241,11 +238,11 @@ class data_manipulate:
         if querylist:
             data = data.query(querylist)    #queryl
         data = self.date_to_string(data)
-
+        print(data[data['City'] == 'Houston'])
         def get_col():
             """ This method will return column of data"""
             return data.columns.tolist()
-        return {'data': data.values.tolist(), 'col': get_col()}
+        return {'data': data.values.tolist(), 'col': get_col(), 'dataframe': data}
     
     def date_to_string(self, data: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
         for col in data.columns:
@@ -253,7 +250,7 @@ class data_manipulate:
                 data[col] = data[col].dt.strftime('%d/%m/%Y')
         return data
 
-    def data_filter(self, item1: list, item2: list, fil1: dict, fil2: dict) -> pd.core.frame.DataFrame:
+    def data_filter(self, item1: list, item2: list, fil1: dict, fil2: dict, measure1:dict, measure2:dict) -> pd.core.frame.DataFrame:
         """
         This method will filter column and item, then return as DataFrame
 
@@ -274,21 +271,28 @@ class data_manipulate:
             filter data
         """
         item = item1+item2  # merge item
+        dimension = [i for i in item if self.is_dimension(i)]
+        measure = {**measure1, **measure2}
+        print(item)
+        print(measure)
         fil = {**fil1, **fil2}    # merge filter 
-        data = self.data_separated_date.copy()
-        if fil:     # if filter have item
-            querylist = []
-            for i, col in enumerate(fil):
-                if col in item and col != "":
-                    if self.check_date_col(col):
-                        for method in ['day', 'year', 'month']:
-                            querylist.append(f'(`{col}_{method}` == {fil[col][method]})')
-                    else:
-                        querylist.append(f'(`{col}` == {fil[col]})')
-            querylist = " & ".join(querylist)
-            data = data.query(querylist)    # query data
-        data = data[item]
-        data = self.date_to_string(data)
+        print(fil)
+        data_groupby = self.get_groupby(dimension, measure, fil)
+        data = data_groupby['dataframe']
+        # data = self.data_separated_date.copy()
+        # if fil:     # if filter have item
+        #     querylist = []
+        #     for i, col in enumerate(fil):
+        #         if col in item and col != "":
+        #             if self.check_date_col(col):
+        #                 for method in ['day', 'year', 'month']:
+        #                     querylist.append(f'(`{col}_{method}` == {fil[col][method]})')
+        #             else:
+        #                 querylist.append(f'(`{col}` == {fil[col]})')
+        #     querylist = " & ".join(querylist)
+        #     data = data.query(querylist)    # query data
+        # data = data[item]
+        # data = self.date_to_string(data)
         # data = self.select_plot_data(item, fil, data)
         return data
     

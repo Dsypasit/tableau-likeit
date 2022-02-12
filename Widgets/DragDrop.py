@@ -59,6 +59,7 @@ class PlotList(QtWidgets.QListWidget):
                 for fil in self.dimension[col]:
                     if self.dimension[col][fil]: # selected item
                         result[col].append(fil)
+        result = {**result, **self.measure_filter}
         return result
 
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:     # when mouse drag in this area

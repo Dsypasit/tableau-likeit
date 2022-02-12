@@ -211,7 +211,7 @@ class MainWindow(QMainWindow):
         test_bar = []
         tooltip_bar = []
         if(len(item_BarColumn)>0 or len(item_BarRow)>0):
-            data = self.dt.data_filter(item_BarColumn, item_BarRow , fil_BarColumn, fil_BarRow )
+            data = self.dt.data_filter(item_BarColumn, item_BarRow , fil_BarColumn, fil_BarRow, measure_BarColumn, measure_BarRow)
             # for i in item1:
             if(len(item_BarColumn)>=1):
                 if item_BarColumn[0] in measure_BarColumn.keys():
@@ -257,7 +257,6 @@ class MainWindow(QMainWindow):
                     tooltip_bar.append(item_BarRow[2])
             test_bar.append(alt.Tooltip(tooltip_bar))
             # print(test_bar)
-
             barchart = alt.Chart(data).mark_bar().encode(
                 *test_bar
             ).resolve_scale(
