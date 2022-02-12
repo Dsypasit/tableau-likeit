@@ -279,21 +279,6 @@ class data_manipulate:
         print(fil)
         data_groupby = self.get_groupby(dimension, measure, fil)
         data = data_groupby['dataframe']
-        # data = self.data_separated_date.copy()
-        # if fil:     # if filter have item
-        #     querylist = []
-        #     for i, col in enumerate(fil):
-        #         if col in item and col != "":
-        #             if self.check_date_col(col):
-        #                 for method in ['day', 'year', 'month']:
-        #                     querylist.append(f'(`{col}_{method}` == {fil[col][method]})')
-        #             else:
-        #                 querylist.append(f'(`{col}` == {fil[col]})')
-        #     querylist = " & ".join(querylist)
-        #     data = data.query(querylist)    # query data
-        # data = data[item]
-        # data = self.date_to_string(data)
-        # data = self.select_plot_data(item, fil, data)
         return data
     
     def select_plot_data(self, item , fil, data):

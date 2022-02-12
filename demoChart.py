@@ -270,7 +270,7 @@ class MainWindow(QMainWindow):
         test_pie = []
         tooltip_pie = []
         if(len(item_Theta)>0 and len(item_Color)>0):
-            data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
+            data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color, measure_Theta, measure_Color)
             # for i in item1:
             if(len(item_Theta)>=1):
                 if item_Theta[0] in measure_Theta.keys():
@@ -314,7 +314,7 @@ class MainWindow(QMainWindow):
         test_line = []
         tooltip_line = []
         if(len(item_LineColumn)>0 or len(item_LineRow)>0):
-            data = self.dt.data_filter(item_LineColumn, item_LineRow , fil_LineColumn, fil_LineRow )
+            data = self.dt.data_filter(item_LineColumn, item_LineRow , fil_LineColumn, fil_LineRow, measure_LineColumn, measure_LineRow)
             # for i in item1:
             if(len(item_LineColumn)>=1):
                 if item_LineColumn[0] in measure_LineColumn.keys():
