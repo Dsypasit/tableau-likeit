@@ -692,7 +692,6 @@
     </property>
     <addaction name="menuImport"/>
     <addaction name="actionUnion"/>
-    <addaction name="actionJoin"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuData"/>
@@ -728,11 +727,6 @@
   <action name="actionUnion">
    <property name="text">
     <string>Union</string>
-   </property>
-  </action>
-  <action name="actionJoin">
-   <property name="text">
-    <string>Join</string>
    </property>
   </action>
  </widget>

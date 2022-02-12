@@ -13,6 +13,7 @@ import sys, random
 import re
 
 import altair as alt
+from matplotlib.pyplot import title
 from vega_datasets import data
 import pandas as pd
 import numpy as np
@@ -205,7 +206,7 @@ class MainWindow(QMainWindow):
         self.i2 = item_BarRow
         test_bar = []
         tooltip_bar = []
-        check_colrow = {'row':False, 'column':False, 'resolve_scale':True, 'moreme':False}
+        check_colrow = {'row':False, 'column':False, 'resolve_scale':True}
 
         if(len(item_BarColumn)>0 or len(item_BarRow)>0):
             data = self.dt.data_filter(item_BarColumn, item_BarRow , fil_BarColumn, fil_BarRow )
@@ -227,13 +228,12 @@ class MainWindow(QMainWindow):
                     coll_Di['row']['count'] += 1
                     coll_Di['row']['list'].append(i)
 
-            print("coll_Di['row']",coll_Di['row']," \
-                coll_Di['column']",coll_Di['column'])
-            print("coll_Me['row']",coll_Me['row']," \
-                coll_Me['column']",coll_Me['column']) 
+            # print("coll_Di['row']",coll_Di['row']," \
+            #     coll_Di['column']",coll_Di['column'])
+            # print("coll_Me['row']",coll_Me['row']," \
+            #     coll_Me['column']",coll_Me['column']) 
 
             # Check 1 Measure in ROW/COLUMN
-           
             if coll_Me['column']['count'] == 1 : #todo: a Measure in column
                 test_bar.append(alt.X(f"{measure_BarColumn[coll_Me['column']['list'][0]]}({coll_Me['column']['list'][0]})"))
                 tooltip_bar.append(f"{measure_BarColumn[coll_Me['column']['list'][0]]}({coll_Me['column']['list'][0]})")
@@ -264,11 +264,18 @@ class MainWindow(QMainWindow):
                         test_bar.append(alt.Y(coll_Di['row']['list'][0]))
                         tooltip_bar.append(coll_Di['row']['list'][0])
                 if coll_Di['row']['count'] >= 2:
-                    test_bar.append(alt.Row(coll_Di['row']['list'][1]))
-                    tooltip_bar.append(coll_Di['row']['list'][1])
+                    if check_colrow['row'] :
+                        test_bar.append(alt.Color(coll_Di['row']['list'][1]))
+                        tooltip_bar.append(coll_Di['row']['list'][1])
+                    else:
+                        test_bar.append(alt.Row(coll_Di['row']['list'][1]))
+                        tooltip_bar.append(coll_Di['row']['list'][1])
                 if coll_Di['row']['count'] >= 3:
-                    pass
-
+                    if check_colrow['row'] :
+                        pass    # Not do anything when it more than >3
+                    else:
+                        test_bar.append(alt.Color(coll_Di['row']['list'][2]))
+                        tooltip_bar.append(coll_Di['row']['list'][2])
                 # Part Dimension COLUMN
                 if coll_Di['column']['count'] >= 1:
                     if check_colrow['column'] :
@@ -279,19 +286,37 @@ class MainWindow(QMainWindow):
                         test_bar.append(alt.X(coll_Di['column']['list'][0]))
                         tooltip_bar.append(coll_Di['column']['list'][0])
                 if coll_Di['column']['count'] >= 2:
-                    test_bar.append(alt.Column(coll_Di['column']['list'][1]))
-                    tooltip_bar.append(coll_Di['column']['list'][1])
+                    if check_colrow['column'] :
+                        test_bar.append(alt.Color(coll_Di['column']['list'][1]))
+                        tooltip_bar.append(coll_Di['column']['list'][1])
+                    else:
+                        test_bar.append(alt.Column(coll_Di['column']['list'][1]))
+                        tooltip_bar.append(coll_Di['column']['list'][1])
                 if coll_Di['column']['count'] >= 3:
-                    test_bar.append(alt.Color(coll_Di['column']['list'][2]))
-                    tooltip_bar.append(coll_Di['column']['list'][2])
-                
-            if (coll_Me['row']['count'] > 1) or (coll_Me['column']['count'] > 1) : # >1 measure 
+                    if check_colrow['column'] :
+                        pass    # Not do anything when it more than >3
+                    else:
+                        test_bar.append(alt.Color(coll_Di['column']['list'][2]))
+                        tooltip_bar.append(coll_Di['column']['list'][2])
+            
+        #######################################################################
+            '''Create Bar Chart'''    
+            # measure >1
+            if (coll_Me['row']['count'] > 1) or (coll_Me['column']['count'] > 1) : 
                 bar_charts = []
+                
+                # tooltip_bar.pop(0) # del tooltip first measure
                 # Row
                 if  coll_Me['row']['count'] > 1 :
                     for i in range(coll_Me['row']['count']):
+                        # edit tooltip
+                        temp_tooltip = tooltip_bar.copy()
+                        temp_tooltip.append(f"{measure_BarRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})")
+
                         bar_charts.append(alt.Chart(data).mark_bar().encode(*test_bar, 
-                        alt.Y(f"{measure_BarRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})")).resolve_scale(
+                            alt.Y(f"{measure_BarRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})"),
+                            alt.Tooltip(temp_tooltip))
+                        .resolve_scale(
                         x='independent',
                         y='independent'
                     ))
@@ -299,13 +324,19 @@ class MainWindow(QMainWindow):
                 # Column
                 elif coll_Me['column']['count'] > 1 : 
                     for i in range(coll_Me['column']['count']):
+                        # edit tooltip
+                        temp_tooltip = tooltip_bar.copy()
+                        temp_tooltip.append(f"{measure_BarRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})")
+
                         bar_charts.append(alt.Chart(data).mark_bar().encode(*test_bar, 
-                        alt.X(f"{measure_BarColumn[coll_Me['column']['list'][i]]}({coll_Me['column']['list'][i]})")).resolve_scale(
+                            alt.X(f"{measure_BarColumn[coll_Me['column']['list'][i]]}({coll_Me['column']['list'][i]})"),
+                            alt.Tooltip(temp_tooltip))
+                        .resolve_scale(
                         x='independent',
                         y='independent'
                     ))
                     barchart = alt.hconcat(*bar_charts)
-
+            # measure =1
             else : 
                 # Create Bar Chart        
                 test_bar.append(alt.Tooltip(tooltip_bar))
@@ -315,37 +346,84 @@ class MainWindow(QMainWindow):
                         y='independent'
                     )
                 else : barchart = alt.Chart(data).mark_bar().encode(*test_bar)
-
+            # Set chart
             self.ui.barChart.updateChart(barchart)
+
+        #######################################################################
+
         #######################################################################
         # Pie Chart
         item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
         item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
-        test_pie = []
-        tooltip_pie = []
-        if(len(item_Theta)>0 and len(item_Color)>0):
+
+        if(len(item_Theta)>0 or len(item_Color)>0):
             data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
-            # for i in item1:
-            if(len(item_Theta)>=1):
-                if item_Theta[0] in measure_Theta.keys():
-                    test_pie.append(alt.Theta(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})'))
-                    tooltip_pie.append(f'{measure_Theta[item_Theta[0]]}({item_Theta[0]})')
-                else:
-                    test_pie.append(alt.Theta(item_Theta[0]))
-                    tooltip_pie.append(item_Theta[0])
-            if(len(item_Color)>=1):
-                if item_Color[0] in measure_Color.keys():
-                    test_pie.append(alt.Color(f'{measure_Color[item_Color[0]]}({item_Color[0]})'))
-                    tooltip_pie.append(f'{measure_Color[item_Color[0]]}({item_Color[0]})')
-                else:
-                    test_pie.append(alt.Color(item_Color[0]))
-                    tooltip_pie.append(item_Color[0])
-            test_pie.append(alt.Tooltip(tooltip_pie))
-            print(test_pie)
-            piechart = alt.Chart(self.dt.data).mark_arc().encode(
-                *test_pie
-            )
+
+            theta_charts = []
+
+            if  (len(item_Theta)>=1) and (len(item_Color)==0) : 
+                theta_chart = []
+                for j in item_Theta:
+                    title = j
+                    # Check item is Measure
+                    if j in measure_Theta.keys(): 
+                        title = f"{measure_Theta[j]} of {j}"
+                        j = f"{measure_Theta[j]}({j}):Q"
+                    theta_chart.append(alt.Chart(data).mark_arc().encode(
+                        alt.Theta(j),
+                        alt.Tooltip([j]),
+                    ).properties(
+                        title = title
+                    ))
+                piechart = alt.hconcat(*theta_chart)
+
+            elif  (len(item_Theta)==0) and (len(item_Color)>=1) : 
+                color_chart = []
+                for i in item_Color:
+                    title = i
+                    # Check item is Measure
+                    if i in measure_Color.keys(): 
+                        title = f"{measure_Color[i]} of {i}"
+                        i = f"{measure_Color[i]}({i}):Q"
+                        print(i)
+                    color_chart.append(alt.Chart(data).mark_arc().encode(
+                        alt.Color(i),
+                        alt.Tooltip([i]),
+                    ).properties(
+                        title = title
+                    ))
+                piechart = alt.vconcat(*color_chart)
+
+            else : 
+                # Part Color / row
+                for i in item_Color:
+                    titleColor = i
+                    if i in measure_Color.keys(): 
+                        titleColor = f"{measure_Color[i]} of {i}"
+                        i = f'{measure_Color[i]}({i}):Q'
+                    # Part Theta / column
+                    theta_chart = []
+                    for j in item_Theta:
+                        titleTheta = j
+                        # Check item is Measure
+                        if j in measure_Theta.keys(): 
+                            titleTheta = f"{measure_Theta[j]} of {j}"
+                            j = f'{measure_Theta[j]}({j}):Q'
+                        theta_chart.append(alt.Chart(data).mark_arc().encode(
+                            alt.Theta(j),
+                            alt.Color(i),
+                            alt.Tooltip([j,i]),
+                        ).properties(
+                            title = titleTheta + " and " + titleColor
+                        ))
+                    if len(theta_chart) >= 1:
+                        theta_charts.append(alt.hconcat(*theta_chart))
+                piechart = alt.vconcat(*theta_charts)
+
             self.ui.pieChart.updateChart(piechart)
+
+        #######################################################################
+
         #######################################################################
         # Line Chart
         item_LineColumn, fil_LineColumn, measure_LineColumn = self.ui.ColumnList_line.get_plot_item()
@@ -409,9 +487,7 @@ class MainWindow(QMainWindow):
         linechart = alt.Chart(self.dt.data).mark_line(point=True).encode(
             *test_line
         )
-
         self.ui.lineChart.updateChart(linechart)
-        
 
     ########################################################################
 
