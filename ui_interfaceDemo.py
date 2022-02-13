@@ -41,7 +41,7 @@ class Ui_App(object):
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
         self.gridLayout_4.addWidget(self.tableWidget, 2, 0, 1, 1)
-      
+       
         self.frame = QtWidgets.QFrame(self.tab)
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -411,15 +411,12 @@ class Ui_App(object):
         self.menuImport.setObjectName("menuImport")
         self.actionUnion = QtWidgets.QAction(App)
         self.actionUnion.setObjectName("actionUnion")
-        self.actionJoin = QtWidgets.QAction(App)
-        self.actionJoin.setObjectName("actionJoin")
         self.menuFile.addAction(self.menuOpen)
         self.menuFile.addAction(self.menuSave)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.menuExit)
         self.menuData.addAction(self.menuImport)
         self.menuData.addAction(self.actionUnion)
-        self.menuData.addAction(self.actionJoin)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuData.menuAction())
 
@@ -465,7 +462,6 @@ class Ui_App(object):
         self.menuExit.setText(_translate("App", "Exit"))
         self.menuImport.setText(_translate("App", "Import"))
         self.actionUnion.setText(_translate("App", "Union"))
-        self.actionJoin.setText(_translate("App", "Join"))
 import resources_rc
 
 

@@ -222,7 +222,8 @@ class data_manipulate:
                 else:
                     querylist.append(f'(`{name}` == {fil[name]})')
             querylist = " & ".join(querylist)   # join to string
-            data = data.query(querylist)    #queryl
+            if querylist:
+                data = data.query(querylist)    #queryl
         if len(measure) > 0:    # if measure have item
             data = data.groupby(col, as_index=False).agg(measure)
         else:
@@ -271,6 +272,8 @@ class data_manipulate:
         """
         item = item1+item2  # merge item
         dimension = [i for i in item if self.is_dimension(i)]
+        if not dimension:
+            dimension = item
         measure = {**measure1, **measure2}
         fil = {**fil1, **fil2}    # merge filter 
         data_groupby = self.get_groupby(dimension, measure, fil)
