@@ -1,6 +1,7 @@
 import pandas as pd
+import pandas 
 
-from Widgets.History import History
+# from Widgets.History import History
 class data_manipulate:
     """
     data_manipulate class is object for manipulate data to pyqt
@@ -25,7 +26,7 @@ class data_manipulate:
 
     """
     def __init__(self):
-        self.data : pd.core.frame.DataFrame = None
+        self.data : pandas.core.frame.DataFrame = None
         self.column : list = []
         self.data_separated_date = None
         self.dimension : list = []
@@ -300,7 +301,7 @@ class data_manipulate:
         self.data_separated_date = self.data.copy()
         for col in self.column:
             if self.check_date_col(col):
-                self.data_separated_date[col] = pd.to_datetime(self.data[col])
+                self.data_separated_date[col] = pd.to_datetime(self.data[col], format="%d/%m/%Y")
                 self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day.astype(str)
                 self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month.astype(str)
                 self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year.astype(str)
@@ -376,6 +377,9 @@ if __name__ == "__main__":
     d.separated_date()
     print(d.data_separated_date.head())
     print(d.data_separated_date['Order Date_day'].unique())
-    print(d.get_unique_date('Order Date', 'day'))
+    # print(d.get_unique_date('Order Date', 'day'))
     # print(d.check_date_col('ship Date'))
+    print(d.get_unique('City'))
 
+else:
+    from Widgets.History import History

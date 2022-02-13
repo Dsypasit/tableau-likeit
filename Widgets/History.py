@@ -62,5 +62,8 @@ class History:
             self.save_hist()
         with open(self.filename, 'r') as file:
             self.hist = json.load(file)
+    
+    def check_file(self, name:str) -> bool:
+        return name in self.hist.keys()
 
 a = History()
