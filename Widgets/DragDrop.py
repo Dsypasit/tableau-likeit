@@ -15,6 +15,8 @@ from matplotlib.pyplot import text
 from Widgets.DataManipulate import data_manipulate
 import copy as cp
 import pandas
+import re
+from Widgets.DateItem import DateWidgetItem
 
 ########################################################################
 ## PLOTLIST CLASS
@@ -27,6 +29,7 @@ class PlotList(QtWidgets.QListWidget):
         self.dt : pandas.core.frame.DataFrame = main.dt
         self.dimension : dict = {}
         self.measure : dict = {}
+        self.measure_filter : dict = {}
         self.setDefaultDropAction(QtCore.Qt.TargetMoveAction)
         self.itemDoubleClicked.connect(self.launchPopup)
         self.itemClicked.connect(self.allow_drag)
@@ -40,13 +43,23 @@ class PlotList(QtWidgets.QListWidget):
         self.allow = True
 
     def getFilter(self) -> dict:
-        """Thise method will return filter dict"""
+        """ This method will return filter dimension dict """
         result = {}
-        for col in self.dimension:  # loop column in dimension
-            result[col] = []
-            for fil in self.dimension[col]:
-                if self.dimension[col][fil]:    # if item is true
-                    result[col].append(fil)
+        for col in self.dimension:  # column in list box
+            if self.dt.check_date_col(col):
+                result[col] = {}
+                for method in ['day', 'month', 'year']:
+                    result[col][method] = []
+                    for fil in self.dimension[col][method]:
+                        if self.dimension[col][method][fil]:
+                            result[col][method].append(fil)
+                result[col]['graph'] = self.dimension[col]['graph']
+            else:
+                result[col] = []
+                for fil in self.dimension[col]:
+                    if self.dimension[col][fil]: # selected item
+                        result[col].append(fil)
+        result = {**result, **self.measure_filter}
         return result
 
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:     # when mouse drag in this area
@@ -68,6 +81,7 @@ class PlotList(QtWidgets.QListWidget):
                 del self.dimension[self.item(self.currentRow()).text()]
             elif self.dt.is_measure(item) and item in self.measure.keys():
                 del self.measure[self.item(self.currentRow()).text()]
+                del self.measure_filter[self.item(self.currentRow()).text()]
             self.takeItem(d)
             self.clearSelection()
             super().dragLeaveEvent(e)
@@ -76,8 +90,13 @@ class PlotList(QtWidgets.QListWidget):
     
     def launchPopup(self, item: QtWidgets.QWidgetItem):
         if self.dt.is_dimension(item.text()): # if item is dimension
-            pop = Popup(item.text(), self)
-            pop.show()
+            if self.dt.check_date_col(item.text()):
+                pop = Popup3(item.text(), self)
+                pop.show()
+            else:
+                pop = Popup(item.text(), self)
+                pop.show()
+
         else:
             pop2 = Popup2(item.text(), self)
             pop2.show()
@@ -108,13 +127,26 @@ class PlotList(QtWidgets.QListWidget):
         """ This method will add filter to dict"""
         if(self.dt.is_dimension(name)):
             if name not in self.dimension.keys():
-                self.dimension[name] = {}
-                fil = self.dt.get_unique(name)
-                for i in fil:
-                    self.dimension[name][i] = True # add column item
+                if self.dt.check_date_col(name):
+                    self.dimension[name] = {}
+                    for method in ['day', 'month', 'year']:
+                        self.dimension[name][method] = {}
+                        fil = self.dt.get_unique_date(name, method)
+                        for i in fil:
+                            self.dimension[name][method][i] = True
+                    self.dimension[name]['graph'] = 'year'
+                else:
+                    self.dimension[name] = {}
+                    fil = self.dt.get_unique(name)
+                    for i in fil:
+                        self.dimension[name][i] = True
         else:
             if name not in self.measure.keys():
                 self.measure[name] = 'sum'  # set sum as default
+                self.measure_filter[name] = dict()
+                self.measure_filter[name]['condition'] = '=='      # set sum method by default
+                self.measure_filter[name]['value'] = 0      # set sum method by default
+                self.measure_filter[name]['state'] = False      # set sum method by default
                 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         item = self.readData(event.mimeData())[0]
@@ -128,15 +160,121 @@ class PlotList(QtWidgets.QListWidget):
 
 
 ########################################################################
+## POPUP DATE WINDOW CLASS
+########################################################################
+class Popup3(QtWidgets.QDialog):
+    def __init__(self, name, parent):
+        super().__init__(parent)
+        self.resize(442, 370)
+        self.name = name
+        self.parent = parent
+        self.dimension = cp.deepcopy(self.parent.dimension)
+        self.method : str = self.dimension[self.name]['graph']
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+
+        self.setWindowTitle("Filter "+name)
+        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout.setObjectName("gridLayout")
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.setObjectName("listWidget")
+        self.gridLayout.addWidget(self.listWidget, 1, 0, 1, 4)
+        # function listwidget
+        self.listWidget.itemChanged.connect(self.testCheck)
+
+        self.selectButton = QtWidgets.QPushButton(self)
+        self.selectButton.setObjectName("selectButton")
+        self.gridLayout.addWidget(self.selectButton, 0, 0, 1, 1)
+        self.selectButton.clicked.connect(self.selectFilter)
+        self.selectButton.setText("All Select")
+
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setObjectName("clearButton")
+        self.gridLayout.addWidget(self.clearButton, 0, 3, 1, 1)
+        self.clearButton.clicked.connect(self.clearFilter)
+        self.clearButton.setText("All Clear")
+
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.gridLayout.addWidget(self.comboBox, 0, 1, 1, 2)
+        self.comboBox.addItem("Year")
+        self.comboBox.addItem("Month")
+        self.comboBox.addItem("Day")
+        self.comboBox.setCurrentText(self.method.capitalize())
+        self.comboBox.currentIndexChanged.connect(self.changeMethod)
+
+        self.doneButton = QtWidgets.QPushButton(self)
+        self.doneButton.setObjectName("doneButton")
+        self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
+        self.doneButton.clicked.connect(self.changeFilter)
+        self.doneButton.setText("Done")
+
+        self.cancelButton = QtWidgets.QPushButton(self)
+        self.cancelButton.setObjectName("cancelButton")
+        self.gridLayout.addWidget(self.cancelButton, 2, 2, 1, 2)
+        self.cancelButton.clicked.connect(self.close)
+        self.cancelButton.setText("Cancel")
+
+        self.createFilter()
+
+    ########################################################################
+    ## FUNCTION
+    ########################################################################     
+    def changeMethod(self, index):
+        self.method = self.comboBox.currentText().lower()
+        self.dimension[self.name]['graph'] = self.method
+        self.createFilter()
+
+    def changeFilter(self, event):
+        self.parent.dimension = self.dimension
+        if(isinstance(self.parent, PlotList)):
+            self.parent.main.app.Graph()
+        else:
+            self.parent.main.tableWidget.make_table()
+        self.close()
+
+    def testCheck(self, item):
+        fil = item.text()
+        print(self.dimension[self.name][self.method])
+        self.dimension[self.name][self.method][fil] = not self.dimension[self.name][self.method][fil]     # change item filter of column dimension
+    
+    def selectFilter(self): # select all item
+        # print('hello')
+        data = self.dimension[self.name]
+        for fil in data[self.method]:
+            self.dimension[self.name][self.method][fil] = True
+        self.createFilter()
+
+    def clearFilter(self):  # deselect all item
+        data = self.dimension[self.name]
+        for fil in data[self.method]:
+            self.dimension[self.name][self.method][fil] = False
+        self.createFilter()
+    
+    def createFilter(self):
+        for i in range(self.listWidget.count()):    # clear all item
+            self.listWidget.takeItem(0)
+
+        data = self.dimension[self.name]
+        for i in data[self.method]:
+            item = QtWidgets.QListWidgetItem()
+            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled) # can check/uncheck
+            if data[self.method][i]:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
+            item.setData(QtCore.Qt.DisplayRole, i)
+            self.listWidget.addItem(item)
+
+########################################################################
 ## POPUP MEASURE WINDOW CLASS
 ########################################################################
-class Popup2(QtWidgets.QDialog):    # popup for measure
+class Popup2(QtWidgets.QDialog):    
     def __init__(self, name, parent):
         super().__init__(parent)
         self.resize(300, 100)
         self.name = name
         self.parent = parent
         self.measure = cp.deepcopy(self.parent.measure)
+        self.measure_filter = cp.deepcopy(self.parent.measure_filter)
 
         self.setWindowTitle("Filter "+name)
         self.gridLayout = QtWidgets.QGridLayout(self)
@@ -160,15 +298,43 @@ class Popup2(QtWidgets.QDialog):    # popup for measure
         self.comboBox.currentIndexChanged.connect(self.selectionchange)
         self.gridLayout.addWidget(self.comboBox, 1, 0, 1, 4)
 
+        self.state = QtWidgets.QCheckBox(self)
+        self.state.setText("Filter")
+        self.state.setChecked(self.measure_filter[self.name]['state'])
+        self.state.stateChanged.connect(self.stateChange)
+        self.gridLayout.addWidget(self.state, 2, 0)
+
+        self.filterBox = QtWidgets.QComboBox(self)
+        self.filterBox.addItem("==")
+        self.filterBox.addItem("!=")
+        self.filterBox.addItem(">")
+        self.filterBox.addItem(">=")
+        self.filterBox.addItem("<")
+        self.filterBox.addItem("<=")
+        self.filterBox.setCurrentText(self.measure_filter[self.name]['condition'])
+        self.filterBox.currentIndexChanged.connect(self.selectionchange)
+        self.gridLayout.addWidget(self.filterBox, 3, 1, 1, 2)
+
+        self.labelData = QtWidgets.QLabel(self)
+        self.labelData.setText("data")
+        self.gridLayout.addWidget(self.labelData, 3,0)
+
+        self.valueEdit = QtWidgets.QLineEdit(self)
+        self.valueEdit.setObjectName("cancelButton")
+        self.gridLayout.addWidget(self.valueEdit, 3, 3)
+        self.valueEdit.setText(str(self.measure_filter[self.name]['value']))
+        self.valueEdit.textEdited.connect(self.valueChange)
+        # self.cancelButton.clicked.connect(self.clearFilter)
+
         self.cancelButton = QtWidgets.QPushButton(self)
         self.cancelButton.setObjectName("cancelButton")
-        self.gridLayout.addWidget(self.cancelButton, 2, 2, 1, 2)
+        self.gridLayout.addWidget(self.cancelButton, 4, 2, 1, 2)
         # self.cancelButton.clicked.connect(self.clearFilter)
         self.cancelButton.setText("Cancel")
 
         self.doneButton = QtWidgets.QPushButton(self)
         self.doneButton.setObjectName("doneButton")
-        self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
+        self.gridLayout.addWidget(self.doneButton, 4, 0, 1, 2)
         # self.doneButton.clicked.connect(self.clearFilter)
         self.doneButton.setText("Done")
 
@@ -178,12 +344,31 @@ class Popup2(QtWidgets.QDialog):    # popup for measure
     ########################################################################
     ## FUNCTION
     ########################################################################    
+    def stateChange(self, e):
+        if e:
+            self.measure_filter[self.name]['state'] = True
+        else:
+            self.measure_filter[self.name]['state'] = False
+    
+    def is_float(self, element: str) -> bool:
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
+    def valueChange(self, e:str):
+        if self.is_float(e):
+            self.measure_filter[self.name]['value'] = float(e)
+    
     def changeFilter(self, e):
         self.parent.measure = self.measure
+        self.parent.measure_filter = self.measure_filter
         self.close()
     
     def selectionchange(self,i):
       self.measure[self.name] = self.comboBox.currentText()     # change method of measure column
+      self.measure_filter[self.name]['condition'] = self.filterBox.currentText()     # change method of measure column
 
     def closeEvent(self, event):
         if(isinstance(self.parent, PlotList)):  # check parent class
@@ -328,8 +513,12 @@ class DimensionList(QtWidgets.QListWidget):
         self.itemDoubleClicked.connect(self.launchFilter)
     
     def launchFilter(self, item):
-        pop = Popup(item.text(), self)
-        pop.show()
+        if self.dt.check_date_col(item.text()):
+            pop = Popup3(item.text(), self)
+            pop.show()
+        else:
+            pop = Popup(item.text(), self)
+            pop.show()
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:     # action when drag item out of area
         if self.count():
@@ -361,19 +550,37 @@ class DimensionList(QtWidgets.QListWidget):
         """ This method will return filter dimension dict """
         result = {}
         for col in self.dimension:  # column in list box
-            result[col] = []
-            for fil in self.dimension[col]:
-                if self.dimension[col][fil]: # selected item
-                    result[col].append(fil)
+            if self.dt.check_date_col(col):
+                result[col] = {}
+                for method in ['day', 'month', 'year']:
+                    result[col][method] = []
+                    for fil in self.dimension[col][method]:
+                        if self.dimension[col][method][fil]:
+                            result[col][method].append(fil)
+                result[col]['graph'] = self.dimension[col]['graph']
+            else:
+                result[col] = []
+                for fil in self.dimension[col]:
+                    if self.dimension[col][fil]: # selected item
+                        result[col].append(fil)
         return result
     
     def addFilter(self, name:str) -> None:
         """ This method will create new dimension col and add unique item """
         if name not in self.dimension.keys():
-            self.dimension[name] = {}
-            fil = self.dt.get_unique(name)
-            for i in fil:
-                self.dimension[name][i] = True
+            if self.dt.check_date_col(name):
+                self.dimension[name] = {}
+                for method in ['day', 'month', 'year']:
+                    self.dimension[name][method] = {}
+                    fil = self.dt.get_unique_date(name, method)
+                    for i in fil:
+                        self.dimension[name][method][i] = True
+                self.dimension[name]['graph'] = 'year'
+            else:
+                self.dimension[name] = {}
+                fil = self.dt.get_unique(name)
+                for i in fil:
+                    self.dimension[name][i] = True
 
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
         col = self.readData(event.mimeData())[0]
@@ -387,6 +594,7 @@ class MeasureList(QtWidgets.QListWidget):
         self.dt = main.dt
         self.main = main
         self.measure = {}
+        self.measure_filter = {}
         self.itemDoubleClicked.connect(self.launchFilter)
         self.allow = False
     
@@ -400,6 +608,7 @@ class MeasureList(QtWidgets.QListWidget):
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
         if self.count():
             del self.measure[self.item(self.currentRow()).text()]
+            del self.measure_filter[self.item(self.currentRow()).text()]
             self.takeItem(self.currentRow())
             self.main.tableWidget.make_table()
 
@@ -429,9 +638,16 @@ class MeasureList(QtWidgets.QListWidget):
         else:
             e.ignore()
     
+    def getFilter(self):
+        return self.measure_filter
+    
     def addFilter(self, item):
         if item not in self.measure.keys():
             self.measure[item] = 'sum'      # set sum method by default
+            self.measure_filter[item] = dict()
+            self.measure_filter[item]['condition'] = '=='      # set sum method by default
+            self.measure_filter[item]['value'] = 0      # set sum method by default
+            self.measure_filter[item]['state'] = False      # set sum method by default
 
     
     def dropEvent(self, event: QtGui.QDropEvent) -> None:
@@ -461,11 +677,13 @@ class TableGroupby(QtWidgets.QTableWidget):
         self.dimension = self.get_widget_item(self.main.DimensionList)  # get dimension list
         self.dimension_filter = self.main.DimensionList.getFilter()     # get dimensino filter
         self.measure = self.main.MeasureList.measure
+        self.measure_filter = self.main.MeasureList.measure_filter
         if not(len(self.dimension) > 0 ):   # if dimension has no item
             self.main.MeasureList.clear()
             self.main.MeasureList.measure = {}
             return
-        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, self.dimension_filter)    # use groupby and get dataframe data
+        fil = {**self.dimension_filter, **self.measure_filter}
+        self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, fil)    # use groupby and get dataframe data
         self.header = self.data_groupby['col']
         self.data = self.data_groupby['data']
         self.setColumnCount(len(self.header))
@@ -476,6 +694,8 @@ class TableGroupby(QtWidgets.QTableWidget):
                 if type(item) in (int, float):  # check type of item when add to table
                     newItem = QTableWidgetItem()
                     newItem.setData(QtCore.Qt.DisplayRole, item)
+                elif re.match('^(0[1-9]|[12][0-9]|3[01]|[1-9])/(0[1-9]|1[0-2]|[1-9])/\d{4}$', str(item)): # check date column
+                    newItem = DateWidgetItem(str(item))
                 else:
                     newItem = QTableWidgetItem(str(item))
                 self.setItem(row, col, newItem)     # add item to table

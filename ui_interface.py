@@ -35,13 +35,13 @@ class Ui_App(object):
         self.gridLayout_4 = QtWidgets.QGridLayout(self.tab)
         self.gridLayout_4.setObjectName("gridLayout_4")
         
-        self.tableDetail = TableGroupby(self, self.tab)
-        self.tableDetail.setAcceptDrops(True)
-        self.tableDetail.setObjectName("tableDetail")
-        self.tableDetail.setColumnCount(0)
-        self.tableDetail.setRowCount(0)
-        self.gridLayout_4.addWidget(self.tableDetail, 2, 0, 1, 1)
-       
+        self.tableWidget = TableGroupby(self, self.tab)
+        self.tableWidget.setAcceptDrops(True)
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setRowCount(0)
+        self.gridLayout_4.addWidget(self.tableWidget, 2, 0, 1, 1)
+
         self.frame = QtWidgets.QFrame(self.tab)
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
