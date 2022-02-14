@@ -134,12 +134,14 @@ class PlotList(QtWidgets.QListWidget):
         d = self.currentRow()
         if self.count() and self.allow:
             item = self.item(self.currentRow()).text()
-            self.item_plot.remove(item)
+            # self.item_plot.remove(item)
             if self.dt.is_dimension(item) and item in self.dimension.keys():
                 del self.dimension[self.item(self.currentRow()).text()]
             elif self.dt.is_measure(item) and item in self.measure.keys():
                 del self.measure[self.item(self.currentRow()).text()]
                 del self.measure_filter[self.item(self.currentRow()).text()]
+            else:
+                del self.dimension[self.item(self.currentRow()).text()]
             self.takeItem(d)
             self.clearSelection()
             super().dragLeaveEvent(e)
@@ -183,7 +185,7 @@ class PlotList(QtWidgets.QListWidget):
 
     def addFilter(self, name:str) -> None:
         """ This method will add filter to dict"""
-        if(self.dt.is_dimension(name)):
+        if(self.dt.is_dimension(name) or self.dt.check_date_col2(name)):
             if name not in self.dimension.keys():
                 if self.dt.check_date_col(name):
                     self.dimension[name] = {}
@@ -698,7 +700,7 @@ class DimensionList(QtWidgets.QListWidget):
     
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
         col = self.readData(e.mimeData())[0]
-        if self.dt.is_dimension(col):
+        if self.dt.is_dimension(col) or self.dt.check_date_col(col):
             e.accept()
         else:
             e.ignore()

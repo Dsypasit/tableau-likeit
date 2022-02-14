@@ -110,7 +110,7 @@ class data_manipulate:
         """
         self.separated_date()
         hist_dict = self.hist.get_hist()    # get dict of history
-        self.data = self.data_separated_date
+        # self.data = self.data_separated_date
         if self.filename in hist_dict.keys():   # check that filename in history
             self.dimension = hist_dict[self.filename]['dimension']
             self.measure = hist_dict[self.filename]['measure']
@@ -118,7 +118,9 @@ class data_manipulate:
             self.dimension = []
             self.measure = []
             for colname, coltype in self.data.dtypes.iteritems():
-                if coltype == 'object': 
+                if self.check_date_col(colname):
+                    self.dimension.append(colname+"_year")
+                elif coltype == 'object': 
                     self.data[colname] = self.data[colname].astype(str)
                     self.dimension.append(colname)
                 elif self.check_dimension_name(colname):
@@ -273,7 +275,7 @@ class data_manipulate:
             filter data
         """
         item = item1+item2  # merge item
-        dimension = [i for i in item if self.is_dimension(i)]
+        dimension = [i for i in item if self.is_dimension(i) or self.check_date_col2(i)]
         if not dimension:
             dimension = item
         measure = {**measure1, **measure2}
@@ -283,6 +285,7 @@ class data_manipulate:
         for i in data.columns:
             if self.check_date_col2(i):
                 data[i] = data[i].astype(str)
+        print(data.head())
         return data
     
     def select_plot_data(self, item , fil, data):
@@ -328,6 +331,7 @@ class data_manipulate:
         except UnicodeDecodeError:
             union_data = pd.read_csv(filename, encoding='utf8')
         self.data = pd.concat([self.data, union_data])
+        self.separated_dimension_measure()
     
     def get_unique_date(self, col, method) -> list:
         data = pd.unique(self.data_separated_date[f'{col}_{method}']).tolist()
@@ -348,7 +352,7 @@ class data_manipulate:
         list
             unique value list
         """
-        return pd.unique(self.data[col]).tolist()
+        return pd.unique(self.data_separated_date[col]).tolist()
     
     def change_to_dimension(self, name:str) -> None:
         """
