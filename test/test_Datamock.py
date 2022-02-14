@@ -20,6 +20,7 @@ class TestDatamanipulate(unittest.TestCase):
 
     def test_get_unique(self):
         self.assertIsInstance(self.dt.get_unique('Name'), list)
+        self.assertListEqual(self.dt.get_unique('Name'), ['Pasit', 'Norasate'])
     
     def test_get_groupby_sum(self):
         col = ['Name']

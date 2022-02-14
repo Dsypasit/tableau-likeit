@@ -280,6 +280,9 @@ class data_manipulate:
         fil = {**fil1, **fil2}    # merge filter 
         data_groupby = self.get_groupby(dimension, measure, fil)
         data = data_groupby['dataframe']
+        for i in data.columns:
+            if self.check_date_col2(i):
+                data[i] = data[i].astype(str)
         return data
     
     def select_plot_data(self, item , fil, data):
@@ -306,9 +309,9 @@ class data_manipulate:
         for col in self.column:
             if self.check_date_col(col):
                 self.data_separated_date[col] = pd.to_datetime(self.data[col], format="%d/%m/%Y")
-                self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day.astype(str)
-                self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month.astype(str)
-                self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year.astype(str)
+                self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day.astype(int)
+                self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month.astype(int)
+                self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year.astype(int)
     
     def unioun_data(self, filename:str) -> None:
         """

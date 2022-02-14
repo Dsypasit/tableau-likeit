@@ -65,6 +65,18 @@ class MainWindow(QMainWindow):
 
         self.ui.filterData.textEdited.connect(self.searchDimensionMeasure)
         self.ui.btnClearFilterData.clicked.connect(self.clearSearch)
+
+        self.ui.btnClearColumn_2.clicked.connect(self.ui.DimensionList.resetAll)
+        self.ui.btnClearRow_2.clicked.connect(self.ui.MeasureList.resetAll)
+
+        self.ui.btnClearColumn_bar.clicked.connect(self.ui.ColumnList_bar.resetAll)
+        self.ui.btnClearRow_bar.clicked.connect(self.ui.RowList_bar.resetAll)
+
+        self.ui.btnClearColumn_line.clicked.connect(self.ui.ColumnList_line.resetAll)
+        self.ui.btnClearRow_line.clicked.connect(self.ui.RowList_line.resetAll)
+
+        self.ui.btnClearTheta.clicked.connect(self.ui.ThetaList.resetAll)
+        self.ui.btnClearColor.clicked.connect(self.ui.ColorList.resetAll)
         #######################################################################
         # SHOW WINDOW
         #######################################################################

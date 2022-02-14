@@ -372,6 +372,7 @@ class Ui_App(object):
         self.DimensionWidget.setDragEnabled(True)
         self.DimensionWidget.setDragDropMode(QtWidgets.QAbstractItemView.DragOnly)
         self.DimensionWidget.setObjectName("DimensionWidget")
+        self.DimensionWidget.setSelectionMode(3)
         self.gridLayout.addWidget(self.DimensionWidget, 2, 0, 1, 3)
         self.line = QtWidgets.QFrame(self.dockWidgetContents)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)

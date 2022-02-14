@@ -39,6 +39,16 @@ class PlotList(QtWidgets.QListWidget):
     ########################################################################
     ## FUNCTION
     ########################################################################
+    def resetAll(self):
+        """Thise method will clear items and reset attribute"""
+        for i in range(self.count()):
+            self.takeItem(0)
+        self.dimension = {}
+        self.measure = {}
+        self.measure_filter = {}
+        self.item_plot = []
+        self.main.app.Graph()
+    
     def _createAction(self):
         self.yearAct = QtWidgets.QAction()
         self.yearAct.setText("Year")
@@ -589,7 +599,11 @@ class Popup(QtWidgets.QDialog):     # popup for dimension
 
     def testCheck(self, item):
         fil = item.text()
-        self.dimension[self.name][fil] = not self.dimension[self.name][fil]     # change item filter of column dimension
+        if not fil.isdigit():
+            self.dimension[self.name][fil] = not self.dimension[self.name][fil]     # change item filter of column dimension
+        else:
+            self.dimension[self.name][int(fil)] = not self.dimension[self.name][int(fil)]     # change item filter of column dimension
+
         
     def search(self, e):
         """ This method will search item in listbox """
@@ -647,6 +661,13 @@ class DimensionList(QtWidgets.QListWidget):
 
         self.itemDoubleClicked.connect(self.launchFilter)
         self._createAction()
+    
+    def resetAll(self):
+        """Thise method will clear items and reset attribute"""
+        for i in range(self.count()):
+            self.takeItem(0)
+        self.dimension = {}
+        self.main.tableWidget.make_table()
     
     def launchFilter(self, item):
         if self.dt.check_date_col(item.text()):
@@ -781,6 +802,14 @@ class MeasureList(QtWidgets.QListWidget):
         self.measure_filter = {}
         self.itemDoubleClicked.connect(self.launchFilter)
         self.allow = False
+
+    def resetAll(self):
+        """Thise method will clear items and reset attribute"""
+        for i in range(self.count()):
+            self.takeItem(0)
+        self.measure = {}
+        self.measure_filter = {}
+        self.main.tableWidget.make_table()
     
     def allow_drag(self):
         self.allow = True
