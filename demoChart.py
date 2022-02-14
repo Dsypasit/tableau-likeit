@@ -80,10 +80,10 @@ class MainWindow(QMainWindow):
             self.ui.dataCombo.setCurrentIndex(index)
             self.dt.load_data(self.ui.dataCombo.itemText(index))    # load selected data
             self.dt.separated_dimension_measure()   # separated measure, dimension
+            self.clear_all()
             self.make_table()
             self.dimension()
             self.Graph()
-            self.clear_all()
     
     def clear_all(self):
         self.ui.DimensionList.dimension = {}
@@ -407,7 +407,6 @@ class MainWindow(QMainWindow):
                     if i in measure_Color.keys(): 
                         title = f"{measure_Color[i]} of {i}"
                         i = f"{measure_Color[i]}({i}):Q"
-                        print(i)
                     color_chart.append(alt.Chart(data).mark_arc().encode(
                         alt.Color(i),
                         alt.Tooltip([i]),
