@@ -219,6 +219,19 @@ class MainWindow(QMainWindow):
         
 
     def Graph(self):
+        """
+        This method will create Graph, it check every listwidget when items in list widget is change
+        
+        ...
+
+        Chart can create now
+        ----------
+        - bar chart 
+        - pie chart 
+        - line chart    # in fact, in Tableau line axis x can use Date only Now not available
+        
+        """
+
         # Bar Chart
         item_BarColumn, fil_BarColumn, measure_BarColumn = self.ui.ColumnList_bar.get_plot_item()
         item_BarRow, fil_BarRow, measure_BarRow  = self.ui.RowList_bar.get_plot_item()
@@ -379,7 +392,7 @@ class MainWindow(QMainWindow):
         item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
 
         if(len(item_Theta)>0 or len(item_Color)>0):
-            data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color )
+            data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color, measure_Theta, measure_Color )
 
             theta_charts = []
 
@@ -455,61 +468,142 @@ class MainWindow(QMainWindow):
         data = None
         test_line = []
         tooltip_line = []
+        check_colrow = {'row':False, 'column':False}
+
         if(len(item_LineColumn)>0 or len(item_LineRow)>0):
             data = self.dt.data_filter(item_LineColumn, item_LineRow , fil_LineColumn, fil_LineRow, measure_LineColumn, measure_LineRow)
-            # for i in item1:
-            if(len(item_LineColumn)>=1):
-                if item_LineColumn[0] in measure_LineColumn.keys():
-                    test_line.append(alt.X(f'{measure_LineColumn[item_LineColumn[0]]}({item_LineColumn[0]})'))
-                    tooltip_line.append(f'{measure_LineColumn[item_LineColumn[0]]}({item_LineColumn[0]})')
-                else:
-                    test_line.append(alt.X(item_LineColumn[0]))
-                    tooltip_line.append(item_LineColumn[0])
-            if(len(item_LineRow)>=1):
-                if item_LineRow[0] in measure_LineRow.keys():
-                    test_line.append(alt.Y(f'{measure_LineRow[item_LineRow[0]]}({item_LineRow[0]})'))
-                    tooltip_line.append(f'{measure_LineRow[item_LineRow[0]]}({item_LineRow[0]})')
-                else:
-                    test_line.append(alt.Y(item_LineRow[0]))
-                    tooltip_line.append(item_LineRow[0])
-            if(len(item_LineColumn)>=2):
-                if item_LineColumn[1] in measure_LineColumn.keys():
-                    test_line.append(alt.Column(f'{measure_LineColumn[item_LineColumn[1]]}({item_LineColumn[1]})'))
-                    tooltip_line.append(f'{measure_LineColumn[item_LineColumn[1]]}({item_LineColumn[1]})')
-                else:
-                    test_line.append(alt.Column(item_LineColumn[1]))
-                    tooltip_line.append(item_LineColumn[1])
-            if(len(item_LineRow)>=2):
-                if item_LineRow[1] in measure_LineRow.keys():
-                    test_line.append(alt.Row(f'{measure_LineRow[item_LineRow[1]]}({item_LineRow[1]})'))
-                    tooltip_line.append(f'{measure_LineRow[item_LineRow[1]]}({item_LineRow[1]})')
-                else:
-                    test_line.append(alt.Row(item_LineRow[1]))
-                    tooltip_line.append(item_LineRow[1])
-            if(len(item_LineColumn)>=3):
-                if item_LineColumn[2] in measure_LineColumn.keys():
-                    test_line.append(alt.Color(f'{measure_LineColumn[item_LineColumn[2]]}({item_LineColumn[2]})'))
-                    tooltip_line.append(f'{measure_LineColumn[item_LineColumn[2]]}({item_LineColumn[2]})')
-                else:
-                    test_line.append(alt.Color(item_LineColumn[2]))
-                    tooltip_line.append(item_LineColumn[2])
-            if(len(item_LineRow)>=3):
-                if item_LineRow[2] in measure_LineRow.keys():
-                    test_line.append(alt.Color(f'{measure_LineRow[item_LineRow[2]]}({item_LineRow[2]})'))
-                    tooltip_line.append(f'{measure_LineRow[item_LineRow[2]]}({item_LineRow[2]})')
-                else:
-                    test_line.append(alt.Color(item_LineRow[2]))
-                    tooltip_line.append(item_LineRow[2])
-            test_line.append(alt.Tooltip(tooltip_line))
-            # test =  (alt.X('Sub-Category'), alt.Y('Profit'))
-            # test =  [ alt.X('Sub-Category'), alt.Y('Profit'), alt.Column('Category') ]
-            # print(test_line)
+           
+            coll_Di = {'row':{'count':0, 'list':[]},'column':{'count':0, 'list':[]}}
+            coll_Me = {'row':{'count':0, 'list':[]},'column':{'count':0, 'list':[]}}
+            for i in item_LineColumn:
+                if i in measure_LineColumn.keys() : 
+                    coll_Me['column']['count'] += 1
+                    coll_Me['column']['list'].append(i)
+                else : 
+                    coll_Di['column']['count'] += 1
+                    coll_Di['column']['list'].append(i)
+            for i in item_LineRow:
+                if i in measure_LineRow.keys() : 
+                    coll_Me['row']['count'] += 1
+                    coll_Me['row']['list'].append(i)
+                else : 
+                    coll_Di['row']['count'] += 1
+                    coll_Di['row']['list'].append(i)
 
-        linechart = alt.Chart(self.dt.data).mark_line(point=True).encode(
-            *test_line
-        )
-        self.ui.lineChart.updateChart(linechart)
+            # print("coll_Di['row']",coll_Di['row']," \
+            #     coll_Di['column']",coll_Di['column'])
+            # print("coll_Me['row']",coll_Me['row']," \
+            #     coll_Me['column']",coll_Me['column']) 
 
+            # Check 1 Measure in ROW/COLUMN
+            if coll_Me['column']['count'] == 1 : #todo: a Measure in column
+                test_line.append(alt.X(f"{measure_LineColumn[coll_Me['column']['list'][0]]}({coll_Me['column']['list'][0]})"))
+                tooltip_line.append(f"{measure_LineColumn[coll_Me['column']['list'][0]]}({coll_Me['column']['list'][0]})")
+                check_colrow['column'] = True
+            elif coll_Me['row']['count'] == 1 : #todo: a Measure in row
+                test_line.append(alt.Y(f"{measure_LineRow[coll_Me['row']['list'][0]]}({coll_Me['row']['list'][0]})"))
+                tooltip_line.append(f"{measure_LineRow[coll_Me['row']['list'][0]]}({coll_Me['row']['list'][0]})")
+                check_colrow['row'] = True
+
+            ## dimension&measure in same ROW/COLUMN 
+            # a Dimension Measure in column
+            if (coll_Me['column']['count'] == 1) and (coll_Di['column']['count'] == 1) and (coll_Di['row']['count'] == 0):
+                test_line.append(alt.Column(coll_Di['column']['list'][0]))
+                tooltip_line.append(coll_Di['column']['list'][0])
+            # a Dimension Measure in row
+            elif (coll_Me['row']['count'] == 1) and (coll_Di['column']['count'] == 0) and (coll_Di['row']['count'] == 1) :
+                test_line.append(alt.Row(coll_Di['row']['list'][0]))
+                tooltip_line.append(coll_Di['row']['list'][0])
+
+            else :   
+                # Part Dimension ROW
+                if coll_Di['row']['count'] >= 1:
+                    if check_colrow['row'] :
+                        test_line.append(alt.Row(coll_Di['row']['list'][0]))
+                        tooltip_line.append(coll_Di['row']['list'][0])
+                    else:
+                        test_line.append(alt.Y(coll_Di['row']['list'][0]))
+                        tooltip_line.append(coll_Di['row']['list'][0])
+                if coll_Di['row']['count'] >= 2:
+                    if check_colrow['row'] :
+                        test_line.append(alt.Color(coll_Di['row']['list'][1]))
+                        tooltip_line.append(coll_Di['row']['list'][1])
+                    else:
+                        test_line.append(alt.Row(coll_Di['row']['list'][1]))
+                        tooltip_line.append(coll_Di['row']['list'][1])
+                if coll_Di['row']['count'] >= 3:
+                    if check_colrow['row'] :
+                        pass    # Not do anything when it more than >3
+                    else:
+                        test_line.append(alt.Color(coll_Di['row']['list'][2]))
+                        tooltip_line.append(coll_Di['row']['list'][2])
+                # Part Dimension COLUMN
+                if coll_Di['column']['count'] >= 1:
+                    if check_colrow['column'] :
+                        test_line.append(alt.Column(coll_Di['column']['list'][0]))
+                        tooltip_line.append(coll_Di['column']['list'][0])
+                    else:
+                        test_line.append(alt.X(coll_Di['column']['list'][0]))
+                        tooltip_line.append(coll_Di['column']['list'][0])
+                if coll_Di['column']['count'] >= 2:
+                    if check_colrow['column'] :
+                        test_line.append(alt.Color(coll_Di['column']['list'][1]))
+                        tooltip_line.append(coll_Di['column']['list'][1])
+                    else:
+                        test_line.append(alt.Column(coll_Di['column']['list'][1]))
+                        tooltip_line.append(coll_Di['column']['list'][1])
+                if coll_Di['column']['count'] >= 3:
+                    if check_colrow['column'] :
+                        pass    # Not do anything when it more than >3
+                    else:
+                        test_line.append(alt.Color(coll_Di['column']['list'][2]))
+                        tooltip_line.append(coll_Di['column']['list'][2])
+            
+        #######################################################################
+            '''Create Bar Chart'''    
+            # measure >1
+            if (coll_Me['row']['count'] > 1) or (coll_Me['column']['count'] > 1) : 
+                line_charts = []
+            
+                # Row
+                if  coll_Me['row']['count'] > 1 :
+                    for i in range(coll_Me['row']['count']):
+                        # edit tooltip
+                        temp_tooltip = tooltip_line.copy()
+                        temp_tooltip.append(f"{measure_LineRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})")
+
+                        line_charts.append(alt.Chart(data).mark_line(point={
+                            "filled": False,
+                            "fill": "white",}
+                        ).encode(*test_line, 
+                            alt.Y(f"{measure_LineRow[coll_Me['row']['list'][i]]}({coll_Me['row']['list'][i]})"),
+                            alt.Tooltip(temp_tooltip)))
+                    linechart = alt.vconcat(*line_charts)
+                # Column
+                elif coll_Me['column']['count'] > 1 : 
+                    for i in range(coll_Me['column']['count']):
+                        # edit tooltip
+                        temp_tooltip = tooltip_line.copy()
+                        temp_tooltip.append(f"{measure_LineColumn[coll_Me['column']['list'][i]]}({coll_Me['column']['list'][i]})")
+
+                        line_charts.append(alt.Chart(data).mark_line( point={
+                            "filled": False,
+                            "fill": "white",}
+                        ).encode(*test_line, 
+                            alt.X(f"{measure_LineColumn[coll_Me['column']['list'][i]]}({coll_Me['column']['list'][i]})"),
+                            alt.Tooltip(temp_tooltip)))
+                    linechart = alt.hconcat(*line_charts)
+            # measure =1
+            else : 
+                # Create Line Chart     
+                test_line.append(alt.Tooltip(tooltip_line))   
+                linechart = alt.Chart(data).mark_line( point={
+                    "filled": False,
+                    "fill": "white",
+                }).encode(*test_line)
+
+            # Set chart
+            self.ui.lineChart.updateChart(linechart)
     ########################################################################
 
 ########################################################################

@@ -160,6 +160,111 @@ class PlotList(QtWidgets.QListWidget):
 
 
 ########################################################################
+## POPUP DATE WINDOW CLASS
+########################################################################
+class Popup3(QtWidgets.QDialog):
+    def __init__(self, name, parent):
+        super().__init__(parent)
+        self.resize(442, 370)
+        self.name = name
+        self.parent = parent
+        self.dimension = cp.deepcopy(self.parent.dimension)
+        self.method : str = self.dimension[self.name]['graph']
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+
+        self.setWindowTitle("Filter "+name)
+        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout.setObjectName("gridLayout")
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.setObjectName("listWidget")
+        self.gridLayout.addWidget(self.listWidget, 1, 0, 1, 4)
+        # function listwidget
+        self.listWidget.itemChanged.connect(self.testCheck)
+
+        self.selectButton = QtWidgets.QPushButton(self)
+        self.selectButton.setObjectName("selectButton")
+        self.gridLayout.addWidget(self.selectButton, 0, 0, 1, 1)
+        self.selectButton.clicked.connect(self.selectFilter)
+        self.selectButton.setText("All Select")
+
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setObjectName("clearButton")
+        self.gridLayout.addWidget(self.clearButton, 0, 3, 1, 1)
+        self.clearButton.clicked.connect(self.clearFilter)
+        self.clearButton.setText("All Clear")
+
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.gridLayout.addWidget(self.comboBox, 0, 1, 1, 2)
+        self.comboBox.addItem("Year")
+        self.comboBox.addItem("Month")
+        self.comboBox.addItem("Day")
+        self.comboBox.setCurrentText(self.method.capitalize())
+        self.comboBox.currentIndexChanged.connect(self.changeMethod)
+
+        self.doneButton = QtWidgets.QPushButton(self)
+        self.doneButton.setObjectName("doneButton")
+        self.gridLayout.addWidget(self.doneButton, 2, 0, 1, 2)
+        self.doneButton.clicked.connect(self.changeFilter)
+        self.doneButton.setText("Done")
+
+        self.cancelButton = QtWidgets.QPushButton(self)
+        self.cancelButton.setObjectName("cancelButton")
+        self.gridLayout.addWidget(self.cancelButton, 2, 2, 1, 2)
+        self.cancelButton.clicked.connect(self.close)
+        self.cancelButton.setText("Cancel")
+
+        self.createFilter()
+
+    ########################################################################
+    ## FUNCTION
+    ########################################################################     
+    def changeMethod(self, index):
+        self.method = self.comboBox.currentText().lower()
+        self.dimension[self.name]['graph'] = self.method
+        self.createFilter()
+
+    def changeFilter(self, event):
+        self.parent.dimension = self.dimension
+        if(isinstance(self.parent, PlotList)):
+            self.parent.main.app.Graph()
+        else:
+            self.parent.main.tableWidget.make_table()
+        self.close()
+
+    def testCheck(self, item):
+        fil = item.text()
+        print(self.dimension[self.name][self.method])
+        self.dimension[self.name][self.method][fil] = not self.dimension[self.name][self.method][fil]     # change item filter of column dimension
+    
+    def selectFilter(self): # select all item
+        # print('hello')
+        data = self.dimension[self.name]
+        for fil in data[self.method]:
+            self.dimension[self.name][self.method][fil] = True
+        self.createFilter()
+
+    def clearFilter(self):  # deselect all item
+        data = self.dimension[self.name]
+        for fil in data[self.method]:
+            self.dimension[self.name][self.method][fil] = False
+        self.createFilter()
+    
+    def createFilter(self):
+        for i in range(self.listWidget.count()):    # clear all item
+            self.listWidget.takeItem(0)
+
+        data = self.dimension[self.name]
+        for i in data[self.method]:
+            item = QtWidgets.QListWidgetItem()
+            item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled) # can check/uncheck
+            if data[self.method][i]:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
+            item.setData(QtCore.Qt.DisplayRole, i)
+            self.listWidget.addItem(item)
+
+########################################################################
 ## POPUP MEASURE WINDOW CLASS
 ########################################################################
 class Popup3(QtWidgets.QDialog):
@@ -249,8 +354,7 @@ class Popup3(QtWidgets.QDialog):
             item.setData(QtCore.Qt.DisplayRole, i)
             self.listWidget.addItem(item)
 
-
-class Popup2(QtWidgets.QDialog):    # popup for measure
+class Popup2(QtWidgets.QDialog):    
     def __init__(self, name, parent):
         super().__init__(parent)
         self.resize(300, 100)
