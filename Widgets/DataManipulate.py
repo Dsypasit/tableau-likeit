@@ -297,6 +297,9 @@ class data_manipulate:
     
     def check_date_col(self, name:str) -> bool:
         return 'date' in name.lower() and "_" not in name.lower()
+
+    def check_date_col2(self, name:str) -> bool:
+        return 'date' in name.lower()
     
     def separated_date(self):
         self.data_separated_date = self.data.copy()

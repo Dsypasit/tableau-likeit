@@ -34,10 +34,58 @@ class PlotList(QtWidgets.QListWidget):
         self.itemDoubleClicked.connect(self.launchPopup)
         self.itemClicked.connect(self.allow_drag)
         self.allow = False
+        self._createAction()
     
     ########################################################################
     ## FUNCTION
     ########################################################################
+    def _createAction(self):
+        self.yearAct = QtWidgets.QAction()
+        self.yearAct.setText("Year")
+        self.yearAct.triggered.connect(self.addYear)
+
+        self.monthAct = QtWidgets.QAction()
+        self.monthAct.setText("Month")
+        self.monthAct.triggered.connect(self.addMonth)
+
+        self.dayAct = QtWidgets.QAction()
+        self.dayAct.setText("Day")
+        self.dayAct.triggered.connect(self.addDay)
+
+    def addYear(self, e):
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_index = self.currentRow()
+        col_name = f'{selected_item}_year'
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.app.Graph()
+
+    def addMonth(self, e):
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_index = self.currentRow()
+        col_name = f'{selected_item}_month'
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.app.Graph()
+
+    def addDay(self, e):
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_index = self.currentRow()
+        col_name = f'{selected_item}_day'
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.app.Graph()
+    
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        if self.dt.check_date_col2(selected_item):
+            print('date')
+            self.contextMenu = QtWidgets.QMenu(self)
+            self.contextMenu.addAction(self.yearAct)
+            self.contextMenu.addAction(self.monthAct)
+            self.contextMenu.addAction(self.dayAct)
+            self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
+
     def allow_drag(self) -> None:
         """ This method will allow drag"""
         self.allow = True
@@ -598,6 +646,7 @@ class DimensionList(QtWidgets.QListWidget):
         self.dimension = {}
 
         self.itemDoubleClicked.connect(self.launchFilter)
+        self._createAction()
     
     def launchFilter(self, item):
         if self.dt.check_date_col(item.text()):
@@ -632,6 +681,54 @@ class DimensionList(QtWidgets.QListWidget):
             e.accept()
         else:
             e.ignore()
+        
+    def _createAction(self):
+        self.yearAct = QtWidgets.QAction()
+        self.yearAct.setText("Year")
+        self.yearAct.triggered.connect(self.addYear)
+
+        self.monthAct = QtWidgets.QAction()
+        self.monthAct.setText("Month")
+        self.monthAct.triggered.connect(self.addMonth)
+
+        self.dayAct = QtWidgets.QAction()
+        self.dayAct.setText("Day")
+        self.dayAct.triggered.connect(self.addDay)
+
+    def addYear(self, e):
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_index = self.currentRow()
+        col_name = f'{selected_item}_year'
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.tableWidget.make_table()
+
+    def addMonth(self, e):
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_index = self.currentRow()
+        col_name = f'{selected_item}_month'
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.tableWidget.make_table()
+
+    def addDay(self, e):
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_index = self.currentRow()
+        col_name = f'{selected_item}_day'
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.tableWidget.make_table()
+    
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        selected_item = self.selectedItems()[0].text().split('_')[0]
+        if self.dt.check_date_col2(selected_item):
+            print('date')
+            self.contextMenu = QtWidgets.QMenu(self)
+            self.contextMenu.addAction(self.yearAct)
+            self.contextMenu.addAction(self.monthAct)
+            self.contextMenu.addAction(self.dayAct)
+            self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
+        
     
     def getFilter(self) -> dict:
         """ This method will return filter dimension dict """

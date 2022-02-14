@@ -135,7 +135,7 @@ class MainWindow(QMainWindow):
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
-            # self.dt.load_data(filename)
+            self.dt.load_data(filename)
 
             self.dataCombo.append(filename)
             self.ui.dataCombo.clear()
