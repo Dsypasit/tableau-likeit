@@ -93,6 +93,10 @@ class MainWindow(QMainWindow):
             self.ui.DimensionWidget.takeItem(0)
         for i in range(self.ui.MeasureWidget.count()):   
             self.ui.MeasureWidget.takeItem(0)    
+        for i in range(self.ui.DimensionList.count()):   
+            self.ui.DimensionList.takeItem(0)
+        for i in range(self.ui.MeasureList.count()):   
+            self.ui.MeasureList.takeItem(0)    
         for i in range(self.ui.ColumnList_bar.count()):   
             self.ui.ColumnList_bar.takeItem(0)
         for i in range(self.ui.RowList_bar.count()):   
@@ -131,16 +135,17 @@ class MainWindow(QMainWindow):
         filename, _ = QFileDialog.getOpenFileName(None, "open File", "", "CSV file (*.csv);; Excel file (*.xlsx)")
         if filename:
             self.path = filename
-            self.dt.load_data(filename)
+            # self.dt.load_data(filename)
 
             self.dataCombo.append(filename)
             self.ui.dataCombo.clear()
             self.ui.dataCombo.addItems(self.dataCombo)
 
-            self.make_table()
+            self.clear_all()
+            # self.make_table()
             self.dt.separated_dimension_measure()
             self.dimension()
-            self.Graph()
+            # self.Graph()
 
     def make_table(self):
         """ This method will make table """

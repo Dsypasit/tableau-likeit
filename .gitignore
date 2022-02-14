@@ -3,3 +3,5 @@ __pycache__
 *.qrc
 data1.csv
 data2.csv
+*.zip
+examplechart/
