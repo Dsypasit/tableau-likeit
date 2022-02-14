@@ -238,6 +238,7 @@ class data_manipulate:
                     querylist.append(measure_query)
         querylist = " & ".join(querylist)   # join to string
         if querylist:
+            print(querylist)
             data = data.query(querylist)    #queryl
         data = self.date_to_string(data)
         def get_col():

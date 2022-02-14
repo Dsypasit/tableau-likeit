@@ -9,7 +9,7 @@ class TestDatamanipulate(unittest.TestCase):
         self.dt = data_manipulate()
         self.dt.load_data('data1.csv')
         self.dt.separated_dimension_measure()
-
+    
     def test_is_dimension(self):
         self.assertTrue(self.dt.is_dimension('City'))
         self.assertTrue(self.dt.is_dimension('State'))
