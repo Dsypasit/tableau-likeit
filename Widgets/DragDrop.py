@@ -85,16 +85,29 @@ class PlotList(QtWidgets.QListWidget):
         self.addFilter(col_name)
         self.insertItem(selected_index+1, col_name)
         self.main.app.Graph()
+
+    def addNewCol(self, new_col):
+        selected_index = self.currentRow()
+        col_name = new_col
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.app.Graph()
     
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         selected_item = self.selectedItems()[0].text().split('_')[0]
+        self.contextMenu = QtWidgets.QMenu(self)
         if self.dt.check_date_col2(selected_item):
-            print('date')
-            self.contextMenu = QtWidgets.QMenu(self)
             self.contextMenu.addAction(self.yearAct)
             self.contextMenu.addAction(self.monthAct)
             self.contextMenu.addAction(self.dayAct)
-            self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
+        if "," in selected_item:
+            items = [item for item in selected_item.split(',')]
+            for i in items[1:]:
+                action = QtWidgets.QAction()
+                action.setText(i)
+                action.triggered.connect(lambda: self.addNewCol(i))
+                self.contextMenu.addAction(action)
+        self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
 
     def allow_drag(self) -> None:
         """ This method will allow drag"""
@@ -113,10 +126,10 @@ class PlotList(QtWidgets.QListWidget):
                             result[col][method].append(fil)
                 result[col]['graph'] = self.dimension[col]['graph']
             else:
-                result[col] = []
+                result[col.split(',')[0]] = []
                 for fil in self.dimension[col]:
                     if self.dimension[col][fil]: # selected item
-                        result[col].append(fil)
+                        result[col.split(',')[0]].append(fil)
         result = {**result, **self.measure_filter}
         return result
 
@@ -154,7 +167,7 @@ class PlotList(QtWidgets.QListWidget):
                 pop = Popup3(item.text(), self)
                 pop.show()
             else:
-                pop = Popup(item.text(), self)
+                pop = Popup(item.text().split(','), self)
                 pop.show()
 
         else:
@@ -179,13 +192,13 @@ class PlotList(QtWidgets.QListWidget):
         """ This method will return important item to plot graph"""
         item_plot = []
         for i in range(self.count()):
-            item_plot.append(self.item(i).text())   
+            item_plot.append(self.item(i).text().split(',')[0])   
         fil = self.getFilter()
         return item_plot, fil, self.measure
 
     def addFilter(self, name:str) -> None:
         """ This method will add filter to dict"""
-        if(self.dt.is_dimension(name) or self.dt.check_date_col2(name)):
+        if(self.dt.is_dimension(name) or self.dt.check_date_col2(name) or "," in name):
             if name not in self.dimension.keys():
                 if self.dt.check_date_col(name):
                     self.dimension[name] = {}
@@ -195,6 +208,11 @@ class PlotList(QtWidgets.QListWidget):
                         for i in fil:
                             self.dimension[name][method][i] = True
                     self.dimension[name]['graph'] = 'year'
+                elif "," in name:
+                    self.dimension[name] = {}
+                    fil = self.dt.get_unique(name.split(',')[0])
+                    for i in fil:
+                        self.dimension[name][i] = True
                 else:
                     self.dimension[name] = {}
                     fil = self.dt.get_unique(name)
@@ -700,7 +718,7 @@ class DimensionList(QtWidgets.QListWidget):
     
     def dragEnterEvent(self, e: QtGui.QDragEnterEvent) -> None:
         col = self.readData(e.mimeData())[0]
-        if self.dt.is_dimension(col) or self.dt.check_date_col(col):
+        if self.dt.is_dimension(col) or self.dt.check_date_col2(col) or "," in col:
             e.accept()
         else:
             e.ignore()
@@ -717,6 +735,7 @@ class DimensionList(QtWidgets.QListWidget):
         self.dayAct = QtWidgets.QAction()
         self.dayAct.setText("Day")
         self.dayAct.triggered.connect(self.addDay)
+
 
     def addYear(self, e):
         selected_item = self.selectedItems()[0].text().split('_')[0]
@@ -741,16 +760,30 @@ class DimensionList(QtWidgets.QListWidget):
         self.addFilter(col_name)
         self.insertItem(selected_index+1, col_name)
         self.main.tableWidget.make_table()
+
+    def addNewCol(self, new_col):
+        selected_index = self.currentRow()
+        col_name = new_col
+        self.addFilter(col_name)
+        self.insertItem(selected_index+1, col_name)
+        self.main.tableWidget.make_table()
     
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
-        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_item = self.selectedItems()[0].text()
+        self.contextMenu = QtWidgets.QMenu(self)
         if self.dt.check_date_col2(selected_item):
             print('date')
-            self.contextMenu = QtWidgets.QMenu(self)
             self.contextMenu.addAction(self.yearAct)
             self.contextMenu.addAction(self.monthAct)
             self.contextMenu.addAction(self.dayAct)
-            self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
+        if "," in selected_item:
+            items = [item for item in selected_item.split(',')]
+            for i in items[1:]:
+                action = QtWidgets.QAction()
+                action.setText(i)
+                action.triggered.connect(lambda: self.addNewCol(i))
+                self.contextMenu.addAction(action)
+        self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
         
     
     def getFilter(self) -> dict:
@@ -766,10 +799,10 @@ class DimensionList(QtWidgets.QListWidget):
                             result[col][method].append(fil)
                 result[col]['graph'] = self.dimension[col]['graph']
             else:
-                result[col] = []
+                result[col.split(',')[0]] = []
                 for fil in self.dimension[col]:
                     if self.dimension[col][fil]: # selected item
-                        result[col].append(fil)
+                        result[col.split(',')[0]].append(fil)
         return result
     
     def addFilter(self, name:str) -> None:
@@ -783,6 +816,11 @@ class DimensionList(QtWidgets.QListWidget):
                     for i in fil:
                         self.dimension[name][method][i] = True
                 self.dimension[name]['graph'] = 'year'
+            elif "," in name:
+                self.dimension[name] = {}
+                fil = self.dt.get_unique(name.split(',')[0])
+                for i in fil:
+                    self.dimension[name][i] = True
             else:
                 self.dimension[name] = {}
                 fil = self.dt.get_unique(name)
@@ -916,7 +954,7 @@ class TableGroupby(QtWidgets.QTableWidget):
                 self.setItem(row, col, newItem)     # add item to table
     
     def get_widget_item(self, widget:QtWidgets.QListWidget) -> list :
-        return [widget.item(i).text() for i in range(widget.count())]
+        return [widget.item(i).text().split(',')[0] for i in range(widget.count())]
 
     def add_listbox(self, e) -> None: # add item to measurelist or dimensin list
         col = self.readData(e.mimeData())[0]
@@ -950,3 +988,35 @@ class TableGroupby(QtWidgets.QTableWidget):
                 if role == Qt.DisplayRole:
                     textList.append(value)
         return textList
+    
+class DimensionWidget(QtWidgets.QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self._createAction()
+    
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        self.col_All = [i.text() for i in self.selectedItems()]
+        self.contextMenu = QtWidgets.QMenu(self)
+        if "," in self.currentItem().text():
+            self.contextMenu.addAction(self.deletedAct)
+        if len(self.col_All) == 2:
+            self.contextMenu.addAction(self.addAct)
+        self.action = self.contextMenu.exec(self.mapToGlobal(event.pos()))
+        print(self.col_All)
+        # return super().contextMenuEvent(a0)
+    
+    def _createAction(self):
+        self.addAct = QtWidgets.QAction()
+        self.addAct.setText('Add')
+        self.addAct.triggered.connect(self.addGroup)
+
+        self.deletedAct = QtWidgets.QAction()
+        self.deletedAct.setText('Delete')
+        self.deletedAct.triggered.connect(self.deleted)
+
+    def deleted(self):
+        self.takeItem(self.currentRow())
+
+    def addGroup(self):
+        text = ",".join(self.col_All)
+        self.addItem(text)

@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Widgets.DragDrop import DimensionList, MeasureList, TableGroupby, PlotList
+from Widgets.DragDrop import DimensionList, DimensionWidget, MeasureList, TableGroupby, PlotList
 from Widgets.Chart import WebEngineView
 
 
@@ -366,7 +366,7 @@ class Ui_App(object):
         self.dataCombo.setObjectName("dataCombo")
         self.dataCombo.addItem("")
         self.gridLayout.addWidget(self.dataCombo, 0, 0, 1, 3)
-        self.DimensionWidget = QtWidgets.QListWidget(self.dockWidgetContents)
+        self.DimensionWidget = DimensionWidget(self.dockWidgetContents)
         self.DimensionWidget.setAcceptDrops(False)
         self.DimensionWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.DimensionWidget.setDragEnabled(True)
