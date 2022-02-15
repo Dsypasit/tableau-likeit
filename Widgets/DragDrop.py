@@ -614,7 +614,7 @@ class Popup(QtWidgets.QDialog):     # popup for dimension
             return 
         for i in range(self.listWidget.count()):
             self.listWidget.takeItem(0)
-        data = self.parent.dimension[self.name]
+        data = self.dimension[self.name]
         for fil in data:
             if e in fil:
                 item = QtWidgets.QListWidgetItem()
