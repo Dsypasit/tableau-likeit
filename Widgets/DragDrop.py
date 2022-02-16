@@ -94,8 +94,9 @@ class PlotList(QtWidgets.QListWidget):
         self.main.app.Graph()
     
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
-        selected_item = self.selectedItems()[0].text().split('_')[0]
+        selected_item = self.selectedItems()[0].text()
         self.contextMenu = QtWidgets.QMenu(self)
+        print(selected_item)
         if self.dt.check_date_col2(selected_item) and 'year' in selected_item:
             self.contextMenu.addAction(self.monthAct)
             self.contextMenu.addAction(self.dayAct)
