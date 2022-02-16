@@ -47,7 +47,7 @@ class PlotList(QtWidgets.QListWidget):
         self.measure = {}
         self.measure_filter = {}
         self.item_plot = []
-        self.main.app.Graph()
+        # self.main.app.Graph()
     
     def _createAction(self):
         self.yearAct = QtWidgets.QAction()

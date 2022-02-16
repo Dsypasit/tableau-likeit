@@ -101,6 +101,12 @@ class MainWindow(QMainWindow):
         self.ui.DimensionList.dimension = {}
         self.ui.MeasureList.measure = {}
         self.ui.MeasureList.measure_filter = {}
+        self.ui.ColumnList_bar.resetAll()
+        self.ui.RowList_bar.resetAll()
+        self.ui.ColumnList_line.resetAll()
+        self.ui.RowList_line.resetAll()
+        self.ui.ThetaList.resetAll()
+        self.ui.ColorList.resetAll()
         for i in range(self.ui.DimensionWidget.count()):   
             self.ui.DimensionWidget.takeItem(0)
         for i in range(self.ui.MeasureWidget.count()):   
@@ -235,6 +241,9 @@ class MainWindow(QMainWindow):
         self.dimension()
         
 
+    ########################################################################
+    ## FUNCTION GRAPH
+    ########################################################################
     def Graph(self):
         """
         This method will create Graph, it check every listwidget when items in list widget is change
@@ -248,8 +257,9 @@ class MainWindow(QMainWindow):
         - line chart    # in fact, in Tableau line axis x can use Date only Now not available
         
         """
-
-        # Bar Chart
+        ########################################################################
+        ## BAR CHART
+        ########################################################################
         item_BarColumn, fil_BarColumn, measure_BarColumn = self.ui.ColumnList_bar.get_plot_item()
         item_BarRow, fil_BarRow, measure_BarRow  = self.ui.RowList_bar.get_plot_item()
         item_BarColumn, item_BarRow = self.check_dup(item_BarColumn, item_BarRow, self.i1, self.i2)
@@ -293,78 +303,86 @@ class MainWindow(QMainWindow):
 
             # Check 1 Measure in ROW/COLUMN
             if coll_Me_bar['column']['count'] == 1 : #todo: a Measure in column
-                if coll_Di_bar['row']['count'] == 1 :       # 1 dimension
+                check_colrow['column'] = True   # have Measure in Column
+                if coll_Di_bar['row']['count'] == 1 :       # 1 dimension in row 
                     # check scale
-                    tempMax = data.groupby([coll_Di_bar['row']['list'][0]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).max()[1]
-                    tempMin = data.groupby([coll_Di_bar['row']['list'][0]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).min()[1]
-                    if max_bar < int(tempMax) : max_bar = int(tempMax)
-                    if min_bar > int(tempMin) : min_bar = int(tempMin)
+                    if coll_Di_bar['column']['count'] == 0 :    # dimension row 1 col 0
+                        tempMax = data.groupby([coll_Di_bar['row']['list'][0]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).max()[1]
+                        tempMin = data.groupby([coll_Di_bar['row']['list'][0]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).min()[1]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
+                    elif coll_Di_bar['column']['count'] > 0 :   # dimension row 1 col > 0
+                        tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['row']['list'][0]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['row']['list'][0]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).min()[2]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
 
                     # print(coll_Di_bar['row']['list'][0],' max_bar : ',max_bar,' min_bar : ',min_bar)
 
                     test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['column']['list'][0]]}({coll_Me_bar['column']['list'][0]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
 
-                elif coll_Di_bar['row']['count'] >= 2 :     # 2 dimension
+                elif coll_Di_bar['row']['count'] >= 2 :     # 2 & 3 dimension in row
                     # check scale
-                    tempMax = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).max()[2]
-                    tempMin = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).min()[2]
-                    if max_bar < int(tempMax) : max_bar = int(tempMax)
-                    if min_bar > int(tempMin) : min_bar = int(tempMin)
+                    if coll_Di_bar['column']['count'] == 0 :    # # dimension row > 1 col 0
+                        tempMax = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).min()[2]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
+
+                    elif coll_Di_bar['column']['count'] > 0 :  # # dimension row > 1 col > 0
+                        tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).max()[3]
+                        tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][0]].agg(measure_BarColumn[coll_Me_bar['column']['list'][0]]).min()[3]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
 
                     test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['column']['list'][0]]}({coll_Me_bar['column']['list'][0]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
 
-                elif coll_Di_bar['row']['count'] == 3 :     # 3 dimension
-                    # check scale
-                    tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][0]].sum().max()[3]
-                    tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][0]].sum().min()[3]
-                    if max_bar < int(tempMax) : max_bar = int(tempMax)
-                    if min_bar > int(tempMin) : min_bar = int(tempMin)
-
-                    temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
-
-                else :  # 0 dimension
+                else :  # 0 dimension in row
                     test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['column']['list'][0]]}({coll_Me_bar['column']['list'][0]})"))
 
                 tooltip_bar.append(f"{measure_BarColumn[coll_Me_bar['column']['list'][0]]}({coll_Me_bar['column']['list'][0]})")
-                check_colrow['column'] = True   # have Measure in Column
 
-            elif coll_Me_bar['row']['count'] == 1 : #todo: a Measure in row=
-                if coll_Di_bar['column']['count'] == 1 :    # 1 dimension
+            elif coll_Me_bar['row']['count'] == 1 : #todo: a Measure in row
+                check_colrow['row'] = True      # have Measure in Row
+                if coll_Di_bar['column']['count'] == 1 :    # 1 dimension in column
                     # check scale
-                    tempMax = data.groupby([coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[1]
-                    tempMin = data.groupby([coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[1]
-                    if max_bar < int(tempMax) : max_bar = int(tempMax)
-                    if min_bar > int(tempMin) : min_bar = int(tempMin)
+                    if coll_Di_bar['row']['count'] == 0 :   # dimension row 0 col 1
+                        tempMax = data.groupby([coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[1]
+                        tempMin = data.groupby([coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[1]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
+
+                    elif coll_Di_bar['row']['count'] > 0 :    # dimension row > 0 col 1
+                        tempMax = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[2]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
 
                     test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})", scale=alt.Scale(domain=(min_bar, max_bar), clamp=True )))
 
-                elif coll_Di_bar['column']['count'] == 2 : # 2 dimension
+                elif coll_Di_bar['column']['count'] >= 2 : # 2 & 3 dimension in column
                     # check scale
-                    tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[2]
-                    tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[2]
-                    if max_bar < int(tempMax) : max_bar = int(tempMax)
-                    if min_bar > int(tempMin) : min_bar = int(tempMin)
+                    if coll_Di_bar['row']['count'] == 0 :   # dimension row 0 col > 1
+                        tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[2]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
+
+                    elif coll_Di_bar['row']['count'] > 0 :   # dimension row > 0 col > 1
+                        tempMax = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[3]
+                        tempMin = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[3]
+                        if max_bar < int(tempMax) : max_bar = int(tempMax)
+                        if min_bar > int(tempMin) : min_bar = int(tempMin)
 
                     test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})", scale=alt.Scale(domain=(min_bar, max_bar), clamp=True )))
 
-                elif coll_Di_bar['column']['count'] == 3 :      # 3 dimension
-                    # check scale
-                    tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).max()[3]
-                    tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][0]].agg(measure_BarRow[coll_Me_bar['row']['list'][0]]).min()[3]
-                    if max_bar < int(tempMax) : max_bar = int(tempMax)
-                    if min_bar > int(tempMin) : min_bar = int(tempMin)
-
-                    print(' max_bar : ',max_bar,' min_bar : ',min_bar)
-
-                    test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
-
-                else :  # 0 dimension
+                else :  # 0 dimension in column
                     test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})"))
 
                 tooltip_bar.append(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})")
-                check_colrow['row'] = True      # have Measure in Row
 
-            ## dimension&measure in same ROW/COLUMN 
+            ########################################################################
+            ##todo dimension&measure in same ROW/COLUMN 
             # a Dimension Measure in column
             if (coll_Me_bar['column']['count'] == 1) and (coll_Di_bar['column']['count'] == 1) and (coll_Di_bar['row']['count'] == 0):
                 # check scale
@@ -393,7 +411,7 @@ class MainWindow(QMainWindow):
                 tooltip_bar.append(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})")
                 test_bar.append(alt.Row(coll_Di_bar['row']['list'][0]))
                 tooltip_bar.append(coll_Di_bar['row']['list'][0])
-
+            ########################################################################
             else :   
                 # Part Dimension ROW
                 if coll_Di_bar['row']['count'] >= 1:
@@ -440,7 +458,7 @@ class MainWindow(QMainWindow):
                         test_bar.append(alt.Color(coll_Di_bar['column']['list'][2]))
                         tooltip_bar.append(coll_Di_bar['column']['list'][2])
             
-        #######################################################################
+        ########################################################################
             '''Create Bar Chart'''    
             # measure >1
             if (coll_Me_bar['row']['count'] > 1) or (coll_Me_bar['column']['count'] > 1) : 
@@ -453,8 +471,8 @@ class MainWindow(QMainWindow):
                         temp_tooltip = tooltip_bar.copy()
                         temp_tooltip.append(f"{measure_BarRow[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})")
                         temp_test_bar = test_bar.copy()
-                        
                         min_bar, max_bar= 0, 0
+                        
                         if coll_Di_bar['column']['count'] == 1 :       # 1 dimension
                             # check scale
                             tempMax = data.groupby([coll_Di_bar['column']['list'][0]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).max()[1]
@@ -464,7 +482,7 @@ class MainWindow(QMainWindow):
 
                             temp_test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
                         
-                        elif coll_Di_bar['column']['count'] == 2 :      # 2 dimension
+                        elif coll_Di_bar['column']['count'] >= 2 :      # 2 & 3 dimension
                             # check scale
                             tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).max()[2]
                             tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).min()[2]
@@ -473,19 +491,10 @@ class MainWindow(QMainWindow):
 
                             temp_test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
 
-                        elif coll_Di_bar['column']['count'] == 3 :      # 3 dimension
-                            # check scale
-                            tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).max()[3]
-                            tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).min()[3]
-                            if max_bar < int(tempMax) : max_bar = int(tempMax)
-                            if min_bar > int(tempMin) : min_bar = int(tempMin)
-
-                            temp_test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
-
                         else :      # 0 dimension
                             temp_test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})"))
                         
-                        print(temp_test_bar)
+                        # print(temp_test_bar)
                         bar_charts.append(alt.Chart(data).mark_bar().encode(*temp_test_bar,alt.Tooltip(temp_tooltip))
                         .resolve_scale(
                             x='independent',
@@ -511,51 +520,37 @@ class MainWindow(QMainWindow):
 
                             temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['column']['list'][i]]}({coll_Me_bar['column']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
                         
-                        elif coll_Di_bar['row']['count'] == 2 :     # 2 dimension
+                        elif coll_Di_bar['row']['count'] >= 2 :     # 2 & 3 dimension
                             # check scale
-                            tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][i]].sum().max()[2]
-                            tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][i]].sum().min()[2]
+                            tempMax = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][i]].sum().max()[2]
+                            tempMin = data.groupby([coll_Di_bar['row']['list'][0], coll_Di_bar['row']['list'][1]], as_index=False)[coll_Me_bar['column']['list'][i]].sum().min()[2]
                             if max_bar < int(tempMax) : max_bar = int(tempMax)
                             if min_bar > int(tempMin) : min_bar = int(tempMin)
 
-                            temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
-
-                        elif coll_Di_bar['row']['count'] == 3 :     # 3 dimension
-                            # check scale
-                            tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][i]].sum().max()[3]
-                            tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1], coll_Di_bar['column']['list'][2]], as_index=False)[coll_Me_bar['row']['list'][i]].sum().min()[3]
-                            if max_bar < int(tempMax) : max_bar = int(tempMax)
-                            if min_bar > int(tempMin) : min_bar = int(tempMin)
-
-                            temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
+                            temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['column']['list'][i]]}({coll_Me_bar['column']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
 
                         else :      # 0 dimension
-                            temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})"))
+                            temp_test_bar.append(alt.X(f"{measure_BarColumn[coll_Me_bar['column']['list'][i]]}({coll_Me_bar['column']['list'][i]})"))
                     
-                        bar_charts.append(alt.Chart(data).mark_bar().encode(*temp_test_bar,alt.Tooltip(temp_tooltip))
-                        .resolve_scale(
-                            x='independent',
-                            y='independent'
-                         ))
-                    barchart = alt.hconcat(*bar_charts)
+                        bar_charts.append(alt.Chart(data).mark_bar().encode(*temp_test_bar,alt.Tooltip(temp_tooltip)).resolve_scale( x='independent', y='independent' ))
+
+                    barchart = alt.concat(*bar_charts)
 
             # measure =1
             else : 
                 # Create Bar Chart        
                 test_bar.append(alt.Tooltip(tooltip_bar))
                 if  check_colrow['resolve_scale'] :
-                    barchart = alt.Chart(data).mark_bar().encode(*test_bar).resolve_scale(
-                        x='independent',
-                        y='independent'
-                    )
+                    barchart = alt.Chart(data).mark_bar().encode(*test_bar).resolve_scale(x='independent', y='independent')
                 else : barchart = alt.Chart(data).mark_bar().encode(*test_bar)
             # Set chart
             self.ui.barChart.updateChart(barchart)
 
-        #######################################################################
+        ########################################################################
 
-        #######################################################################
-        # Pie Chart
+        ########################################################################
+        ## PIE CHART
+        ########################################################################
         item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
         item_Color, fil_Color, measure_Color  = self.ui.ColorList.get_plot_item()
 
@@ -625,10 +620,11 @@ class MainWindow(QMainWindow):
 
             self.ui.pieChart.updateChart(piechart)
 
-        #######################################################################
+        ########################################################################
 
-        #######################################################################
-        # Line Chart
+        ########################################################################
+        ## LINE CHART
+        ########################################################################
         item_LineColumn, fil_LineColumn, measure_LineColumn = self.ui.ColumnList_line.get_plot_item()
         item_LineRow, fil_LineRow, measure_LineRow  = self.ui.RowList_line.get_plot_item()
         item_LineColumn, item_LineRow = self.check_dup(item_LineColumn, item_LineRow, self.il1, self.il2)
