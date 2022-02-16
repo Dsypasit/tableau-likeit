@@ -10,6 +10,95 @@
             "Customer Name",
             "Segment",
             "Country/Region",
+            "State",
+            "Postal Code",
+            "Region",
+            "Product ID",
+            "Category",
+            "Sub-Category",
+            "Product Name",
+            "City"
+        ],
+        "measure": [
+            "Sales",
+            "Quantity",
+            "Discount",
+            "Profit"
+        ]
+    },
+    "data1.csv": {
+        "dimension": [
+            "Row ID",
+            "Order ID",
+            "Order Date_year",
+            "Ship Date_year",
+            "Ship Mode",
+            "Customer ID",
+            "Customer Name",
+            "Segment",
+            "Country/Region",
+            "City",
+            "State",
+            "Postal Code",
+            "Region",
+            "Product ID",
+            "Category",
+            "Sub-Category",
+            "Product Name"
+        ],
+        "measure": [
+            "Sales",
+            "Quantity",
+            "Discount",
+            "Profit"
+        ]
+    },
+    "mock data.xlsx": {
+        "dimension": [
+            "Name"
+        ],
+        "measure": [
+            "amout"
+        ]
+    },
+    "C:/Users/User/Desktop/Superstore.csv": {
+        "dimension": [
+            "Row ID",
+            "Order ID",
+            "Order Date_year",
+            "Ship Date_year",
+            "Ship Mode",
+            "Customer ID",
+            "Customer Name",
+            "Segment",
+            "Country/Region",
+            "City",
+            "State",
+            "Postal Code",
+            "Region",
+            "Product ID",
+            "Category",
+            "Sub-Category",
+            "Product Name"
+        ],
+        "measure": [
+            "Sales",
+            "Quantity",
+            "Discount",
+            "Profit"
+        ]
+    },
+    "C:/Users/User/Desktop/softdev/SuperStore/Superstore.csv": {
+        "dimension": [
+            "Row ID",
+            "Order ID",
+            "Order Date_year",
+            "Ship Date_year",
+            "Ship Mode",
+            "Customer ID",
+            "Customer Name",
+            "Segment",
+            "Country/Region",
             "City",
             "State",
             "Postal Code",

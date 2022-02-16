@@ -22,6 +22,14 @@ class TestDatamanipulate(unittest.TestCase):
         self.assertIsInstance(self.dt.get_unique('Name'), list)
         self.assertListEqual(self.dt.get_unique('Name'), ['Pasit', 'Norasate'])
     
+    def test_is_measure(self):
+        self.assertTrue(self.dt.is_measure('amout'))
+        self.assertFalse(self.dt.is_measure('Name'))
+
+    def test_is_dimension(self):
+        self.assertTrue(self.dt.is_dimension('Name'))
+        self.assertFalse(self.dt.is_dimension('amout'))
+    
     def test_get_groupby_sum(self):
         col = ['Name']
         measure = {'amout': 'sum'}

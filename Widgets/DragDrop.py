@@ -164,7 +164,7 @@ class PlotList(QtWidgets.QListWidget):
             self.allow = False
     
     def launchPopup(self, item: QtWidgets.QWidgetItem):
-        if self.dt.is_dimension(item.text()) or "," in item.text(): # if item is dimension
+        if self.dt.is_dimension(item.text()) or "," in item.text() or self.dt.check_date_col2(item.text()): # if item is dimension
             if self.dt.check_date_col(item.text()):
                 pop = Popup3(item.text(), self)
                 pop.show()
@@ -692,12 +692,12 @@ class DimensionList(QtWidgets.QListWidget):
         self.main.tableWidget.make_table()
     
     def launchFilter(self, item):
-        if self.dt.check_date_col(item.text()):
-            pop = Popup3(item.text(), self)
-            pop.show()
-        else:
-            pop = Popup(item.text(), self)
-            pop.show()
+        # if self.dt.check_date_col(item.text()):
+        #     pop = Popup3(item.text(), self)
+        #     pop.show()
+        # else:
+        pop = Popup(item.text(), self)
+        pop.show()
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:     # action when drag item out of area
         if self.count():
