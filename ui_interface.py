@@ -34,14 +34,14 @@ class Ui_App(object):
         self.tab.setObjectName("tab")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.tab)
         self.gridLayout_4.setObjectName("gridLayout_4")
-        
+       
         self.tableWidget = TableGroupby(self, self.tab)
         self.tableWidget.setAcceptDrops(True)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
         self.gridLayout_4.addWidget(self.tableWidget, 2, 0, 1, 1)
-
+     
         self.frame = QtWidgets.QFrame(self.tab)
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -51,7 +51,7 @@ class Ui_App(object):
         self.btnClearColumn_2 = QtWidgets.QPushButton(self.frame)
         self.btnClearColumn_2.setObjectName("btnClearColumn_2")
         self.gridLayout_2.addWidget(self.btnClearColumn_2, 1, 2, 1, 1)
-       
+     
         self.DimensionList = DimensionList(self, self.frame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(2)
@@ -67,7 +67,7 @@ class Ui_App(object):
         self.DimensionList.setFlow(QtWidgets.QListView.LeftToRight)
         self.DimensionList.setObjectName("DimensionList")
         self.gridLayout_2.addWidget(self.DimensionList, 1, 1, 1, 1)
-      
+     
         self.label = QtWidgets.QLabel(self.frame)
         self.label.setObjectName("label")
         self.gridLayout_2.addWidget(self.label, 1, 0, 1, 1)
@@ -77,7 +77,7 @@ class Ui_App(object):
         self.btnClearRow_2 = QtWidgets.QPushButton(self.frame)
         self.btnClearRow_2.setObjectName("btnClearRow_2")
         self.gridLayout_2.addWidget(self.btnClearRow_2, 3, 2, 1, 1)
-        
+     
         self.MeasureList = MeasureList(self, self.frame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
@@ -143,7 +143,7 @@ class Ui_App(object):
         self.label_6 = QtWidgets.QLabel(self.frame_2)
         self.label_6.setObjectName("label_6")
         self.gridLayout_7.addWidget(self.label_6, 0, 0, 1, 1)
-       
+      
         self.ColumnList_bar = PlotList(self, self.frame_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(2)
@@ -159,11 +159,11 @@ class Ui_App(object):
         self.ColumnList_bar.setFlow(QtWidgets.QListView.LeftToRight)
         self.ColumnList_bar.setObjectName("ColumnList_bar")
         self.gridLayout_7.addWidget(self.ColumnList_bar, 0, 1, 1, 1)
-       
+        
         self.label_5 = QtWidgets.QLabel(self.frame_2)
         self.label_5.setObjectName("label_5")
         self.gridLayout_7.addWidget(self.label_5, 2, 0, 1, 1)
-   
+       
         self.RowList_bar = PlotList(self, self.frame_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
@@ -183,6 +183,7 @@ class Ui_App(object):
         #BarChart 
         self.barChart = WebEngineView()
         self.gridLayout_5.addWidget(self.barChart, 1, 0, 1, 1)
+
       
         self.btnClearRow_bar = QtWidgets.QPushButton(self.frame_2)
         self.btnClearRow_bar.setObjectName("btnClearRow_bar")
@@ -218,7 +219,7 @@ class Ui_App(object):
         self.label_12 = QtWidgets.QLabel(self.frame_8)
         self.label_12.setObjectName("label_12")
         self.gridLayout_10.addWidget(self.label_12, 2, 0, 1, 1)
-     
+        
         self.ThetaList = PlotList(self, self.frame_8)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(2)
@@ -234,7 +235,7 @@ class Ui_App(object):
         self.ThetaList.setFlow(QtWidgets.QListView.LeftToRight)
         self.ThetaList.setObjectName("ThetaList")
         self.gridLayout_10.addWidget(self.ThetaList, 0, 1, 1, 1)
-      
+       
         self.ColorList = PlotList(self, self.frame_8)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
@@ -250,11 +251,12 @@ class Ui_App(object):
         self.ColorList.setFlow(QtWidgets.QListView.LeftToRight)
         self.ColorList.setObjectName("ColorList")
         self.gridLayout_10.addWidget(self.ColorList, 2, 1, 1, 1)
-
+     
         #PieChart 
         self.pieChart = WebEngineView()
         self.gridLayout_6.addWidget(self.pieChart, 1, 0, 1, 1)
-      
+
+
         self.btnClearColor = QtWidgets.QPushButton(self.frame_8)
         self.btnClearColor.setObjectName("btnClearColor")
         self.gridLayout_10.addWidget(self.btnClearColor, 2, 2, 1, 1)
@@ -286,7 +288,7 @@ class Ui_App(object):
         self.label_8 = QtWidgets.QLabel(self.frame_4)
         self.label_8.setObjectName("label_8")
         self.gridLayout_8.addWidget(self.label_8, 0, 0, 1, 1)
-       
+      
         self.ColumnList_line = PlotList(self, self.frame_4)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(2)
@@ -302,11 +304,11 @@ class Ui_App(object):
         self.ColumnList_line.setFlow(QtWidgets.QListView.LeftToRight)
         self.ColumnList_line.setObjectName("ColumnList_line")
         self.gridLayout_8.addWidget(self.ColumnList_line, 0, 1, 1, 1)
-        
+       
         self.label_9 = QtWidgets.QLabel(self.frame_4)
         self.label_9.setObjectName("label_9")
         self.gridLayout_8.addWidget(self.label_9, 2, 0, 1, 1)
-       
+     
         self.RowList_line = PlotList(self, self.frame_4)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
@@ -327,6 +329,7 @@ class Ui_App(object):
         self.lineChart = WebEngineView()
         self.gridLayout_9.addWidget(self.lineChart, 1, 0, 1, 1)
       
+        
         self.btnClearRow_line = QtWidgets.QPushButton(self.frame_4)
         self.btnClearRow_line.setObjectName("btnClearRow_line")
         self.gridLayout_8.addWidget(self.btnClearRow_line, 2, 2, 1, 1)
@@ -348,12 +351,21 @@ class Ui_App(object):
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.gridLayout = QtWidgets.QGridLayout(self.dockWidgetContents)
         self.gridLayout.setObjectName("gridLayout")
-        self.label_10 = QtWidgets.QLabel(self.dockWidgetContents)
-        self.label_10.setObjectName("label_10")
-        self.gridLayout.addWidget(self.label_10, 1, 0, 1, 1)
+        self.line_2 = QtWidgets.QFrame(self.dockWidgetContents)
+        self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.gridLayout.addWidget(self.line_2, 2, 0, 1, 3)
+        self.dataCombo = QtWidgets.QComboBox(self.dockWidgetContents)
+        self.dataCombo.setObjectName("dataCombo")
+        self.dataCombo.addItem("")
+        self.gridLayout.addWidget(self.dataCombo, 0, 0, 1, 3)
         self.filterData = QtWidgets.QLineEdit(self.dockWidgetContents)
         self.filterData.setObjectName("filterData")
-        self.gridLayout.addWidget(self.filterData, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.filterData, 3, 1, 1, 1)
+        self.label_10 = QtWidgets.QLabel(self.dockWidgetContents)
+        self.label_10.setObjectName("label_10")
+        self.gridLayout.addWidget(self.label_10, 3, 0, 1, 1)
         self.btnClearFilterData = QtWidgets.QPushButton(self.dockWidgetContents)
         self.btnClearFilterData.setText("")
         icon1 = QtGui.QIcon()
@@ -361,30 +373,26 @@ class Ui_App(object):
         self.btnClearFilterData.setIcon(icon1)
         self.btnClearFilterData.setIconSize(QtCore.QSize(10, 10))
         self.btnClearFilterData.setObjectName("btnClearFilterData")
-        self.gridLayout.addWidget(self.btnClearFilterData, 1, 2, 1, 1)
-        self.dataCombo = QtWidgets.QComboBox(self.dockWidgetContents)
-        self.dataCombo.setObjectName("dataCombo")
-        self.dataCombo.addItem("")
-        self.gridLayout.addWidget(self.dataCombo, 0, 0, 1, 3)
+        self.gridLayout.addWidget(self.btnClearFilterData, 3, 2, 1, 1)
         self.DimensionWidget = QtWidgets.QListWidget(self.dockWidgetContents)
         self.DimensionWidget.setAcceptDrops(False)
         self.DimensionWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.DimensionWidget.setDragEnabled(True)
         self.DimensionWidget.setDragDropMode(QtWidgets.QAbstractItemView.DragOnly)
         self.DimensionWidget.setObjectName("DimensionWidget")
-        self.gridLayout.addWidget(self.DimensionWidget, 2, 0, 1, 3)
+        self.gridLayout.addWidget(self.DimensionWidget, 4, 0, 1, 3)
         self.line = QtWidgets.QFrame(self.dockWidgetContents)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
-        self.gridLayout.addWidget(self.line, 3, 0, 1, 3)
+        self.gridLayout.addWidget(self.line, 5, 0, 1, 3)
         self.MeasureWidget = QtWidgets.QListWidget(self.dockWidgetContents)
         self.MeasureWidget.setAcceptDrops(False)
         self.MeasureWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.MeasureWidget.setDragEnabled(True)
         self.MeasureWidget.setDragDropMode(QtWidgets.QAbstractItemView.DragOnly)
         self.MeasureWidget.setObjectName("MeasureWidget")
-        self.gridLayout.addWidget(self.MeasureWidget, 4, 0, 1, 3)
+        self.gridLayout.addWidget(self.MeasureWidget, 6, 0, 1, 3)
         self.dataWidget.setWidget(self.dockWidgetContents)
         App.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dataWidget)
         self.menubar = QtWidgets.QMenuBar(App)
@@ -392,17 +400,11 @@ class Ui_App(object):
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
-        self.menuData = QtWidgets.QMenu(self.menubar)
-        self.menuData.setObjectName("menuData")
         App.setMenuBar(self.menubar)
-        self.menuOpen = QtWidgets.QAction(App)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/images/icons8-opened-folder-384.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.menuOpen.setIcon(icon2)
-        self.menuOpen.setObjectName("menuOpen")
-        self.menuSave = QtWidgets.QAction(App)
-        self.menuSave.setObjectName("menuSave")
         self.menuExit = QtWidgets.QAction(App)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/icons/images/icons8-emergency-exit-96.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.menuExit.setIcon(icon2)
         self.menuExit.setObjectName("menuExit")
         self.menuImport = QtWidgets.QAction(App)
         icon3 = QtGui.QIcon()
@@ -410,18 +412,15 @@ class Ui_App(object):
         self.menuImport.setIcon(icon3)
         self.menuImport.setObjectName("menuImport")
         self.actionUnion = QtWidgets.QAction(App)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(":/icons/images/icons8-group-layouts-96.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionUnion.setIcon(icon4)
         self.actionUnion.setObjectName("actionUnion")
-        self.actionJoin = QtWidgets.QAction(App)
-        self.actionJoin.setObjectName("actionJoin")
-        self.menuFile.addAction(self.menuOpen)
-        self.menuFile.addAction(self.menuSave)
+        self.menuFile.addAction(self.menuImport)
+        self.menuFile.addAction(self.actionUnion)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.menuExit)
-        self.menuData.addAction(self.menuImport)
-        self.menuData.addAction(self.actionUnion)
-        self.menuData.addAction(self.actionJoin)
         self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuData.menuAction())
 
         self.retranslateUi(App)
         self.tabWidget.setCurrentIndex(0)
@@ -456,16 +455,12 @@ class Ui_App(object):
         self.btnClearColumn_line.setText(_translate("App", "Clear Column"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("App", "Chart"))
         self.dataWidget.setWindowTitle(_translate("App", "Data Source"))
-        self.label_10.setText(_translate("App", "filter"))
         self.dataCombo.setItemText(0, _translate("App", "Data Source"))
+        self.label_10.setText(_translate("App", "Search"))
         self.menuFile.setTitle(_translate("App", "File"))
-        self.menuData.setTitle(_translate("App", "Data"))
-        self.menuOpen.setText(_translate("App", "Open"))
-        self.menuSave.setText(_translate("App", "Save"))
         self.menuExit.setText(_translate("App", "Exit"))
         self.menuImport.setText(_translate("App", "Import"))
         self.actionUnion.setText(_translate("App", "Union"))
-        self.actionJoin.setText(_translate("App", "Join"))
 import resources_rc
 
 
