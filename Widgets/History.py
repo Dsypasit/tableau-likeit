@@ -52,7 +52,7 @@ class History:
         This method will save history to json file
         """
         with open(self.filename, 'w') as file:
-            json.dump(self.hist, file)
+            json.dump(self.hist, file, indent=4)
 
     def load_hist(self):
         """

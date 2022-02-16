@@ -96,9 +96,10 @@ class PlotList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         selected_item = self.selectedItems()[0].text().split('_')[0]
         self.contextMenu = QtWidgets.QMenu(self)
-        if self.dt.check_date_col2(selected_item):
-            self.contextMenu.addAction(self.yearAct)
+        if self.dt.check_date_col2(selected_item) and 'year' in selected_item:
             self.contextMenu.addAction(self.monthAct)
+            self.contextMenu.addAction(self.dayAct)
+        elif self.dt.check_date_col2(selected_item) and 'month' in selected_item:
             self.contextMenu.addAction(self.dayAct)
         if "," in selected_item:
             items = [item for item in selected_item.split(',')]
@@ -771,10 +772,10 @@ class DimensionList(QtWidgets.QListWidget):
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         selected_item = self.selectedItems()[0].text()
         self.contextMenu = QtWidgets.QMenu(self)
-        if self.dt.check_date_col2(selected_item):
-            print('date')
-            self.contextMenu.addAction(self.yearAct)
+        if self.dt.check_date_col2(selected_item) and 'year' in selected_item:
             self.contextMenu.addAction(self.monthAct)
+            self.contextMenu.addAction(self.dayAct)
+        elif self.dt.check_date_col2(selected_item) and 'month' in selected_item:
             self.contextMenu.addAction(self.dayAct)
         if "," in selected_item:
             items = [item for item in selected_item.split(',')]
@@ -934,6 +935,7 @@ class TableGroupby(QtWidgets.QTableWidget):
         if not(len(self.dimension) > 0 ):   # if dimension has no item
             self.main.MeasureList.clear()
             self.main.MeasureList.measure = {}
+            self.main.app.make_table()
             return
         fil = {**self.dimension_filter, **self.measure_filter}
         self.data_groupby = self.dt.get_groupby(self.dimension, self.measure, fil)    # use groupby and get dataframe data
@@ -965,7 +967,7 @@ class TableGroupby(QtWidgets.QTableWidget):
             self.main.MeasureList.addItem(item)
             self.main.MeasureList.addFilter(col)
             e.accept()
-        elif self.dt.is_dimension(col):
+        elif self.dt.is_dimension(col) or "," in col:
             self.dimension.append(col)
             self.main.DimensionList.addFilter(col)
             self.main.DimensionList.addItem(col)
