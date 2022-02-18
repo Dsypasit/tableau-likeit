@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas 
+import hashlib
 
 # from Widgets.History import History
 class data_manipulate:
@@ -110,10 +111,10 @@ class data_manipulate:
         """
         self.separated_date()
         hist_dict = self.hist.get_hist()    # get dict of history
-        # self.data = self.data_separated_date
-        if self.filename in hist_dict.keys():   # check that filename in history
-            self.dimension = hist_dict[self.filename]['dimension']
-            self.measure = hist_dict[self.filename]['measure']
+        hash_name = self.getMd5(self.filename)
+        if hash_name in hist_dict.keys():   # check that filename in history
+            self.dimension = hist_dict[hash_name]['dimension']
+            self.measure = hist_dict[hash_name]['measure']
         else:
             self.dimension = []
             self.measure = []
@@ -135,7 +136,8 @@ class data_manipulate:
         This method will save measure and dimension to history file
         """
         new_dict = {'dimension': self.dimension, 'measure': self.measure}
-        self.hist.creat_hist(self.filename, new_dict)
+        hash_name = self.getMd5(self.filename)
+        self.hist.creat_hist(hash_name, new_dict)
 
     
     def is_dimension(self, s:str) -> bool:
@@ -379,6 +381,10 @@ class data_manipulate:
         self.dimension.remove(name)
         self.measure.append(name)
         self.save_hist()
+    
+    def getMd5(self, name:str):
+        hash_name = hashlib.md5(open(name, 'rb').read()).hexdigest()
+        return hash_name
 
 if __name__ == "__main__":
     from History import History
