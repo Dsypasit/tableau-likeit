@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Widgets.DragDrop import DimensionList, DimensionWidget, MeasureList, TableGroupby, PlotList
+from Widgets.DragDrop import DimensionList, MeasureList, TableGroupby, PlotList
 from Widgets.Chart import WebEngineView
 
 
@@ -373,14 +373,13 @@ class Ui_App(object):
         self.btnClearFilterData.setIcon(icon1)
         self.btnClearFilterData.setIconSize(QtCore.QSize(10, 10))
         self.btnClearFilterData.setObjectName("btnClearFilterData")
-        self.DimensionWidget = DimensionWidget(self.dockWidgetContents)
         self.gridLayout.addWidget(self.btnClearFilterData, 3, 2, 1, 1)
+        self.DimensionWidget = QtWidgets.QListWidget(self.dockWidgetContents)
         self.DimensionWidget.setAcceptDrops(False)
         self.DimensionWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.DimensionWidget.setDragEnabled(True)
         self.DimensionWidget.setDragDropMode(QtWidgets.QAbstractItemView.DragOnly)
         self.DimensionWidget.setObjectName("DimensionWidget")
-        self.DimensionWidget.setSelectionMode(3)
         self.gridLayout.addWidget(self.DimensionWidget, 4, 0, 1, 3)
         self.line = QtWidgets.QFrame(self.dockWidgetContents)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)

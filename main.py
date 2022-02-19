@@ -382,7 +382,7 @@ class MainWindow(QMainWindow):
                 tooltip_bar.append(f"{measure_BarRow[coll_Me_bar['row']['list'][0]]}({coll_Me_bar['row']['list'][0]})")
 
             ########################################################################
-            ##todo dimension&measure in same ROW/COLUMN 
+            ##todo dimension&measure in same ROW/COLUMN
             # a Dimension Measure in column
             if (coll_Me_bar['column']['count'] == 1) and (coll_Di_bar['column']['count'] == 1) and (coll_Di_bar['row']['count'] == 0):
                 # check scale
@@ -482,7 +482,7 @@ class MainWindow(QMainWindow):
 
                             temp_test_bar.append(alt.Y(f"{measure_BarRow[coll_Me_bar['row']['list'][i]]}({coll_Me_bar['row']['list'][i]})",scale=alt.Scale(domain=(min_bar, max_bar),clamp=True )))
                         
-                        elif coll_Di_bar['column']['count'] >= 2 :      # 2 & 3 dimension
+                        elif coll_Di_bar['column']['count'] >= 2 :      # 2 & 3 dimeฆnsion
                             # check scale
                             tempMax = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).max()[2]
                             tempMin = data.groupby([coll_Di_bar['column']['list'][0], coll_Di_bar['column']['list'][1]], as_index=False)[coll_Me_bar['row']['list'][i]].agg(measure_BarRow[coll_Me_bar['row']['list'][i]]).min()[2]
@@ -627,13 +627,16 @@ class MainWindow(QMainWindow):
         ########################################################################
         item_LineColumn, fil_LineColumn, measure_LineColumn = self.ui.ColumnList_line.get_plot_item()
         item_LineRow, fil_LineRow, measure_LineRow  = self.ui.RowList_line.get_plot_item()
-        item_LineColumn, item_LineRow = self.check_dup(item_LineColumn, item_LineRow, self.il1, self.il2)
-        self.il1 = item_LineColumn
-        self.il2 = item_LineRow
+        item_LineColumn, item_LineRow = self.check_dup(item_LineColumn, item_LineRow, self.i1, self.i2)
         data = None
+        self.i1 = item_LineColumn
+        self.i2 = item_LineRow
         test_line = []
         tooltip_line = []
-        check_colrow = {'row':False, 'column':False}
+        check_colrow = {'row':False, 'column':False, 'resolve_scale':True}
+
+        min_line = 0
+        max_line = 0
 
         if(len(item_LineColumn)>0 or len(item_LineRow)>0):
             data = self.dt.data_filter(item_LineColumn, item_LineRow , fil_LineColumn, fil_LineRow, measure_LineColumn, measure_LineRow)
@@ -654,41 +657,133 @@ class MainWindow(QMainWindow):
                 else : 
                     coll_Di_line['row']['count'] += 1
                     coll_Di_line['row']['list'].append(i)
-
+            
             coll_Di_line['row']['list'].reverse()
             coll_Di_line['column']['list'].reverse()
 
-            # print("coll_Di_line['row']",coll_Di_line['row']," \
-            #     coll_Di_line['column']",coll_Di_line['column'])
-            # print("coll_Me_line['row']",coll_Me_line['row']," \
-            #     coll_Me_line['column']",coll_Me_line['column']) 
+            # print("coll_Di_bar['row']",coll_Di_bar['row']," \
+            #     coll_Di_bar['column']",coll_Di_bar['column'])
+            # print("coll_Me_bar['row']",coll_Me_bar['row']," \
+            #     coll_Me_bar['column']",coll_Me_bar['column']) 
 
             # Check 1 Measure in ROW/COLUMN
             if coll_Me_line['column']['count'] == 1 : #todo: a Measure in column
-                test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})"))
-                tooltip_line.append(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})")
-                check_colrow['column'] = True
-            elif coll_Me_line['row']['count'] == 1 : #todo: a Measure in row
-                test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})"))
-                tooltip_line.append(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})")
-                check_colrow['row'] = True
+                check_colrow['column'] = True   # have Measure in Column
+                if coll_Di_line['row']['count'] == 1 :       # 1 dimension in row 
+                    # check scale
+                    if coll_Di_line['column']['count'] == 0 :    # dimension row 1 col 0
+                        tempMax = data.groupby([coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).max()[1]
+                        tempMin = data.groupby([coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).min()[1]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+                    elif coll_Di_line['column']['count'] > 0 :   # dimension row 1 col > 0
+                        tempMax = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).min()[2]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
 
-            ## dimension&measure in same ROW/COLUMN 
+                    # print(coll_Di_bar['row']['list'][0],' max_bar : ',max_bar,' min_bar : ',min_bar)
+
+                    test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})",scale=alt.Scale(domain=(min_line, max_line),clamp=True )))
+
+                elif coll_Di_line['row']['count'] >= 2 :     # 2 & 3 dimension in row
+                    # check scale
+                    if coll_Di_line['column']['count'] == 0 :    # # dimension row > 1 col 0
+                        tempMax = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['row']['list'][1]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['row']['list'][1]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).min()[2]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+
+                    elif coll_Di_line['column']['count'] > 0 :  # # dimension row > 1 col > 0
+                        tempMax = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['row']['list'][0], coll_Di_line['row']['list'][1]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).max()[3]
+                        tempMin = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['row']['list'][0], coll_Di_line['row']['list'][1]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).min()[3]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+
+                    test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})",scale=alt.Scale(domain=(min_line, max_line),clamp=True )))
+
+                else :  # 0 dimension in row
+                    test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})"))
+
+                tooltip_line.append(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})")
+
+            elif coll_Me_line['row']['count'] == 1 : #todo: a Measure in row
+                check_colrow['row'] = True      # have Measure in Row
+                if coll_Di_line['column']['count'] == 1 :    # 1 dimension in column
+                    # check scale
+                    if coll_Di_line['row']['count'] == 0 :   # dimension row 0 col 1
+                        tempMax = data.groupby([coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).max()[1]
+                        tempMin = data.groupby([coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).min()[1]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+
+                    elif coll_Di_line['row']['count'] > 0 :    # dimension row > 0 col 1
+                        tempMax = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).min()[2]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+
+                    test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})", scale=alt.Scale(domain=(min_line, max_line), clamp=True )))
+
+                elif coll_Di_line['column']['count'] >= 2 : # 2 & 3 dimension in column
+                    # check scale
+                    if coll_Di_line['row']['count'] == 0 :   # dimension row 0 col > 1
+                        tempMax = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['column']['list'][1]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).max()[2]
+                        tempMin = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['column']['list'][1]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).min()[2]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+
+                    elif coll_Di_line['row']['count'] > 0 :   # dimension row > 0 col > 1
+                        tempMax = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['column']['list'][0], coll_Di_line['column']['list'][1]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).max()[3]
+                        tempMin = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['column']['list'][0], coll_Di_line['column']['list'][1]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).min()[3]
+                        if max_line < int(tempMax) : max_line = int(tempMax)
+                        if min_line > int(tempMin) : min_line = int(tempMin)
+
+                    test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})", scale=alt.Scale(domain=(min_line, max_line), clamp=True )))
+
+                else :  # 0 dimension in column
+                    test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})"))
+
+                tooltip_line.append(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})")
+
+            ########################################################################
+            ##todo dimension&measure in same ROW/COLUMN 
             # a Dimension Measure in column
             if (coll_Me_line['column']['count'] == 1) and (coll_Di_line['column']['count'] == 1) and (coll_Di_line['row']['count'] == 0):
+                # check scale
+                tempMax = data.groupby([coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).max()[1]
+                tempMin = data.groupby([coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['column']['list'][0]].agg(measure_LineColumn[coll_Me_line['column']['list'][0]]).min()[1]
+                if max_line < int(tempMax) : max_line = int(tempMax)
+                if min_line > int(tempMin) : min_line = int(tempMin)
+
+                test_line, tooltip_line = [], []
+                test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})", scale=alt.Scale(domain=(min_line, max_line), clamp=True )))
+                tooltip_line.append(f"{measure_LineColumn[coll_Me_line['column']['list'][0]]}({coll_Me_line['column']['list'][0]})")
                 test_line.append(alt.Column(coll_Di_line['column']['list'][0]))
                 tooltip_line.append(coll_Di_line['column']['list'][0])
+                
+
             # a Dimension Measure in row
             elif (coll_Me_line['row']['count'] == 1) and (coll_Di_line['column']['count'] == 0) and (coll_Di_line['row']['count'] == 1) :
+                # check scale
+                tempMax = data.groupby([coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).max()[1]
+                tempMin = data.groupby([coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['row']['list'][0]].agg(measure_LineRow[coll_Me_line['row']['list'][0]]).min()[1]
+                if max_line < int(tempMax) : max_line = int(tempMax)
+                if min_line > int(tempMin) : min_line = int(tempMin)
+
+                test_line, tooltip_line = [], []
+                test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})", scale=alt.Scale(domain=(min_line, max_line), clamp=True )))
+                tooltip_line.append(f"{measure_LineRow[coll_Me_line['row']['list'][0]]}({coll_Me_line['row']['list'][0]})")
                 test_line.append(alt.Row(coll_Di_line['row']['list'][0]))
                 tooltip_line.append(coll_Di_line['row']['list'][0])
-
+            ########################################################################
             else :   
                 # Part Dimension ROW
                 if coll_Di_line['row']['count'] >= 1:
                     if check_colrow['row'] :
                         test_line.append(alt.Row(coll_Di_line['row']['list'][0]))
                         tooltip_line.append(coll_Di_line['row']['list'][0])
+                        check_colrow['resolve_scale'] = False
                     else:
                         test_line.append(alt.Y(coll_Di_line['row']['list'][0]))
                         tooltip_line.append(coll_Di_line['row']['list'][0])
@@ -710,6 +805,7 @@ class MainWindow(QMainWindow):
                     if check_colrow['column'] :
                         test_line.append(alt.Column(coll_Di_line['column']['list'][0]))
                         tooltip_line.append(coll_Di_line['column']['list'][0])
+                        check_colrow['resolve_scale'] = False
                     else:
                         test_line.append(alt.X(coll_Di_line['column']['list'][0]))
                         tooltip_line.append(coll_Di_line['column']['list'][0])
@@ -727,48 +823,91 @@ class MainWindow(QMainWindow):
                         test_line.append(alt.Color(coll_Di_line['column']['list'][2]))
                         tooltip_line.append(coll_Di_line['column']['list'][2])
             
-        #######################################################################
-            '''Create Bar Chart'''    
+        ########################################################################
+            '''Create Line Chart'''    
             # measure >1
             if (coll_Me_line['row']['count'] > 1) or (coll_Me_line['column']['count'] > 1) : 
                 line_charts = []
-            
-                # Row
-                if  coll_Me_line['row']['count'] > 1 :
+                if  coll_Me_line['row']['count'] > 1 :   # Measure row 
                     for i in range(coll_Me_line['row']['count']):
                         # edit tooltip
                         temp_tooltip = tooltip_line.copy()
                         temp_tooltip.append(f"{measure_LineRow[coll_Me_line['row']['list'][i]]}({coll_Me_line['row']['list'][i]})")
+                        temp_test_line = test_line.copy()
+                        min_line, max_line= 0, 0
+                        
+                        if coll_Di_line['column']['count'] == 1 :       # 1 dimension
+                            # check scale
+                            tempMax = data.groupby([coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['row']['list'][i]].agg(measure_LineRow[coll_Me_line['row']['list'][i]]).max()[1]
+                            tempMin = data.groupby([coll_Di_line['column']['list'][0]], as_index=False)[coll_Me_line['row']['list'][i]].agg(measure_LineRow[coll_Me_line['row']['list'][i]]).min()[1]
+                            if max_line < int(tempMax) : max_line = int(tempMax)
+                            if min_line > int(tempMin) : min_line = int(tempMin)
 
-                        line_charts.append(alt.Chart(data).mark_line(point={
-                            "filled": False,
-                            "fill": "white",}
-                        ).encode(*test_line, 
-                            alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][i]]}({coll_Me_line['row']['list'][i]})"),
-                            alt.Tooltip(temp_tooltip)))
+                            temp_test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][i]]}({coll_Me_line['row']['list'][i]})",scale=alt.Scale(domain=(min_line, max_line),clamp=True )))
+                        
+                        elif coll_Di_line['column']['count'] >= 2 :      # 2 & 3 dimension
+                            # check scale
+                            tempMax = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['column']['list'][1]], as_index=False)[coll_Me_line['row']['list'][i]].agg(measure_LineRow[coll_Me_line['row']['list'][i]]).max()[2]
+                            tempMin = data.groupby([coll_Di_line['column']['list'][0], coll_Di_line['column']['list'][1]], as_index=False)[coll_Me_line['row']['list'][i]].agg(measure_LineRow[coll_Me_line['row']['list'][i]]).min()[2]
+                            if max_line < int(tempMax) : max_line = int(tempMax)
+                            if min_line > int(tempMin) : min_line = int(tempMin)
+
+                            temp_test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][i]]}({coll_Me_line['row']['list'][i]})",scale=alt.Scale(domain=(min_line, max_line),clamp=True )))
+
+                        else :      # 0 dimension
+                            temp_test_line.append(alt.Y(f"{measure_LineRow[coll_Me_line['row']['list'][i]]}({coll_Me_line['row']['list'][i]})"))
+                        
+                        # print(temp_test_line)
+                        line_charts.append(alt.Chart(data).mark_line().encode(*temp_test_line,alt.Tooltip(temp_tooltip))
+                        .resolve_scale(
+                            x='independent',
+                            y='independent'
+                        ))
+
                     linechart = alt.vconcat(*line_charts)
-                # Column
-                elif coll_Me_line['column']['count'] > 1 : 
+
+                elif coll_Me_line['column']['count'] > 1 :   # Measure column 
                     for i in range(coll_Me_line['column']['count']):
                         # edit tooltip
                         temp_tooltip = tooltip_line.copy()
                         temp_tooltip.append(f"{measure_LineColumn[coll_Me_line['column']['list'][i]]}({coll_Me_line['column']['list'][i]})")
+                        temp_test_line = test_line.copy()
+                        
+                        min_line, max_line= 0, 0
+                        if coll_Di_line['row']['count'] == 1 :       # 1 dimension
+                            # check scale
+                            tempMax = data.groupby([coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['column']['list'][i]].agg(measure_LineColumn[coll_Me_line['column']['list'][i]]).max()[1]
+                            tempMin = data.groupby([coll_Di_line['row']['list'][0]], as_index=False)[coll_Me_line['column']['list'][i]].agg(measure_LineColumn[coll_Me_line['column']['list'][i]]).min()[1]
+                            if max_line < int(tempMax) : max_line = int(tempMax)
+                            if min_line > int(tempMin) : min_line = int(tempMin)
 
-                        line_charts.append(alt.Chart(data).mark_line( point={
-                            "filled": False,
-                            "fill": "white",}
-                        ).encode(*test_line, 
-                            alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][i]]}({coll_Me_line['column']['list'][i]})"),
-                            alt.Tooltip(temp_tooltip)))
-                    linechart = alt.hconcat(*line_charts)
+                            temp_test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][i]]}({coll_Me_line['column']['list'][i]})",scale=alt.Scale(domain=(min_line, max_line),clamp=True )))
+                        
+                        elif coll_Di_line['row']['count'] >= 2 :     # 2 & 3 dimension
+                            # check scale
+                            tempMax = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['row']['list'][1]], as_index=False)[coll_Me_line['column']['list'][i]].sum().max()[2]
+                            tempMin = data.groupby([coll_Di_line['row']['list'][0], coll_Di_line['row']['list'][1]], as_index=False)[coll_Me_line['column']['list'][i]].sum().min()[2]
+                            if max_line < int(tempMax) : max_line = int(tempMax)
+                            if min_line > int(tempMin) : min_line = int(tempMin)
+
+                            temp_test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][i]]}({coll_Me_line['column']['list'][i]})",scale=alt.Scale(domain=(min_line, max_line),clamp=True )))
+
+                        else :      # 0 dimension
+                            temp_test_line.append(alt.X(f"{measure_LineColumn[coll_Me_line['column']['list'][i]]}({coll_Me_line['column']['list'][i]})"))
+                    
+                        line_charts.append(alt.Chart(data).mark_line().encode(*temp_test_line,alt.Tooltip(temp_tooltip)).resolve_scale( x='independent', y='independent' ))
+
+                    linechart = alt.concat(*line_charts)
+
             # measure =1
             else : 
-                # Create Line Chart     
-                test_line.append(alt.Tooltip(tooltip_line))   
-                linechart = alt.Chart(data).mark_line( point={
-                    "filled": False,
-                    "fill": "white",
-                }).encode(*test_line)
+                # Create Line Chart        
+                test_line.append(alt.Tooltip(tooltip_line))
+                if  check_colrow['resolve_scale'] :
+                    linechart = alt.Chart(data).mark_line().encode(*test_line).resolve_scale(x='independent', y='independent')
+                else : linechart = alt.Chart(data).mark_line().encode(*test_line)
+            # Set chart
+            self.ui.lineChart.updateChart(linechart)
 
             # Set chart
             self.ui.lineChart.updateChart(linechart)

@@ -15,9 +15,9 @@
             "Region",
             "Product ID",
             "Category",
-            "Sub-Category",
+            "City",
             "Product Name",
-            "City"
+            "Sub-Category"
         ],
         "measure": [
             "Sales",
