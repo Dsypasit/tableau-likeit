@@ -242,7 +242,6 @@ class data_manipulate:
                     querylist.append(measure_query)
         querylist = " & ".join(querylist)   # join to string
         if querylist:
-            print(querylist)
             data = data.query(querylist)    #queryl
         data = self.date_to_string(data)
         def get_col():
@@ -287,7 +286,6 @@ class data_manipulate:
         for i in data.columns:
             if self.check_date_col2(i):
                 data[i] = data[i].astype(str)
-        print(data.head())
         return data
     
     def select_plot_data(self, item , fil, data):
@@ -328,10 +326,17 @@ class data_manipulate:
             path of file
         """
         union_data = None
-        try:
-            union_data = pd.read_csv(filename, encoding='windows-1252')
-        except UnicodeDecodeError:
-            union_data = pd.read_csv(filename, encoding='utf8')
+        if filename.split('.')[-1] == "csv":
+            try:
+                union_data = pd.read_csv(filename, encoding='windows-1252')
+                union_data = union_data.dropna()
+            except UnicodeDecodeError:
+                union_data = pd.read_csv(filename, encoding='utf8')
+                self.column = union_data.columns
+                union_data = union_data.dropna()
+        else:
+            union_data = pd.read_excel(filename)
+            union_data = union_data.dropna()
         self.data = pd.concat([self.data, union_data])
         self.separated_dimension_measure()
     
@@ -383,8 +388,9 @@ class data_manipulate:
         self.save_hist()
     
     def getMd5(self, name:str):
-        hash_name = hashlib.md5(open(name, 'rb').read()).hexdigest()
-        return hash_name
+        with open(name, 'rb') as r:
+            hash_name = hashlib.md5(r.read()).hexdigest()
+            return hash_name
 
 if __name__ == "__main__":
     from History import History

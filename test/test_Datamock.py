@@ -1,7 +1,7 @@
 
 from Widgets.DataManipulate import data_manipulate
 import unittest
-
+import pandas as pd
 class TestDatamanipulate(unittest.TestCase):
 
     def setUp(self):
@@ -9,6 +9,9 @@ class TestDatamanipulate(unittest.TestCase):
         self.dt.load_data('mock data.xlsx')
         self.dt.separated_dimension_measure()
     
+    def test_get_data(self):
+        self.assertIsInstance(self.dt.get_data(), list)
+
     def test_get_measure(self):
         self.assertIsInstance(self.dt.get_measure(), list)
     
@@ -74,3 +77,30 @@ class TestDatamanipulate(unittest.TestCase):
         norasate_amount = data.loc[data['Name'] == 'Norasate', 'amout'].values[0]
         self.assertEqual(pasit_amount, 5)
         self.assertEqual(norasate_amount, 6)
+
+    def test_get_groupby_filter_dimension(self):
+        col = ['Name']
+        measure = {'amout': 'count'}
+        fil = {'Name': ["Pasit"]}
+        data = self.dt.get_groupby(col, measure, fil)['dataframe']
+        name = data['Name'].unique()
+        self.assertEqual(name, ['Pasit'])
+
+    def test_get_groupby_filter_measure(self):
+        col = ['Name']
+        measure = {'amout': 'max'}
+        fil = {'amout': {'condition':'>', 'value': 7, 'state': True}}
+        data = self.dt.get_groupby(col, measure, fil)['dataframe']
+        value = data['amout']
+        for i in value: 
+            self.assertGreater(i, 7)
+    
+    def test_measure_condition(self):
+        self.assertEqual(self.dt.measure_condition('test', '==', 10), "`test` == 10")
+        self.assertEqual(self.dt.measure_condition('good', '>=', 10), "`good` >= 10")
+    
+    def test_union_data(self):
+        self.dt.unioun_data('mock data copy.xlsx')
+        name = ['Pasit']*5+['Norasate']*6+['Pasit']*2+['Norasate']*2
+        df = pd.DataFrame({'Name':name, 'amout':[1,2,3,4,5,11,11,11,11,11,11,6,7,12,12]})
+        self.assertEqual(self.dt.data.values.tolist(), df.values.tolist())
