@@ -25,5 +25,40 @@
             "Discount",
             "Profit"
         ]
+    },
+    "a5aacf06958d13ab192a02f721fe9ec9": {
+        "dimension": [
+            "Row ID",
+            "Order ID",
+            "Order Date_year",
+            "Ship Date_year",
+            "Ship Mode",
+            "Customer ID",
+            "Customer Name",
+            "Segment",
+            "Country/Region",
+            "City",
+            "State",
+            "Postal Code",
+            "Region",
+            "Product ID",
+            "Category",
+            "Sub-Category",
+            "Product Name"
+        ],
+        "measure": [
+            "Sales",
+            "Quantity",
+            "Discount",
+            "Profit"
+        ]
+    },
+    "7382d83189f0d58b69cb2f35f7cca0ff": {
+        "dimension": [
+            "Name"
+        ],
+        "measure": [
+            "amout"
+        ]
     }
 }

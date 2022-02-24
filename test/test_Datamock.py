@@ -104,3 +104,11 @@ class TestDatamanipulate(unittest.TestCase):
         name = ['Pasit']*5+['Norasate']*6+['Pasit']*2+['Norasate']*2
         df = pd.DataFrame({'Name':name, 'amout':[1,2,3,4,5,11,11,11,11,11,11,6,7,12,12]})
         self.assertEqual(self.dt.data.values.tolist(), df.values.tolist())
+
+    def test_import_data(self):
+        dt = data_manipulate()
+        dt.load_data("mock data.xlsx")
+        # self.dt.unioun_data('mock data copy.xlsx')
+        name = ['Pasit']*5+['Norasate']*6
+        df = pd.DataFrame({'Name':name, 'amout':[1,2,3,4,5,11,11,11,11,11,11]})
+        self.assertEqual(dt.data.values.tolist(), df.values.tolist())
