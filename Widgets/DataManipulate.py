@@ -283,9 +283,9 @@ class data_manipulate:
         fil = {**fil1, **fil2}    # merge filter 
         data_groupby = self.get_groupby(dimension, measure, fil)
         data = data_groupby['dataframe']
-        for i in data.columns:
-            if self.check_date_col2(i):
-                data[i] = data[i].astype(str)
+        # for i in data.columns:
+        #     if self.check_date_col2(i):
+        #         data[i] = data[i].astype(str)
         return data
     
     def select_plot_data(self, item , fil, data):

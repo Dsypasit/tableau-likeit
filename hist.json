@@ -60,5 +60,32 @@
         "measure": [
             "amout"
         ]
+    },
+    "85362cd820c910b794c66fc78feda3fc": {
+        "dimension": [
+            "Row ID",
+            "Order ID",
+            "Order Date_year",
+            "Ship Date_year",
+            "Ship Mode",
+            "Customer ID",
+            "Customer Name",
+            "Segment",
+            "Country/Region",
+            "City",
+            "State",
+            "Postal Code",
+            "Region",
+            "Product ID",
+            "Category",
+            "Sub-Category",
+            "Product Name"
+        ],
+        "measure": [
+            "Sales",
+            "Quantity",
+            "Discount",
+            "Profit"
+        ]
     }
 }

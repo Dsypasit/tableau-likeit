@@ -416,47 +416,47 @@ class MainWindow(QMainWindow):
                 # Part Dimension ROW
                 if coll_Di_bar['row']['count'] >= 1:
                     if check_colrow['row'] :
-                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][0]))
-                        tooltip_bar.append(coll_Di_bar['row']['list'][0])
+                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][0])+':O')
+                        tooltip_bar.append(coll_Di_bar['row']['list'][0]+':O')
                         check_colrow['resolve_scale'] = False
                     else:
-                        test_bar.append(alt.Y(coll_Di_bar['row']['list'][0]))
-                        tooltip_bar.append(coll_Di_bar['row']['list'][0])
+                        test_bar.append(alt.Y(coll_Di_bar['row']['list'][0])+':O')
+                        tooltip_bar.append(coll_Di_bar['row']['list'][0]+':O')
                 if coll_Di_bar['row']['count'] >= 2:
                     if check_colrow['row'] :
-                        test_bar.append(alt.Color(coll_Di_bar['row']['list'][1]))
-                        tooltip_bar.append(coll_Di_bar['row']['list'][1])
+                        test_bar.append(alt.Color(coll_Di_bar['row']['list'][1])+':O')
+                        tooltip_bar.append(coll_Di_bar['row']['list'][1]+':O')
                     else:
-                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][1]))
-                        tooltip_bar.append(coll_Di_bar['row']['list'][1])
+                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][1])+':O')
+                        tooltip_bar.append(coll_Di_bar['row']['list'][1]+':O')
                 if coll_Di_bar['row']['count'] >= 3:
                     if check_colrow['row'] :
                         pass    # Not do anything when it more than >3
                     else:
-                        test_bar.append(alt.Color(coll_Di_bar['row']['list'][2]))
-                        tooltip_bar.append(coll_Di_bar['row']['list'][2])
+                        test_bar.append(alt.Color(coll_Di_bar['row']['list'][2]+':O'))
+                        tooltip_bar.append(coll_Di_bar['row']['list'][2]+':O')
                 # Part Dimension COLUMN
                 if coll_Di_bar['column']['count'] >= 1:
                     if check_colrow['column'] :
-                        test_bar.append(alt.Column(coll_Di_bar['column']['list'][0]))
-                        tooltip_bar.append(coll_Di_bar['column']['list'][0])
+                        test_bar.append(alt.Column(coll_Di_bar['column']['list'][0]+':O'))
+                        tooltip_bar.append(coll_Di_bar['column']['list'][0]+':O')
                         check_colrow['resolve_scale'] = False
                     else:
-                        test_bar.append(alt.X(coll_Di_bar['column']['list'][0]))
-                        tooltip_bar.append(coll_Di_bar['column']['list'][0])
+                        test_bar.append(alt.X(coll_Di_bar['column']['list'][0]+':O'))
+                        tooltip_bar.append(coll_Di_bar['column']['list'][0]+':O')
                 if coll_Di_bar['column']['count'] >= 2:
                     if check_colrow['column'] :
-                        test_bar.append(alt.Color(coll_Di_bar['column']['list'][1]))
-                        tooltip_bar.append(coll_Di_bar['column']['list'][1])
+                        test_bar.append(alt.Color(coll_Di_bar['column']['list'][1]+':O'))
+                        tooltip_bar.append(coll_Di_bar['column']['list'][1]+':O')
                     else:
-                        test_bar.append(alt.Column(coll_Di_bar['column']['list'][1]))
-                        tooltip_bar.append(coll_Di_bar['column']['list'][1])
+                        test_bar.append(alt.Column(coll_Di_bar['column']['list'][1]+':O'))
+                        tooltip_bar.append(coll_Di_bar['column']['list'][1]+':O')
                 if coll_Di_bar['column']['count'] >= 3:
                     if check_colrow['column'] :
                         pass    # Not do anything when it more than >3
                     else:
-                        test_bar.append(alt.Color(coll_Di_bar['column']['list'][2]))
-                        tooltip_bar.append(coll_Di_bar['column']['list'][2])
+                        test_bar.append(alt.Color(coll_Di_bar['column']['list'][2]+':O'))
+                        tooltip_bar.append(coll_Di_bar['column']['list'][2]+':O')
             
         ########################################################################
             '''Create Bar Chart'''    
@@ -781,47 +781,47 @@ class MainWindow(QMainWindow):
                 # Part Dimension ROW
                 if coll_Di_line['row']['count'] >= 1:
                     if check_colrow['row'] :
-                        test_line.append(alt.Row(coll_Di_line['row']['list'][0]))
-                        tooltip_line.append(coll_Di_line['row']['list'][0])
+                        test_line.append(alt.Row(coll_Di_line['row']['list'][0]+':O'))
+                        tooltip_line.append(coll_Di_line['row']['list'][0]+':O')
                         check_colrow['resolve_scale'] = False
                     else:
-                        test_line.append(alt.Y(coll_Di_line['row']['list'][0]))
-                        tooltip_line.append(coll_Di_line['row']['list'][0])
+                        test_line.append(alt.Y(coll_Di_line['row']['list'][0]+':O'))
+                        tooltip_line.append(coll_Di_line['row']['list'][0]+':O')
                 if coll_Di_line['row']['count'] >= 2:
                     if check_colrow['row'] :
-                        test_line.append(alt.Color(coll_Di_line['row']['list'][1]))
-                        tooltip_line.append(coll_Di_line['row']['list'][1])
+                        test_line.append(alt.Color(coll_Di_line['row']['list'][1]+':O'))
+                        tooltip_line.append(coll_Di_line['row']['list'][1]+':O')
                     else:
-                        test_line.append(alt.Row(coll_Di_line['row']['list'][1]))
-                        tooltip_line.append(coll_Di_line['row']['list'][1])
+                        test_line.append(alt.Row(coll_Di_line['row']['list'][1]+':O'))
+                        tooltip_line.append(coll_Di_line['row']['list'][1]+':O')
                 if coll_Di_line['row']['count'] >= 3:
                     if check_colrow['row'] :
                         pass    # Not do anything when it more than >3
                     else:
-                        test_line.append(alt.Color(coll_Di_line['row']['list'][2]))
-                        tooltip_line.append(coll_Di_line['row']['list'][2])
+                        test_line.append(alt.Color(coll_Di_line['row']['list'][2]+':O'))
+                        tooltip_line.append(coll_Di_line['row']['list'][2]+':O')
                 # Part Dimension COLUMN
                 if coll_Di_line['column']['count'] >= 1:
                     if check_colrow['column'] :
-                        test_line.append(alt.Column(coll_Di_line['column']['list'][0]))
-                        tooltip_line.append(coll_Di_line['column']['list'][0])
+                        test_line.append(alt.Column(coll_Di_line['column']['list'][0]+':O'))
+                        tooltip_line.append(coll_Di_line['column']['list'][0]+':O')
                         check_colrow['resolve_scale'] = False
                     else:
-                        test_line.append(alt.X(coll_Di_line['column']['list'][0]))
-                        tooltip_line.append(coll_Di_line['column']['list'][0])
+                        test_line.append(alt.X(coll_Di_line['column']['list'][0]+':O'))
+                        tooltip_line.append(coll_Di_line['column']['list'][0]+':O')
                 if coll_Di_line['column']['count'] >= 2:
                     if check_colrow['column'] :
-                        test_line.append(alt.Color(coll_Di_line['column']['list'][1]))
-                        tooltip_line.append(coll_Di_line['column']['list'][1])
+                        test_line.append(alt.Color(coll_Di_line['column']['list'][1]+':O'))
+                        tooltip_line.append(coll_Di_line['column']['list'][1]+':O')
                     else:
-                        test_line.append(alt.Column(coll_Di_line['column']['list'][1]))
-                        tooltip_line.append(coll_Di_line['column']['list'][1])
+                        test_line.append(alt.Column(coll_Di_line['column']['list'][1]+':O'))
+                        tooltip_line.append(coll_Di_line['column']['list'][1]+':O')
                 if coll_Di_line['column']['count'] >= 3:
                     if check_colrow['column'] :
                         pass    # Not do anything when it more than >3
                     else:
-                        test_line.append(alt.Color(coll_Di_line['column']['list'][2]))
-                        tooltip_line.append(coll_Di_line['column']['list'][2])
+                        test_line.append(alt.Color(coll_Di_line['column']['list'][2]+':O'))
+                        tooltip_line.append(coll_Di_line['column']['list'][2]+':O')
             
         ########################################################################
             '''Create Line Chart'''    
