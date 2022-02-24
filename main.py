@@ -573,7 +573,7 @@ class MainWindow(QMainWindow):
                     ).properties(
                         title = title
                     ))
-                piechart = alt.hconcat(*theta_chart)
+                piechart = alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent")
 
             elif  (len(item_Theta)==0) and (len(item_Color)>=1) : 
                 color_chart = []
@@ -590,7 +590,7 @@ class MainWindow(QMainWindow):
                     ).properties(
                         title = title
                     ))
-                piechart = alt.vconcat(*color_chart)
+                piechart = alt.vconcat(*color_chart).resolve_scale(theta="independent", color="independent")
 
             else : 
                 # Part Color / row
@@ -615,8 +615,8 @@ class MainWindow(QMainWindow):
                             title = titleTheta + " and " + titleColor
                         ))
                     if len(theta_chart) >= 1:
-                        theta_charts.append(alt.hconcat(*theta_chart))
-                piechart = alt.vconcat(*theta_charts)
+                        theta_charts.append(alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent"))
+                piechart = alt.vconcat(*theta_charts).resolve_scale(theta="independent", color="independent")
 
             self.ui.pieChart.updateChart(piechart)
 
