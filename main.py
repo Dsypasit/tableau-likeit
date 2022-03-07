@@ -548,7 +548,7 @@ class MainWindow(QMainWindow):
 
         ########################################################################
 
-        ########################################################################
+         ########################################################################
         ## PIE CHART
         ########################################################################
         item_Theta, fil_Theta, measure_Theta = self.ui.ThetaList.get_plot_item()
@@ -557,66 +557,205 @@ class MainWindow(QMainWindow):
         if(len(item_Theta)>0 or len(item_Color)>0):
             data = self.dt.data_filter(item_Theta, item_Color , fil_Theta, fil_Color, measure_Theta, measure_Color )
 
+            thetaList = item_Theta.copy()
+            thetaList.reverse()
+            colorList = item_Color.copy()
+            colorList.reverse()
+
             theta_charts = []
+            temp_chart_pie = []
+            temp_tooltip_pie = []
 
+            # theta >= 2
+            if (len(thetaList) > 1) and (thetaList[0] not in measure_Theta.keys()):
+                        temp_chart_pie.append(alt.Column(thetaList[0]))
+                        temp_tooltip_pie.append(thetaList[0])
+            # color >= 2
+            if (len(colorList) > 1) and (colorList[0] not in measure_Color.keys()):
+                        temp_chart_pie.append(alt.Row(colorList[0]))
+                        temp_tooltip_pie.append(colorList[0])
+
+            # have only item_Theta
             if  (len(item_Theta)>=1) and (len(item_Color)==0) : 
-                theta_chart = []
-                for j in item_Theta:
-                    title = j
+                if len(thetaList) == 1 :
+                    temp = thetaList[0]
+                    title = temp
                     # Check item is Measure
-                    if j in measure_Theta.keys(): 
-                        title = f"{measure_Theta[j]} of {j}"
-                        j = f"{measure_Theta[j]}({j}):Q"
-                    theta_chart.append(alt.Chart(data).mark_arc().encode(
-                        alt.Theta(j),
-                        alt.Tooltip([j]),
-                    ).properties(
-                        title = title
-                    ))
-                piechart = alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent")
+                    if temp in measure_Theta.keys(): 
+                        title = f"{measure_Theta[temp]} of {temp}"
+                        temp = f"{measure_Theta[temp]}({temp}):Q"
 
+                    piechart = alt.Chart(data).mark_arc().encode(
+                            alt.Theta(temp),
+                            alt.Tooltip([temp])
+                        ).properties(
+                            title = title
+                        ).resolve_scale(theta="independent", color="independent")
+
+                elif len(thetaList) > 1 :
+                    theta_chart = []
+                    for j in range(1,len(thetaList)):
+                        temp = thetaList[j]
+                        title = temp
+                        # Check item is Measure
+                        if temp in measure_Theta.keys(): 
+                            title = f"{measure_Theta[temp]} of {temp}"
+                            temp = f"{measure_Theta[temp]}({temp}):Q"
+
+                        theta_chart.append(alt.Chart(data).mark_arc().encode(
+                            *temp_chart_pie, alt.Theta(temp),
+                            alt.Tooltip([*temp_tooltip_pie, temp])
+                        ).properties(
+                            title = title
+                        ))
+                    piechart = alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent")
+                    
+            # have only item_Color
             elif  (len(item_Theta)==0) and (len(item_Color)>=1) : 
-                color_chart = []
-                for i in item_Color:
-                    title = i
+                if len(colorList) == 1 :
+                    temp = colorList[0]
+                    title = temp
                     # Check item is Measure
-                    if i in measure_Color.keys(): 
-                        title = f"{measure_Color[i]} of {i}"
-                        i = f"{measure_Color[i]}({i}):Q"
-                        print(i)
-                    color_chart.append(alt.Chart(data).mark_arc().encode(
-                        alt.Color(i),
-                        alt.Tooltip([i]),
-                    ).properties(
-                        title = title
-                    ))
-                piechart = alt.vconcat(*color_chart).resolve_scale(theta="independent", color="independent")
+                    if temp in measure_Color.keys(): 
+                        title = f"{measure_Color[temp]} of {temp}"
+                        temp = f"{measure_Color[temp]}({temp}):Q"
+
+                    piechart = alt.Chart(data).mark_arc().encode(
+                            alt.Color(temp),
+                            alt.Tooltip([temp])
+                        ).properties(
+                            title = title
+                        ).resolve_scale(theta="independent", color="independent")
+                
+                elif len(colorList) > 1 :
+                    color_chart = []
+                    for i in range(1,len(colorList)):
+                        temp = colorList[j]
+                        title = temp
+                        # Check item is Measure
+                        if temp in measure_Color.keys(): 
+                            title = f"{measure_Color[temp]} of {temp}"
+                            temp = f"{measure_Color[temp]}({temp}):Q"
+
+                        color_chart.append(alt.Chart(data).mark_arc().encode(
+                            *temp_chart_pie, alt.Color(temp),
+                            alt.Tooltip([*temp_tooltip_pie, temp])
+                        ).properties(
+                            title = title
+                        ))
+                    piechart = alt.vconcat(*color_chart).resolve_scale(theta="independent", color="independent")
 
             else : 
-                # Part Color / row
-                for i in item_Color:
-                    titleColor = i
-                    if i in measure_Color.keys(): 
-                        titleColor = f"{measure_Color[i]} of {i}"
-                        i = f'{measure_Color[i]}({i}):Q'
-                    # Part Theta / column
-                    theta_chart = []
-                    for j in item_Theta:
-                        titleTheta = j
-                        # Check item is Measure
-                        if j in measure_Theta.keys(): 
-                            titleTheta = f"{measure_Theta[j]} of {j}"
-                            j = f'{measure_Theta[j]}({j}):Q'
-                        theta_chart.append(alt.Chart(data).mark_arc().encode(
-                            alt.Theta(j),
-                            alt.Color(i),
-                            alt.Tooltip([j,i]),
+                if (len(item_Theta)==1) and (len(item_Color)==1) :
+                    temp_theta = thetaList[0]
+                    titleTheta = temp_theta
+                    temp_color = colorList[0]
+                    titleColor = temp_color
+                    # Check theta is Measure
+                    if temp_theta in measure_Theta.keys(): 
+                        titleTheta = f"{measure_Theta[temp_theta]} of {temp_theta}"
+                        temp_theta = f"{measure_Theta[temp_theta]}({temp_theta}):Q"
+                    # Check color is Measure
+                    if temp_color in measure_Color.keys(): 
+                        titleColor = f"{measure_Color[temp_color]} of {temp_color}"
+                        temp_color = f"{measure_Color[temp_color]}({temp_color}):Q" 
+
+                    piechart = alt.Chart(data).mark_arc().encode(
+                            alt.Theta(temp_theta),
+                            alt.Color(temp_color),
+                            alt.Tooltip([temp_theta, temp_color])
                         ).properties(
                             title = titleTheta + " and " + titleColor
-                        ))
-                    if len(theta_chart) >= 1:
-                        theta_charts.append(alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent"))
-                piechart = alt.vconcat(*theta_charts).resolve_scale(theta="independent", color="independent")
+                        ).resolve_scale(theta="independent", color="independent")
+
+                elif (len(item_Theta)>=1) and (len(item_Color)>=1):
+                    if (len(item_Theta)==1) and (len(item_Color)>=1):
+                        temp_theta = thetaList[0]
+                        titleTheta = temp_theta
+                        # Check item is Measure
+                        if temp_theta in measure_Theta.keys(): 
+                            titleTheta = f"{measure_Theta[temp_theta]} of {temp_theta}"
+                            temp_theta = f"{measure_Theta[temp_theta]}({temp_theta}):Q"
+
+                        color_chart = []
+                        for i in range(1,len(colorList)):
+                            temp_color = colorList[i]
+                            titleColor = temp_color
+                            # Check item is Measure
+                            if temp_color in measure_Color.keys(): 
+                                titleColor = f"{measure_Color[temp_color]} of {temp_color}"
+                                temp_color = f"{measure_Color[temp_color]}({temp_color}):Q"
+                            
+                            color_chart.append(alt.Chart(data).mark_arc().encode(
+                                *temp_chart_pie, 
+                                alt.Color(temp_color), 
+                                alt.Theta(temp_theta),
+                                alt.Tooltip([*temp_tooltip_pie, temp_color, temp_theta])
+                            ).properties(
+                                title = titleTheta + " and " + titleColor
+                            ).resolve_scale(theta="independent", color="independent"))
+                        piechart = alt.vconcat(*color_chart).resolve_scale(theta="independent", color="independent")
+
+                    elif (len(item_Theta)>=1) and (len(item_Color)==1) :
+                        temp_color = colorList[0]
+                        titleColor = temp_color
+                        # Check item is Measure
+                        if temp_color in measure_Color.keys(): 
+                            titleColor = f"{measure_Color[temp_color]} of {temp_color}"
+                            temp_color = f"{measure_Color[temp_color]}({temp_color}):Q"
+
+                        theta_chart = []
+                        for j in range(1,len(thetaList)):
+                            temp_theta = thetaList[j]
+                            titleTheta = temp_theta
+                            # Check item is Measure
+                            if temp_theta in measure_Theta.keys(): 
+                                titleTheta = f"{measure_Theta[temp_theta]} of {temp_theta}"
+                                temp_theta = f"{measure_Theta[temp_theta]}({temp_theta}):Q"
+
+                            theta_chart.append(alt.Chart(data).mark_arc().encode(
+                                *temp_chart_pie, 
+                                alt.Color(temp_color), 
+                                alt.Theta(temp_theta),
+                                alt.Tooltip([*temp_tooltip_pie, temp_color, temp_theta])
+                            ).properties(
+                                title = titleTheta + " and " + titleColor
+                            ).resolve_scale(theta="independent", color="independent"))
+                        piechart = alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent")
+
+                    else:
+                        for i in range(1,len(colorList)):
+                            temp_color = colorList[i]
+                            titleColor = temp_color
+
+                            # Check color is Measure
+                            if temp_color in measure_Color.keys(): 
+                                titleColor = f"{measure_Color[temp_color]} of {temp_color}"
+                                temp_color = f"{measure_Color[temp_color]}({temp_color}):Q"
+
+                            theta_chart = []
+                            for j in range(1,len(thetaList)):
+                                temp_theta = thetaList[j]
+                                titleTheta = temp_theta
+
+                                # Check item is Measure
+                                if temp_theta in measure_Theta.keys(): 
+                                    titleTheta = f"{measure_Theta[temp_theta]} of {temp_theta}"
+                                    temp_theta = f"{measure_Theta[temp_theta]}({temp_theta}):Q"
+
+                                theta_chart.append(alt.Chart(data).mark_arc().encode(
+                                    *temp_chart_pie,
+                                    alt.Theta(temp_theta),
+                                    alt.Color(temp_color),
+                                    alt.Tooltip([*temp_tooltip_pie, temp_theta, temp_color]),
+                                ).properties(
+                                    title = titleTheta + " and " + titleColor
+                                ).resolve_scale(theta="independent", color="independent"))
+                                # print(theta_chart)
+
+                            if len(theta_chart) >= 1:
+                                theta_charts.append(alt.hconcat(*theta_chart).resolve_scale(theta="independent", color="independent"))
+                        piechart = alt.vconcat(*theta_charts).resolve_scale(theta="independent", color="independent")
 
             self.ui.pieChart.updateChart(piechart)
 
