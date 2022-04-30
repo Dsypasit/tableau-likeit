@@ -311,7 +311,7 @@ class data_manipulate:
         self.data_separated_date = self.data.copy()
         for col in self.column:
             if self.check_date_col(col):
-                self.data_separated_date[col] = pd.to_datetime(self.data[col], format="%d/%m/%Y")
+                self.data_separated_date[col] = pd.to_datetime(self.data[col])
                 self.data_separated_date[col+'_day'] = self.data_separated_date[col].dt.day.astype(int)
                 self.data_separated_date[col+'_month'] = self.data_separated_date[col].dt.month.astype(int)
                 self.data_separated_date[col+'_year'] = self.data_separated_date[col].dt.year.astype(int)

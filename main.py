@@ -416,18 +416,18 @@ class MainWindow(QMainWindow):
                 # Part Dimension ROW
                 if coll_Di_bar['row']['count'] >= 1:
                     if check_colrow['row'] :
-                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][0])+':O')
+                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][0]+':O'))
                         tooltip_bar.append(coll_Di_bar['row']['list'][0]+':O')
                         check_colrow['resolve_scale'] = False
                     else:
-                        test_bar.append(alt.Y(coll_Di_bar['row']['list'][0])+':O')
+                        test_bar.append(alt.Y(coll_Di_bar['row']['list'][0]+':O'))
                         tooltip_bar.append(coll_Di_bar['row']['list'][0]+':O')
                 if coll_Di_bar['row']['count'] >= 2:
                     if check_colrow['row'] :
-                        test_bar.append(alt.Color(coll_Di_bar['row']['list'][1])+':O')
+                        test_bar.append(alt.Color(coll_Di_bar['row']['list'][1]+':O'))
                         tooltip_bar.append(coll_Di_bar['row']['list'][1]+':O')
                     else:
-                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][1])+':O')
+                        test_bar.append(alt.Row(coll_Di_bar['row']['list'][1]+':O'))
                         tooltip_bar.append(coll_Di_bar['row']['list'][1]+':O')
                 if coll_Di_bar['row']['count'] >= 3:
                     if check_colrow['row'] :
